@@ -2,7 +2,7 @@ package com.nelumbo.park.mapper;
 
 import com.nelumbo.park.dto.TokenResponse;
 import com.nelumbo.park.entity.User;
-import com.nelumbo.park.security.JwtService;
+import com.nelumbo.park.configuration.security.JwtService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -25,12 +25,21 @@ public abstract class AuthMapper {
     public abstract TokenResponse toTokenResponse(User user);
 
     protected String generateJwtToken(User user) {
+        System.out.println("=== GENERANDO TOKEN JWT ===");
+        System.out.println("Usuario: " + user.getUsername());
+        System.out.println("ID: " + user.getId());
+        System.out.println("Email: " + user.getEmail());
+        System.out.println("Role: " + user.getRole());
+
         Map<String, Object> claims = new HashMap<>();
         claims.put("uid", user.getId());
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole());
 
-        return jwtService.generateToken(user.getUsername(), claims);
+        String token = jwtService.generateToken(user.getUsername(), claims);
+        System.out.println("Token generado: " + token);
+
+        return token;
     }
 
     protected String getExpirationTime() {

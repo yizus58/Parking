@@ -1,3 +1,9 @@
 ### GET request to example query params with to enginners
-GET http://localhost:8080/Software-engineer/engineers
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@mail.com",
+  "password": "admin"
+}
 

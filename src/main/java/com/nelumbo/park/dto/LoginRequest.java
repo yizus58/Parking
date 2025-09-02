@@ -1,5 +1,6 @@
 package com.nelumbo.park.dto;
 
+import com.nelumbo.park.service.UserService;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

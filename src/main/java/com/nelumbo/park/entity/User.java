@@ -6,11 +6,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 
 @Entity
 @Table(name = "users_table")
@@ -30,13 +32,4 @@ public class User {
     private String email;
 
     private String role;
-
-    public User() {}
-
-    public User(String username, String password, String email, String role) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.role = role;
-    }
 }
