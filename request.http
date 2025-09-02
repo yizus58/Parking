@@ -1,0 +1,3 @@
+### GET request to example query params with to enginners
+GET http://localhost:8080/Software-engineer/engineers
+
