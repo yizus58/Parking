@@ -1,5 +1,8 @@
 package com.nelumbo.park.configuration.security;
 
+import com.nelumbo.park.configuration.security.exception.exceptions.UserNotFoundException;
+import com.nelumbo.park.entity.User;
+import com.nelumbo.park.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,15 +18,22 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+
+    public JwtAuthenticationFilter(
+            JwtService jwtService,
+            UserRepository userRepository
+    ) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -40,23 +50,59 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
             try {
-                username = jwtService.extractUsername(jwt);
+                username = jwtService.extractUid(jwt);
+                System.out.println("username extraído: " + username);
             } catch (Exception e) {
                 logger.error("Error al extraer username del token: {}", e.getMessage());
+
+                // Si es un error de firma JWT, devolver 401 Unauthorized
+                if (e.getMessage().contains("JWT signature does not match") || 
+                    e.getMessage().contains("signature") || 
+                    e.getMessage().contains("SignatureException")) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"error\":\"Token JWT inválido o firma no válida\"}");
+                    return;
+                }
+            }
+        }
+
+        if (username != null) {
+            try {
+                Optional<User> userOptional = userRepository.findById(username);
+                if (userOptional.isEmpty()) {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"error\":\"Usuario no encontrado\"}");
+                    return;
+                }
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"error\":\"Error interno del servidor\"}");
+                return;
             }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
+
                 if (!jwtService.isTokenExpired(jwt)) {
                     String role = jwtService.extractRole(jwt);
+                    System.out.println("role: " + role);
 
                     List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                        new SimpleGrantedAuthority(role)
+                            new SimpleGrantedAuthority(role)
                     );
+                    System.out.println("authorities: " + authorities);
 
-                    UsernamePasswordAuthenticationToken authToken = 
-                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(username, null, authorities);
+
+                    System.out.println("authToken: " + authToken);
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {

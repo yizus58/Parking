@@ -1,6 +1,6 @@
 package com.nelumbo.park.service;
 
-import com.nelumbo.park.dto.ParkingUpdateRequest;
+import com.nelumbo.park.dto.request.ParkingUpdateRequest;
 import com.nelumbo.park.dto.request.ParkingRequest;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.entity.User;

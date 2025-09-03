@@ -46,6 +46,14 @@ public class JwtService {
                 .compact();
     }
 
+    public String extractUid(String token) {
+        String uid = extractClaim(token, claims -> claims.get("uid", String.class));
+        if (uid == null || uid.isEmpty()) {
+            uid = extractClaim(token, Claims::getId);
+        }
+        return uid;
+    }
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }

@@ -1,6 +1,7 @@
 package com.nelumbo.park.service;
 
 import com.nelumbo.park.entity.User;
+import com.nelumbo.park.configuration.security.exception.exceptions.JwtUserNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,8 +22,17 @@ public class SecurityService {
             return null;
         }
 
+
         String email = authentication.getName();
-        return userRepository.findByEmail(email);
+        System.out.println("email extraído: " + email);
+        User user = userRepository.findByEmail(email);
+        System.out.println("user extraído: " + user);
+
+        if (user == null) {
+            throw new JwtUserNotFoundException("El usuario no se encuentra en la base de datos. Por favor verifica tu correo electrónico.");
+        }
+
+        return user;
     }
 
     public boolean isAdmin() {
