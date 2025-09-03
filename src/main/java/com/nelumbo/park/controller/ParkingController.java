@@ -3,6 +3,7 @@ package com.nelumbo.park.controller;
 import com.nelumbo.park.dto.ParkingRequest;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.service.ParkingService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +31,7 @@ public class ParkingController {
     }
 
     @PostMapping("/")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Parking createParking(@Validated @RequestBody ParkingRequest parking) {
         return parkingService.createParking(parking);
     }

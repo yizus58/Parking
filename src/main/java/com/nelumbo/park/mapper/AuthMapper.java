@@ -21,25 +21,16 @@ public abstract class AuthMapper {
 
     @Mapping(target = "tokenType", constant = "Bearer")
     @Mapping(target = "accessToken", expression = "java(generateJwtToken(user))")
-    @Mapping(target = "expiresAt", expression = "java(getExpirationTime())")
     public abstract TokenResponse toTokenResponse(User user);
 
     protected String generateJwtToken(User user) {
-        System.out.println("=== GENERANDO TOKEN JWT ===");
-        System.out.println("Usuario: " + user.getUsername());
-        System.out.println("ID: " + user.getId());
-        System.out.println("Email: " + user.getEmail());
-        System.out.println("Role: " + user.getRole());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("uid", user.getId());
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole());
 
-        String token = jwtService.generateToken(user.getUsername(), claims);
-        System.out.println("Token generado: " + token);
-
-        return token;
+        return jwtService.generateToken(user.getUsername(), claims);
     }
 
     protected String getExpirationTime() {

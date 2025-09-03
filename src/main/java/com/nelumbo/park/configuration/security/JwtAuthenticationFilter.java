@@ -41,7 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwt = authHeader.substring(7);
             try {
                 username = jwtService.extractUsername(jwt);
-                logger.info("Token JWT encontrado para usuario: {}", username);
             } catch (Exception e) {
                 logger.error("Error al extraer username del token: {}", e.getMessage());
             }
@@ -51,10 +50,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 if (!jwtService.isTokenExpired(jwt)) {
                     String role = jwtService.extractRole(jwt);
-                    String email = jwtService.extractEmail(jwt);
-                    String userId = jwtService.extractUserId(jwt);
-
-                    logger.info("Token válido - Usuario: {}, Role: {}, Email: {}", username, role, email);
 
                     List<SimpleGrantedAuthority> authorities = Collections.singletonList(
                         new SimpleGrantedAuthority(role)
@@ -64,9 +59,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(username, null, authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                    logger.info("Autenticación establecida para usuario: {} con authorities: {}", 
-                        username, authorities);
                 } else {
                     logger.warn("Token expirado para usuario: {}", username);
                 }

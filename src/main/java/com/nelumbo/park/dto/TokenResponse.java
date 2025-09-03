@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 public class TokenResponse {
     private String tokenType;
     private String accessToken;
-    private String expiresAt;
 }

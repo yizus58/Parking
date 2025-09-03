@@ -1,6 +1,7 @@
 package com.nelumbo.park.dto;
 
-import com.nelumbo.park.service.UserService;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.nelumbo.park.configuration.deserializer.StrictStringDeserializer;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -15,10 +16,12 @@ public class LoginRequest {
 
     @NotBlank(message = "El email no debe estar en blanco")
     @Email(message = "El campo 'email' debe ser una dirección de correo electrónico válida. Ingrese el formato nombre@ejemplo.com")
+    @JsonDeserialize(using = StrictStringDeserializer.class)
     private String email;
 
     @NotBlank(message = "La password no puede ser nula")
     @Size(min = 4, max = 255, message = "La password debe tener entre 4 y 255 caracteres")
+    @JsonDeserialize(using = StrictStringDeserializer.class)
     private String password;
 
 }

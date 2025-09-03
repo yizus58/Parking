@@ -23,10 +23,6 @@ public class JwtService {
             @Value("${app.security.jwt.secret}") String secret,
             @Value("${app.security.jwt.expiration-hours:6}") long expirationHours
     ) {
-        System.out.println("=== CONFIGURANDO JWT SERVICE ===");
-        System.out.println("Secret recibido: " + secret);
-        System.out.println("Secret length: " + secret.length());
-        System.out.println("Expiration hours: " + expirationHours);
 
         if (secret == null || secret.length() < 32) {
             throw new IllegalArgumentException("JWT secret debe tener al menos 32 caracteres");
@@ -34,47 +30,28 @@ public class JwtService {
 
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationHours = expirationHours;
-
-        System.out.println("JWT Service configurado correctamente");
     }
 
     public String generateToken(String subject, Map<String, Object> extraClaims) {
-        System.out.println("=== GENERANDO TOKEN EN JWT SERVICE ===");
-        System.out.println("Subject: " + subject);
-        System.out.println("Claims: " + extraClaims);
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationHours * 3_600_000L);
 
-        System.out.println("Fecha de emisión: " + now);
-        System.out.println("Fecha de expiración: " + expiry);
-
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(subject)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-
-        System.out.println("Token JWT generado exitosamente");
-        return token;
     }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public String extractUserId(String token) {
-        return extractClaim(token, claims -> claims.get("uid", String.class));
-    }
-
     public String extractRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
-    }
-
-    public String extractEmail(String token) {
-        return extractClaim(token, claims -> claims.get("email", String.class));
     }
 
     public Date extractExpiration(String token) {
