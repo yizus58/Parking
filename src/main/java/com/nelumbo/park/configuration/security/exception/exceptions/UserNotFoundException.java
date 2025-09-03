@@ -1,4 +1,4 @@
-package com.nelumbo.park.configuration.security.exceptions;
+package com.nelumbo.park.configuration.security.exception.exceptions;
 
 public class UserNotFoundException extends RuntimeException {
     public UserNotFoundException() {

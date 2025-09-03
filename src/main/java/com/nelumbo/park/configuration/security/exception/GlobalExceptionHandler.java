@@ -1,11 +1,12 @@
-package com.nelumbo.park.configuration.security.exceptions.exception;
+package com.nelumbo.park.configuration.security.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.nelumbo.park.configuration.security.exceptions.EmailNotFoundException;
-import com.nelumbo.park.configuration.security.exceptions.InvalidPasswordException;
-import com.nelumbo.park.configuration.security.exceptions.InsufficientPermissionsException;
-import com.nelumbo.park.configuration.security.exceptions.NoAssociatedParkingException;
-import com.nelumbo.park.configuration.security.exceptions.UserNotFoundException;
+import com.nelumbo.park.configuration.security.exception.exceptions.EmailNotFoundException;
+import com.nelumbo.park.configuration.security.exception.exceptions.InvalidPasswordException;
+import com.nelumbo.park.configuration.security.exception.exceptions.InsufficientPermissionsException;
+import com.nelumbo.park.configuration.security.exception.exceptions.NoAssociatedParkingException;
+import com.nelumbo.park.configuration.security.exception.exceptions.UserNotFoundException;
+import com.nelumbo.park.configuration.security.exception.exceptions.ParkingNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -120,6 +121,12 @@ public class GlobalExceptionHandler {
         errors.put("error", "Método HTTP no soportado");
         errors.put("message", "El método " + ex.getMethod() + " no está permitido para esta URL. Métodos permitidos: " + String.join(", ", ex.getSupportedMethods()));
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errors);
+    }
+
+    @ExceptionHandler(ParkingNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleParkingNotFoundException(ParkingNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap("error", "El parking no existe"));
     }
 
 }
