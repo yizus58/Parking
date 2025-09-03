@@ -1,11 +1,11 @@
 package com.nelumbo.park.service;
 
-import com.nelumbo.park.dto.LoginRequest;
-import com.nelumbo.park.dto.TokenResponse;
-import com.nelumbo.park.dto.UserCreateRequest;
+import com.nelumbo.park.dto.request.LoginRequest;
+import com.nelumbo.park.dto.response.TokenResponse;
+import com.nelumbo.park.dto.request.UserCreateRequest;
 import com.nelumbo.park.entity.User;
-import com.nelumbo.park.exception.EmailNotFoundException;
-import com.nelumbo.park.exception.InvalidPasswordException;
+import com.nelumbo.park.configuration.security.exceptions.EmailNotFoundException;
+import com.nelumbo.park.configuration.security.exceptions.InvalidPasswordException;
 import com.nelumbo.park.mapper.AuthMapper;
 import com.nelumbo.park.mapper.UserMapper;
 import com.nelumbo.park.repository.UserRepository;

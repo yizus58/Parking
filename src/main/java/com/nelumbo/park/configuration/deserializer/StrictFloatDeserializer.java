@@ -18,7 +18,6 @@ public class StrictFloatDeserializer extends JsonDeserializer<Float> {
             return parser.getFloatValue();
         }
 
-        // Si no es un número, lanzar excepción
         throw new InvalidFormatException(parser, 
             "El valor debe ser un número decimal (float), no " + token.name().toLowerCase(), 
             parser.getCurrentValue(), 

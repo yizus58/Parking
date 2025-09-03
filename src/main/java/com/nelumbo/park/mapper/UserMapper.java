@@ -1,6 +1,6 @@
 package com.nelumbo.park.mapper;
 
-import com.nelumbo.park.dto.UserCreateRequest;
+import com.nelumbo.park.dto.request.UserCreateRequest;
 import com.nelumbo.park.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

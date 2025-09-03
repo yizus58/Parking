@@ -1,9 +1,11 @@
-package com.nelumbo.park.configuration.security.exception;
+package com.nelumbo.park.configuration.security.exceptions.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.nelumbo.park.exception.EmailNotFoundException;
-import com.nelumbo.park.exception.InvalidPasswordException;
-import com.nelumbo.park.exception.InsufficientPermissionsException;
+import com.nelumbo.park.configuration.security.exceptions.EmailNotFoundException;
+import com.nelumbo.park.configuration.security.exceptions.InvalidPasswordException;
+import com.nelumbo.park.configuration.security.exceptions.InsufficientPermissionsException;
+import com.nelumbo.park.configuration.security.exceptions.NoAssociatedParkingException;
+import com.nelumbo.park.configuration.security.exceptions.UserNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -98,6 +100,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleAccessDeniedException(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Collections.singletonMap("error", "No tienes permisos para realizar esta acción"));
+    }
+
+    @ExceptionHandler(NoAssociatedParkingException.class)
+    public ResponseEntity<Map<String, String>> handleNoAssociatedParkingException(NoAssociatedParkingException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Collections.singletonMap("error", "No tienes parkings asociados"));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotFoundException(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap("error", "El usuario no existe"));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

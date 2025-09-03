@@ -1,6 +1,6 @@
 package com.nelumbo.park.controller;
 
-import com.nelumbo.park.dto.UserCreateRequest;
+import com.nelumbo.park.dto.request.UserCreateRequest;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.service.UserService;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package com.nelumbo.park.controller;
 
-import com.nelumbo.park.dto.LoginRequest;
-import com.nelumbo.park.dto.TokenResponse;
+import com.nelumbo.park.dto.request.LoginRequest;
+import com.nelumbo.park.dto.response.TokenResponse;
 import com.nelumbo.park.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

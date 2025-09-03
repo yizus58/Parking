@@ -1,4 +1,4 @@
-package com.nelumbo.park.dto;
+package com.nelumbo.park.dto.request;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.nelumbo.park.configuration.deserializer.StrictStringDeserializer;

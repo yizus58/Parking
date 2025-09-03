@@ -1,4 +1,4 @@
-package com.nelumbo.park.exception;
+package com.nelumbo.park.configuration.security.exceptions;
 
 public class InvalidPasswordException extends RuntimeException {
     public InvalidPasswordException() {

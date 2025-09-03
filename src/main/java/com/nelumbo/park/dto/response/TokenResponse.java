@@ -1,4 +1,4 @@
-package com.nelumbo.park.dto;
+package com.nelumbo.park.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

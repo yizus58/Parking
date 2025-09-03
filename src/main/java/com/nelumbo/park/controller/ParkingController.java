@@ -1,11 +1,14 @@
 package com.nelumbo.park.controller;
 
-import com.nelumbo.park.dto.ParkingRequest;
+import com.nelumbo.park.dto.request.ParkingRequest;
+import com.nelumbo.park.dto.response.ParkingResponse;
 import com.nelumbo.park.entity.Parking;
+import com.nelumbo.park.mapper.ParkingResponseMapper;
 import com.nelumbo.park.service.ParkingService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,21 +21,32 @@ import java.util.List;
 public class ParkingController {
 
     private final ParkingService parkingService;
+    private final ParkingResponseMapper parkingResponseMapper;
 
     public ParkingController(
-            ParkingService parkingService
+            ParkingService parkingService,
+            ParkingResponseMapper parkingResponseMapper
     ) {
         this.parkingService = parkingService;
+        this.parkingResponseMapper = parkingResponseMapper;
     }
 
     @GetMapping("/")
-    public List<Parking> getParkings() {
-        return parkingService.getAllParkings();
+    public List<ParkingResponse> getParkings() {
+        List<Parking> parkings = parkingService.getAllParkings();
+        return parkingResponseMapper.toResponseList(parkings);
+    }
+
+    @GetMapping("/{id}")
+    public ParkingResponse getParkingById(@PathVariable String id) {
+        Parking parking = parkingService.getParkingById(id);
+        return parkingResponseMapper.toResponse(parking);
     }
 
     @PostMapping("/")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public Parking createParking(@Validated @RequestBody ParkingRequest parking) {
-        return parkingService.createParking(parking);
+    public ParkingResponse createParking(@Validated @RequestBody ParkingRequest parking) {
+        Parking createdParking = parkingService.createParking(parking);
+        return parkingResponseMapper.toResponse(createdParking);
     }
 }
