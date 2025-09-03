@@ -55,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 logger.error("Error al extraer username del token: {}", e.getMessage());
 
-                // Si es un error de firma JWT, devolver 401 Unauthorized
                 if (e.getMessage().contains("JWT signature does not match") || 
                     e.getMessage().contains("signature") || 
                     e.getMessage().contains("SignatureException")) {
@@ -69,20 +68,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (username != null) {
-            try {
-                Optional<User> userOptional = userRepository.findById(username);
-                if (userOptional.isEmpty()) {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
-                    response.getWriter().write("{\"error\":\"Usuario no encontrado\"}");
-                    return;
-                }
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            Optional<User> userOptional = userRepository.findById(username);
+            if (userOptional.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-                response.getWriter().write("{\"error\":\"Error interno del servidor\"}");
+                response.getWriter().write("{\"error\":\"Usuario no encontrado\"}");
                 return;
             }
         }
@@ -107,9 +98,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {
                     logger.warn("Token expirado para usuario: {}", username);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"error\":\"Token expirado\"}");
                 }
             } catch (Exception e) {
                 logger.error("Error al validar token: {}", e.getMessage());
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"error\":\"Error al validar token\"}");
             }
         }
 

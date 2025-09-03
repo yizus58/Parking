@@ -5,6 +5,8 @@ import com.nelumbo.park.dto.response.TokenResponse;
 import com.nelumbo.park.dto.request.UserCreateRequest;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.configuration.security.exception.exceptions.EmailNotFoundException;
+import com.nelumbo.park.configuration.security.exception.exceptions.DuplicateEmailException;
+import com.nelumbo.park.configuration.security.exception.exceptions.DuplicateUsernameException;
 import com.nelumbo.park.configuration.security.exception.exceptions.InvalidPasswordException;
 import com.nelumbo.park.mapper.AuthMapper;
 import com.nelumbo.park.mapper.UserMapper;
@@ -41,6 +43,18 @@ public class UserService {
     }
 
     public void createUser(UserCreateRequest userCreateRequest) {
+        // Verificar si el email ya existe
+        User existingUserByEmail = userRepository.findByEmail(userCreateRequest.getEmail());
+        if (existingUserByEmail != null) {
+            throw new DuplicateEmailException("El email " + userCreateRequest.getEmail() + " ya está registrado");
+        }
+
+        // Verificar si el username ya existe
+        User existingUserByUsername = userRepository.findByName(userCreateRequest.getUsername());
+        if (existingUserByUsername != null) {
+            throw new DuplicateUsernameException("El nombre de usuario " + userCreateRequest.getUsername() + " ya está registrado");
+        }
+
         User user = userMapper.toEntity(userCreateRequest);
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -53,7 +67,6 @@ public class UserService {
         User user = userRepository.findByEmail(loginRequest.getEmail());
 
         if (user == null) {
-            logger.warn("Usuario no encontrado con email: {}", loginRequest.getEmail());
             throw new EmailNotFoundException();
         }
 

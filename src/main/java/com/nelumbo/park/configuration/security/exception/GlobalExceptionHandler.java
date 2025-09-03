@@ -6,6 +6,8 @@ import com.nelumbo.park.configuration.security.exception.exceptions.InvalidPassw
 import com.nelumbo.park.configuration.security.exception.exceptions.InsufficientPermissionsException;
 import com.nelumbo.park.configuration.security.exception.exceptions.NoAssociatedParkingException;
 import com.nelumbo.park.configuration.security.exception.exceptions.UserNotFoundException;
+import com.nelumbo.park.configuration.security.exception.exceptions.DuplicateEmailException;
+import com.nelumbo.park.configuration.security.exception.exceptions.DuplicateUsernameException;
 import com.nelumbo.park.configuration.security.exception.exceptions.ParkingNotFoundException;
 import com.nelumbo.park.configuration.security.exception.exceptions.VehicleNotFoundException;
 import com.nelumbo.park.configuration.security.exception.exceptions.JwtUserNotFoundException;
@@ -78,10 +80,30 @@ public class GlobalExceptionHandler {
                 errors.put("error", ex.getCause() != null ? ex.getCause().getMessage() : message);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
             }
+
+            if (message.contains("Cannot deserialize") || message.contains("StrictStringDeserializer") ||
+                message.contains("StrictIntegerDeserializer") || message.contains("StrictFloatDeserializer")) {
+                errors.put("error", "Error en el tipo de datos");
+                errors.put("message", "Verifique que todos los campos tengan el tipo de dato correcto (texto, número entero, número decimal)");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+            }
+
+            if (message.contains("Cannot construct instance")) {
+                errors.put("error", "Datos incompatibles con el endpoint");
+                errors.put("message", "Verifique que esté usando el endpoint correcto y enviando los campos apropiados");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+            }
+
+            if (message.contains("Unrecognized field") || message.contains("not marked as ignorable")) {
+                String fieldName = extractFieldNameFromMessage(message);
+                errors.put("error", "Campo desconocido: " + fieldName);
+                errors.put("message", "El campo '" + fieldName + "' no es válido para este endpoint. Verifique los campos requeridos.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+            }
         }
 
         errors.put("error", "Error en el formato de los datos");
-        errors.put("message", "Verifique que los datos enviados sean correctos");
+        errors.put("message", "Verifique que los datos enviados sean correctos y que esté usando el endpoint apropiado");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
@@ -95,6 +117,21 @@ public class GlobalExceptionHandler {
         errors.put("error", "El cuerpo de la petición es requerido");
         errors.put("message", "Debe enviar un JSON válido con los datos necesarios");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    private String extractFieldNameFromMessage(String message) {
+        try {
+            if (message.contains("Unrecognized field")) {
+                int start = message.indexOf("\"") + 1;
+                int end = message.indexOf("\"", start);
+                if (start > 0 && end > start) {
+                    return message.substring(start, end);
+                }
+            }
+            return "desconocido";
+        } catch (Exception e) {
+            return "desconocido";
+        }
     }
 
     @ExceptionHandler(InvalidFormatException.class)
@@ -157,6 +194,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap("error", "Usuario no encontrado"));
+    }
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateEmailException(DuplicateEmailException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap("error", "El email ya está registrado"));
+    }
+
+    @ExceptionHandler(DuplicateUsernameException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateUsernameException(DuplicateUsernameException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap("error", "El nombre de usuario ya está registrado"));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
