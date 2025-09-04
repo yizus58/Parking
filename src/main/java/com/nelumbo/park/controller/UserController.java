@@ -1,6 +1,7 @@
 package com.nelumbo.park.controller;
 
 import com.nelumbo.park.dto.request.UserCreateRequest;
+import com.nelumbo.park.dto.response.UserResponse;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +28,13 @@ public class UserController {
     }
 
     @GetMapping("/")
-    public List<User> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @PostMapping("")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<String> createUser(@Validated @RequestBody UserCreateRequest request) {
-        userService.createUser(request);
-        return ResponseEntity.ok("User created successfully.");
+    public UserResponse createUser(@Validated @RequestBody UserCreateRequest request) {
+        return userService.createUser(request);
     }
 }

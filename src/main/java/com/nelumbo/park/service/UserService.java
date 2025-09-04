@@ -2,6 +2,7 @@ package com.nelumbo.park.service;
 
 import com.nelumbo.park.dto.request.LoginRequest;
 import com.nelumbo.park.dto.response.TokenResponse;
+import com.nelumbo.park.dto.response.UserResponse;
 import com.nelumbo.park.dto.request.UserCreateRequest;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.configuration.security.exception.exceptions.EmailNotFoundException;
@@ -38,11 +39,14 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(userMapper::toResponse)
+                .toList();
     }
 
-    public void createUser(UserCreateRequest userCreateRequest) {
+    public UserResponse createUser(UserCreateRequest userCreateRequest) {
         User existingUserByEmail = userRepository.findByEmail(userCreateRequest.getEmail());
         if (existingUserByEmail != null) {
             throw new DuplicateEmailException("El email " + userCreateRequest.getEmail() + " ya está registrado");
@@ -57,7 +61,8 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return userMapper.toResponse(savedUser);
     }
 
     public TokenResponse login(LoginRequest loginRequest) {
