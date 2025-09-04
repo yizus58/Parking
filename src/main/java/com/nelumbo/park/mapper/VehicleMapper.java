@@ -59,8 +59,6 @@ public abstract class VehicleMapper {
         response.setCostPerHour(vehicle.getCostPerHour());
         response.setStatus(vehicle.getStatus());
         response.setTotalCost(totalCost);
-        response.setMsg("Salida registrada");
-        response.setResult(true);
         return response;
     }
 

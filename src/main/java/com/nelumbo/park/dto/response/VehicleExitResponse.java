@@ -18,6 +18,4 @@ public class VehicleExitResponse {
     private Float costPerHour;
     private VehicleStatus status;
     private Float totalCost;
-    private String msg;
-    private boolean result;
 }
