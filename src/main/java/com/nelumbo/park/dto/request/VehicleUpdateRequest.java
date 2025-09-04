@@ -2,6 +2,7 @@ package com.nelumbo.park.dto.request;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.nelumbo.park.configuration.deserializer.StrictFloatDeserializer;
+import com.nelumbo.park.configuration.deserializer.StrictIntegerDeserializer;
 import com.nelumbo.park.configuration.deserializer.StrictStringDeserializer;
 import com.nelumbo.park.enums.VehicleStatus;
 import jakarta.validation.constraints.NotBlank;

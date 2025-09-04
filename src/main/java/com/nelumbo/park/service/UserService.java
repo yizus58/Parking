@@ -43,13 +43,11 @@ public class UserService {
     }
 
     public void createUser(UserCreateRequest userCreateRequest) {
-        // Verificar si el email ya existe
         User existingUserByEmail = userRepository.findByEmail(userCreateRequest.getEmail());
         if (existingUserByEmail != null) {
             throw new DuplicateEmailException("El email " + userCreateRequest.getEmail() + " ya está registrado");
         }
 
-        // Verificar si el username ya existe
         User existingUserByUsername = userRepository.findByName(userCreateRequest.getUsername());
         if (existingUserByUsername != null) {
             throw new DuplicateUsernameException("El nombre de usuario " + userCreateRequest.getUsername() + " ya está registrado");

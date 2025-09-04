@@ -30,7 +30,6 @@ public class VehicleCreateRequest {
     @JsonDeserialize(using = StrictStringDeserializer.class)
     private String model_vehicle;
 
-    @NotNull(message = "La hora de entrada es obligatoria")
     @JsonDeserialize(using = StrictDateDeserializer.class)
     private Date entry_time;
 
@@ -41,11 +40,9 @@ public class VehicleCreateRequest {
     @JsonDeserialize(using = StrictStringDeserializer.class)
     private String id_parking;
 
-    @NotBlank(message = "El ID del administrador es obligatorio")
     @JsonDeserialize(using = StrictStringDeserializer.class)
     private String id_admin;
 
-    @NotNull(message = "El costo por hora es obligatorio")
     @Positive(message = "El costo por hora debe ser mayor a 0")
     @JsonDeserialize(using = StrictFloatDeserializer.class)
     private Float cost_per_hour;

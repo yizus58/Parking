@@ -2,10 +2,12 @@ package com.nelumbo.park.mapper;
 
 import com.nelumbo.park.dto.request.VehicleCreateRequest;
 import com.nelumbo.park.dto.request.VehicleUpdateRequest;
+import com.nelumbo.park.dto.response.VehicleSimpleResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.configuration.security.exception.exceptions.UserNotFoundException;
+import com.nelumbo.park.configuration.security.exception.exceptions.ParkingNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.repository.ParkingRepository;
 import org.mapstruct.Mapper;
@@ -43,6 +45,8 @@ public abstract class VehicleMapper {
     @Mapping(target = "admin", source = "id_admin", qualifiedByName = "mapAdmin")
     public abstract Vehicle toEntity(VehicleUpdateRequest dto);
 
+    public abstract VehicleSimpleResponse toSimpleResponse(Vehicle vehicle);
+
     @Named("mapAdmin")
     protected User mapAdmin(String id_admin) {
         if (id_admin == null) {
@@ -56,6 +60,10 @@ public abstract class VehicleMapper {
         if (id_parking == null) {
             return null;
         }
-        return parkingRepository.findById(id_parking);
+        Parking parking = parkingRepository.findById(id_parking);
+        if (parking == null) {
+            throw new ParkingNotFoundException("Parking no encontrado con ID: " + id_parking);
+        }
+        return parking;
     }
 }

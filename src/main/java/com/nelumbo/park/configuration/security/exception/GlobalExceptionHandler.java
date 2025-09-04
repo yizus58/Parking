@@ -10,6 +10,7 @@ import com.nelumbo.park.configuration.security.exception.exceptions.DuplicateEma
 import com.nelumbo.park.configuration.security.exception.exceptions.DuplicateUsernameException;
 import com.nelumbo.park.configuration.security.exception.exceptions.ParkingNotFoundException;
 import com.nelumbo.park.configuration.security.exception.exceptions.VehicleNotFoundException;
+import com.nelumbo.park.configuration.security.exception.exceptions.VehicleAlreadyInParkingException;
 import com.nelumbo.park.configuration.security.exception.exceptions.JwtUserNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -193,7 +194,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap("error", "Usuario no encontrado"));
+                .body(Collections.singletonMap("error", "Usuario referenciado no encontrado"));
     }
 
     @ExceptionHandler(DuplicateEmailException.class)
@@ -226,6 +227,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleVehicleNotFoundException(VehicleNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap("error", "El vehículo no existe"));
+    }
+
+    @ExceptionHandler(VehicleAlreadyInParkingException.class)
+    public ResponseEntity<Map<String, String>> handleVehicleAlreadyInParkingException(VehicleAlreadyInParkingException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap("error", ex.getMessage()));
     }
 
     @ExceptionHandler(JwtUserNotFoundException.class)

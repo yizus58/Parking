@@ -51,7 +51,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwt = authHeader.substring(7);
             try {
                 username = jwtService.extractUid(jwt);
-                System.out.println("username extraído: " + username);
             } catch (Exception e) {
                 logger.error("Error al extraer username del token: {}", e.getMessage());
 
@@ -83,17 +82,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (!jwtService.isTokenExpired(jwt)) {
                     String role = jwtService.extractRole(jwt);
-                    System.out.println("role: " + role);
 
                     List<SimpleGrantedAuthority> authorities = Collections.singletonList(
                             new SimpleGrantedAuthority(role)
                     );
-                    System.out.println("authorities: " + authorities);
 
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(username, null, authorities);
-
-                    System.out.println("authToken: " + authToken);
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {

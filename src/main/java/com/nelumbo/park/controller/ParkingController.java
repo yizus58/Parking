@@ -51,7 +51,7 @@ public class ParkingController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ParkingResponse createParking(@Validated @RequestBody ParkingRequest parking) {
         Parking createdParking = parkingService.createParking(parking);
-        return parkingResponseMapper.toResponse(createdParking);
+        return parkingResponseMapper.toCreateResponse(createdParking);
     }
 
     @PutMapping("/{id}")

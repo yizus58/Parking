@@ -23,10 +23,8 @@ public class SecurityService {
         }
 
 
-        String email = authentication.getName();
-        System.out.println("email extraído: " + email);
-        User user = userRepository.findByEmail(email);
-        System.out.println("user extraído: " + user);
+        String id = authentication.getName();
+        User user = userRepository.findByIdUser(id);
 
         if (user == null) {
             throw new JwtUserNotFoundException("El usuario no se encuentra en la base de datos. Por favor verifica tu correo electrónico.");
