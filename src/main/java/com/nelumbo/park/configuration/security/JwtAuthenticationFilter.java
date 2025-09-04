@@ -69,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (username != null) {
             Optional<User> userOptional = userRepository.findById(username);
             if (userOptional.isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getWriter().write("{\"error\":\"Usuario no encontrado\"}");

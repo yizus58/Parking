@@ -16,7 +16,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
         
-        response.setStatus(HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("{\"error\":\"Se requiere autenticación. Debe proporcionar un token de autorización válido.\"}");
