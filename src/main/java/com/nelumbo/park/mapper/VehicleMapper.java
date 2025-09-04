@@ -29,23 +29,23 @@ public abstract class VehicleMapper {
     protected ParkingRepository parkingRepository;
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "plateNumber", source = "plate_number")
-    @Mapping(target = "model", source = "model_vehicle")
-    @Mapping(target = "entryTime", source = "entry_time")
-    @Mapping(target = "exitTime", source = "exit_time")
-    @Mapping(target = "costPerHour", source = "cost_per_hour")
-    @Mapping(target = "parking", source = "id_parking", qualifiedByName = "mapParking")
-    @Mapping(target = "admin", source = "id_admin", qualifiedByName = "mapAdmin")
+    @Mapping(target = "plateNumber", source = "plateNumber")
+    @Mapping(target = "model", source = "modelVehicle")
+    @Mapping(target = "entryTime", source = "entryTime")
+    @Mapping(target = "exitTime", source = "exitTime")
+    @Mapping(target = "costPerHour", source = "costPerHour")
+    @Mapping(target = "parking", source = "idParking", qualifiedByName = "mapParking")
+    @Mapping(target = "admin", source = "idAdmin", qualifiedByName = "mapAdmin")
     public abstract Vehicle toEntity(VehicleCreateRequest dto);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "plateNumber", source = "plate_number")
-    @Mapping(target = "model", source = "model_vehicle")
-    @Mapping(target = "entryTime", source = "entry_time")
-    @Mapping(target = "exitTime", source = "exit_time")
-    @Mapping(target = "costPerHour", source = "cost_per_hour")
-    @Mapping(target = "parking", source = "id_parking", qualifiedByName = "mapParking")
-    @Mapping(target = "admin", source = "id_admin", qualifiedByName = "mapAdmin")
+    @Mapping(target = "plateNumber", source = "plateNumber")
+    @Mapping(target = "model", source = "modelVehicle")
+    @Mapping(target = "entryTime", source = "entryTime")
+    @Mapping(target = "exitTime", source = "exitTime")
+    @Mapping(target = "costPerHour", source = "costPerHour")
+    @Mapping(target = "parking", source = "idParking", qualifiedByName = "mapParking")
+    @Mapping(target = "admin", source = "idAdmin", qualifiedByName = "mapAdmin")
     public abstract Vehicle toEntity(VehicleUpdateRequest dto);
 
     public abstract VehicleCreateResponse toSimpleResponse(Vehicle vehicle);
@@ -63,21 +63,21 @@ public abstract class VehicleMapper {
     }
 
     @Named("mapAdmin")
-    protected User mapAdmin(String id_admin) {
-        if (id_admin == null) {
+    protected User mapAdmin(String idAdmin) {
+        if (idAdmin == null) {
             return null;
         }
-        return userRepository.findById(id_admin).orElseThrow(() -> new UserNotFoundException());
+        return userRepository.findById(idAdmin).orElseThrow(() -> new UserNotFoundException());
     }
 
     @Named("mapParking")
-    protected Parking mapParking(String id_parking) {
-        if (id_parking == null) {
+    protected Parking mapParking(String idParking) {
+        if (idParking == null) {
             return null;
         }
-        Parking parking = parkingRepository.findById(id_parking);
+        Parking parking = parkingRepository.findById(idParking);
         if (parking == null) {
-            throw new ParkingNotFoundException("Parking no encontrado con ID: " + id_parking);
+            throw new ParkingNotFoundException("Parking no encontrado con ID: " + idParking);
         }
         return parking;
     }

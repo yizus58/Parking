@@ -19,23 +19,23 @@ public class VehicleCreateRequest {
 
     @NotBlank(message = "La placa del vehículo es obligatoria")
     @Size(max = 10, message = "La placa no debe exceder 10 caracteres")
-    private String plate_number;
+    private String plateNumber;
 
     @NotBlank(message = "El modelo del vehículo es obligatorio")
     @Size(max = 50, message = "El modelo no debe exceder 50 caracteres")
-    private String model_vehicle;
+    private String modelVehicle;
 
-    private Date entry_time;
+    private Date entryTime;
 
-    private Date exit_time;
+    private Date exitTime;
 
     @NotBlank(message = "El ID del parking es obligatorio")
-    private String id_parking;
+    private String idParking;
 
-    private String id_admin;
+    private String idAdmin;
 
     @Positive(message = "El costo por hora debe ser mayor a 0")
-    private Float cost_per_hour;
+    private Float costPerHour;
 
     private VehicleStatus status = VehicleStatus.IN;
 }

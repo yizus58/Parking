@@ -19,20 +19,20 @@ public abstract class ParkingMapper {
     protected UserRepository userRepository;
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "owner", source = "id_owner", qualifiedByName = "mapOwner")
-    @Mapping(target = "costPerHour", source = "cost_per_hour")
+    @Mapping(target = "owner", source = "idOwner", qualifiedByName = "mapOwner")
+    @Mapping(target = "costPerHour", source = "costPerHour")
     public abstract Parking toEntity(ParkingRequest dto);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "owner", source = "id_owner", qualifiedByName = "mapOwner")
-    @Mapping(target = "costPerHour", source = "cost_per_hour")
+    @Mapping(target = "owner", source = "idOwner", qualifiedByName = "mapOwner")
+    @Mapping(target = "costPerHour", source = "costPerHour")
     public abstract Parking toEntity(ParkingUpdateRequest dto);
 
     @Named("mapOwner")
-    protected User mapOwner(String id_owner) {
-        if (id_owner == null) {
+    protected User mapOwner(String idOwner) {
+        if (idOwner == null) {
             return null;
         }
-        return userRepository.findById(id_owner).orElseThrow(() -> new UserNotFoundException());
+        return userRepository.findById(idOwner).orElseThrow(() -> new UserNotFoundException());
     }
 }

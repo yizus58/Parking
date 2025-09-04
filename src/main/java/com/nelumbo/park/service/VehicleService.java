@@ -16,7 +16,6 @@ import com.nelumbo.park.enums.VehicleStatus;
 import com.nelumbo.park.mapper.VehicleMapper;
 import com.nelumbo.park.repository.VehicleRepository;
 import com.nelumbo.park.repository.UserRepository;
-import com.nelumbo.park.repository.ParkingRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -29,20 +28,17 @@ public class VehicleService {
     private final VehicleMapper vehicleMapper;
     private final SecurityService securityService;
     private final UserRepository userRepository;
-    private final ParkingRepository parkingRepository;
 
     public VehicleService(
             VehicleRepository vehicleRepository,
             VehicleMapper vehicleMapper,
             SecurityService securityService,
-            UserRepository userRepository,
-            ParkingRepository parkingRepository
+            UserRepository userRepository
     ) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleMapper = vehicleMapper;
         this.securityService = securityService;
         this.userRepository = userRepository;
-        this.parkingRepository = parkingRepository;
     }
 
     public List<Vehicle> getAllVehicles() {
@@ -97,7 +93,7 @@ public class VehicleService {
     }
 
     public VehicleExitResponse exitVehicle(VehicleUpdateRequest vehicleUpdateRequest) {
-        String vehiclePlate = vehicleUpdateRequest.getPlate_number().toUpperCase();
+        String vehiclePlate = vehicleUpdateRequest.getPlateNumber().toUpperCase();
         Vehicle existingVehicle = vehicleRepository.findByPlateNumberAndStatus(vehiclePlate, VehicleStatus.IN)
                 .orElseThrow(() -> new VehicleNotFoundException());
 

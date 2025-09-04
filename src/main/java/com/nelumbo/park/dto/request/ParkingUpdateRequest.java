@@ -28,8 +28,8 @@ public class ParkingUpdateRequest {
 
     @NotNull(message = "El costo por hora no puede estar vacío")
     @Positive(message = "El costo por hora debe ser mayor a 0")
-    private Float cost_per_hour;
+    private Float costPerHour;
 
     @NotBlank(message = "El id del administrador no puede estar vacío")
-    private String id_owner;
+    private String idOwner;
 }
