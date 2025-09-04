@@ -1,5 +1,6 @@
 package com.nelumbo.park.repository;
 
+import com.nelumbo.park.dto.response.TopVehicleResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Parking;
@@ -28,4 +29,20 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
     List<Vehicle> findByAdminAndParking(User admin, Parking parking);
     Optional<Vehicle> findByPlateNumberAndStatus(String plateNumber, VehicleStatus status);
     Optional<Vehicle> findByParkingAndPlateNumberAndStatus(Parking parking, String plateNumber, VehicleStatus status);
+
+    @Query(value = "SELECT v.plateNumber, COUNT(*) as total_visits " +
+                  "FROM Vehicle v " +
+                  "GROUP BY v.plateNumber " +
+                  "ORDER BY COUNT(*) DESC " +
+                  "LIMIT 10")
+    List<Object[]> findTopVehiclesByVisits();
+    
+    @Query("SELECT v.plateNumber, COUNT(v) as total_visits " +
+           "FROM Vehicle v " + 
+           "INNER JOIN Parking p ON v.parking = p " +
+           "WHERE p.id = :id " +
+           "GROUP BY v.plateNumber " +
+           "ORDER BY COUNT(v) DESC " +
+           "LIMIT 10")
+    List<Object[]> findTopVehicleById(String id);
 }

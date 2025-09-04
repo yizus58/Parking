@@ -7,6 +7,7 @@ import com.nelumbo.park.dto.request.VehicleUpdateRequest;
 import com.nelumbo.park.dto.response.VehicleCreateResponse;
 import com.nelumbo.park.dto.response.VehicleExitResponse;
 import com.nelumbo.park.dto.response.IndicatorResponse;
+import com.nelumbo.park.dto.response.TopVehicleResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Parking;
@@ -150,6 +151,29 @@ public class VehicleService {
                         vehicle.getEntryTime(),
                         vehicle.getExitTime(),
                         new IndicatorResponse.ParkingSimpleResponse(vehicle.getParking().getName())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public List<TopVehicleResponse> getTopVehicles() {
+        List<Object[]> topVehiclesData = vehicleRepository.findTopVehiclesByVisits();
+
+        List<TopVehicleResponse> topVehicles = topVehiclesData.stream()
+                .map(data -> new TopVehicleResponse(
+                        (String) data[0],
+                        ((Number) data[1]).longValue()
+                ))
+                .collect(Collectors.toList());
+        return topVehicles;
+    }
+
+    public List<TopVehicleResponse> getTopVehicleById(String id) {
+        List<Object[]> topVehiclesData = vehicleRepository.findTopVehicleById(id);
+
+        return topVehiclesData.stream()
+                .map(data -> new TopVehicleResponse(
+                        (String) data[0],
+                        ((Number) data[1]).longValue()
                 ))
                 .collect(Collectors.toList());
     }
