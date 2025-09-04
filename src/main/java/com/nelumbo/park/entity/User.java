@@ -37,7 +37,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String role = "EMPLEADO";
+    private String role = "SOCIO";
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Parking> ownedParkings;

@@ -49,19 +49,19 @@ public class VehicleController {
     }
 
     @PostMapping("/")
-    @PreAuthorize("hasAuthority('EMPLEADO')")
+    @PreAuthorize("hasAuthority('SOCIO')")
     public VehicleCreateResponse createVehicle(@Validated @RequestBody VehicleCreateRequest vehicle) {
         return vehicleService.createVehicle(vehicle);
     }
 
     @PutMapping("/")
-    @PreAuthorize("hasAuthority('EMPLEADO')")
+    @PreAuthorize("hasAuthority('SOCIO')")
     public VehicleExitResponse exitVehicle(@Validated @RequestBody VehicleUpdateRequest vehicle) {
         return vehicleService.exitVehicle(vehicle);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('EMPLEADO')")
+    @PreAuthorize("hasAuthority('SOCIO')")
     public ResponseEntity<String> deleteVehicle(@PathVariable String id) {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.ok("Vehículo eliminado exitosamente");

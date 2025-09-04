@@ -11,7 +11,7 @@ import org.mapstruct.MappingConstants;
 public abstract class UserMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "role", constant = "EMPLEADO")
+    @Mapping(target = "role", constant = "SOCIO")
     public abstract User toEntity(UserCreateRequest dto);
     
     public abstract UserResponse toResponse(User user);

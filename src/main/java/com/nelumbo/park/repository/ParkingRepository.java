@@ -3,6 +3,7 @@ package com.nelumbo.park.repository;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,6 +14,9 @@ public interface ParkingRepository extends JpaRepository<Parking, Long> {
     boolean existsById(String id);
 
     Parking findByName(String name);
+
+    @Query("SELECT p FROM Parking p WHERE p.owner = :owner")
     List<Parking> findByOwner(User owner);
+
     Parking findByIdAndOwner(String id, User owner);
 }

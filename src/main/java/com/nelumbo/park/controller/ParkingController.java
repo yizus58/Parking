@@ -3,6 +3,7 @@ package com.nelumbo.park.controller;
 import com.nelumbo.park.dto.request.ParkingRequest;
 import com.nelumbo.park.dto.response.ParkingResponse;
 import com.nelumbo.park.dto.request.ParkingUpdateRequest;
+import com.nelumbo.park.dto.response.ParkingWithVehiclesResponse;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.mapper.ParkingResponseMapper;
 import com.nelumbo.park.service.ParkingService;
@@ -37,14 +38,12 @@ public class ParkingController {
 
     @GetMapping("/")
     public List<ParkingResponse> getParkings() {
-        List<Parking> parkings = parkingService.getAllParkings();
-        return parkingResponseMapper.toResponseList(parkings);
+        return parkingService.getAllParkings();
     }
 
     @GetMapping("/{id}")
-    public ParkingResponse getParkingById(@PathVariable String id) {
-        Parking parking = parkingService.getParkingById(id);
-        return parkingResponseMapper.toResponse(parking);
+    public ParkingWithVehiclesResponse getParkingById(@PathVariable String id) {
+        return parkingService.getParkingById(id);
     }
 
     @PostMapping("/")

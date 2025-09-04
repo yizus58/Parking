@@ -2,12 +2,16 @@ package com.nelumbo.park.service;
 
 import com.nelumbo.park.dto.request.ParkingUpdateRequest;
 import com.nelumbo.park.dto.request.ParkingRequest;
+import com.nelumbo.park.dto.response.ParkingResponse;
+import com.nelumbo.park.dto.response.ParkingWithVehiclesResponse;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.exception.exceptions.InsufficientPermissionsException;
 import com.nelumbo.park.exception.exceptions.NoAssociatedParkingException;
 import com.nelumbo.park.exception.exceptions.ParkingNotFoundException;
 import com.nelumbo.park.mapper.ParkingMapper;
+import com.nelumbo.park.mapper.ParkingResponseMapper;
+import com.nelumbo.park.mapper.ParkingWithVehiclesMapper;
 import com.nelumbo.park.repository.ParkingRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,48 +21,63 @@ import java.util.List;
 public class ParkingService {
     private final ParkingRepository parkingRepository;
     private final ParkingMapper parkingMapper;
+    private final ParkingResponseMapper parkingResponseMapper;
+    private final ParkingWithVehiclesMapper parkingWithVehiclesMapper;
     private final SecurityService securityService;
 
     public ParkingService(
             ParkingMapper parkingMapper,
             ParkingRepository parkingRepository,
+            ParkingResponseMapper parkingResponseMapper,
+            ParkingWithVehiclesMapper parkingWithVehiclesMapper,
             SecurityService securityService
     ) {
         this.parkingMapper = parkingMapper;
         this.parkingRepository = parkingRepository;
+        this.parkingResponseMapper = parkingResponseMapper;
+        this.parkingWithVehiclesMapper = parkingWithVehiclesMapper;
         this.securityService = securityService;
     }
 
-    public List<Parking> getAllParkings() {
+    public List<ParkingResponse> getAllParkings() {
         User currentUser = securityService.getCurrentUser();
 
-        if (securityService.isAdmin()) {
-            return parkingRepository.findAll();
-        } else if (securityService.isEmpleado()) {
+        if ("SOCIO".equals(currentUser.getRole())) {
             List<Parking> userParkings = parkingRepository.findByOwner(currentUser);
             if (userParkings.isEmpty()) {
                 throw new NoAssociatedParkingException();
             }
-            return userParkings;
+            return parkingResponseMapper.toResponseListWithoutOwner(userParkings);
         }
 
-        return parkingRepository.findAll();
+        List<Parking> parkings = parkingRepository.findAll();
+        if (parkings.isEmpty()) {
+            throw new ParkingNotFoundException();
+        }
+        return parkingResponseMapper.toResponseList(parkings);
     }
 
-    public Parking getParkingById(String id) {
+    public ParkingWithVehiclesResponse getParkingById(String id) {
         User currentUser = securityService.getCurrentUser();
 
-        if (securityService.isAdmin()) {
-            return parkingRepository.findById(id);
-        } else if (securityService.isEmpleado()) {
+        if ("SOCIO".equals(currentUser.getRole())) {
             Parking parking = parkingRepository.findByIdAndOwner(id, currentUser);
             if (parking == null) {
-                throw new InsufficientPermissionsException();
+                Parking newParking = parkingRepository.findById(id);
+                if (newParking.getOwner() != currentUser) {
+                    throw new InsufficientPermissionsException();
+                }
+
+                throw new NoAssociatedParkingException();
             }
-            return parking;
+            return parkingWithVehiclesMapper.toResponse(parking);
         }
 
-        return parkingRepository.findById(id);
+        Parking parking = parkingRepository.findById(id);
+        if (parking == null) {
+            throw new ParkingNotFoundException();
+        }
+        return parkingWithVehiclesMapper.toResponse(parking);
     }
 
     public Parking createParking (ParkingRequest parkingRequest) {

@@ -38,8 +38,8 @@ public class SecurityService {
         return currentUser != null && "ADMIN".equals(currentUser.getRole());
     }
 
-    public boolean isEmpleado() {
+    public boolean isSocio() {
         User currentUser = getCurrentUser();
-        return currentUser != null && "EMPLEADO".equals(currentUser.getRole());
+        return currentUser != null && "SOCIO".equals(currentUser.getRole());
     }
 }

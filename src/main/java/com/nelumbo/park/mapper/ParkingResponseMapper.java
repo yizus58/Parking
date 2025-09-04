@@ -31,4 +31,11 @@ public interface ParkingResponseMapper {
     @Mapping(target = "id", ignore = true)
     @Named("toUserResponseWithoutId")
     UserResponse toUserResponseWithoutId(User user);
+
+    @Mapping(target = "owner", ignore = true)
+    @Named("toResponseWithoutOwner")
+    ParkingResponse toResponseWithoutOwner(Parking parking);
+
+    @IterableMapping(qualifiedByName = "toResponseWithoutOwner")
+    List<ParkingResponse> toResponseListWithoutOwner(List<Parking> parkings);
 }

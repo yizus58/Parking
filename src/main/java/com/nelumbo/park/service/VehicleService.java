@@ -46,7 +46,7 @@ public class VehicleService {
 
         if (securityService.isAdmin()) {
             return vehicleRepository.findAll();
-        } else if (securityService.isEmpleado()) {
+        } else if (securityService.isSocio()) {
             return vehicleRepository.findByAdmin(currentUser);
         }
 
@@ -58,7 +58,7 @@ public class VehicleService {
 
         User currentUser = securityService.getCurrentUser();
 
-        if (securityService.isEmpleado()) {
+        if (securityService.isSocio()) {
             if (!vehicle.getAdmin().getId().equals(currentUser.getId())) {
                 throw new InsufficientPermissionsException();
             }
@@ -99,7 +99,7 @@ public class VehicleService {
 
         User currentUser = securityService.getCurrentUser();
 
-        if (securityService.isEmpleado()) {
+        if (securityService.isSocio()) {
             if (!existingVehicle.getAdmin().getId().equals(currentUser.getId())) {
                 throw new InsufficientPermissionsException();
             }
