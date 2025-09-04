@@ -5,6 +5,7 @@ import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.enums.VehicleStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,7 +13,11 @@ import java.util.Optional;
 
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, String> {
-    List<Vehicle> findByPlateNumber(String plateNumber);
+    
+    @Query("SELECT v FROM Vehicle v WHERE v.plateNumber = :plateNumber AND v.status = :status")
+    List<Vehicle> findByPlateNumberAndStatus(String plateNumber, String status);
+    
+    
     List<Vehicle> findByAdmin(User admin);
     List<Vehicle> findByParking(Parking parking);
     List<Vehicle> findByAdminAndParking(User admin, Parking parking);

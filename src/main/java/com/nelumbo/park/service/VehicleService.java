@@ -98,11 +98,8 @@ public class VehicleService {
 
     public VehicleExitResponse exitVehicle(VehicleUpdateRequest vehicleUpdateRequest) {
         String vehiclePlate = vehicleUpdateRequest.getPlate_number().toUpperCase();
-        List<Vehicle> vehicles = vehicleRepository.findByPlateNumber(vehiclePlate);
-        if (vehicles.isEmpty()) {
-            throw new VehicleNotFoundException();
-        }
-        Vehicle existingVehicle = vehicles.get(0);
+        Vehicle existingVehicle = vehicleRepository.findByPlateNumberAndStatus(vehiclePlate, VehicleStatus.IN)
+                .orElseThrow(() -> new VehicleNotFoundException());
 
         User currentUser = securityService.getCurrentUser();
 
