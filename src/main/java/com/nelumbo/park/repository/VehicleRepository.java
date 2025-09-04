@@ -16,8 +16,13 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
     
     @Query("SELECT v FROM Vehicle v WHERE v.plateNumber = :plateNumber AND v.status = :status")
     List<Vehicle> findByPlateNumberAndStatus(String plateNumber, String status);
-    
-    
+
+    @Query("SELECT v FROM Vehicle v " +
+           "WHERE v.status = :status " +
+           "GROUP BY v.id, v.plateNumber, v.model, v.entryTime, v.exitTime, v.costPerHour, v.status, v.parking.id, v.parking.name, v.parking.address, v.parking.capacity, v.parking.costPerHour, v.admin.id " +
+           "HAVING COUNT(v.plateNumber) = 1")
+    List<Vehicle> findFirstTimeParkedVehicles(VehicleStatus status);
+
     List<Vehicle> findByAdmin(User admin);
     List<Vehicle> findByParking(Parking parking);
     List<Vehicle> findByAdminAndParking(User admin, Parking parking);

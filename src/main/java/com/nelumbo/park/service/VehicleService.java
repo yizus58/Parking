@@ -6,6 +6,7 @@ import com.nelumbo.park.dto.request.VehicleCreateRequest;
 import com.nelumbo.park.dto.request.VehicleUpdateRequest;
 import com.nelumbo.park.dto.response.VehicleCreateResponse;
 import com.nelumbo.park.dto.response.VehicleExitResponse;
+import com.nelumbo.park.dto.response.IndicatorResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Parking;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class VehicleService {
@@ -136,5 +138,19 @@ public class VehicleService {
         Vehicle existingVehicle = vehicleRepository.findById(id).orElseThrow(() -> new VehicleNotFoundException());
 
         vehicleRepository.delete(existingVehicle);
+    }
+
+    public List<IndicatorResponse> getFirstTimeParkedVehicles() {
+        List<Vehicle> firstTimeVehicles = vehicleRepository.findFirstTimeParkedVehicles(VehicleStatus.IN);
+
+        return firstTimeVehicles.stream()
+                .map(vehicle -> new IndicatorResponse(
+                        vehicle.getPlateNumber(),
+                        vehicle.getModel(),
+                        vehicle.getEntryTime(),
+                        vehicle.getExitTime(),
+                        new IndicatorResponse.ParkingSimpleResponse(vehicle.getParking().getName())
+                ))
+                .collect(Collectors.toList());
     }
 }
