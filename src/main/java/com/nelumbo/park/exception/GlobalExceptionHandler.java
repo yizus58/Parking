@@ -78,13 +78,7 @@ public class GlobalExceptionHandler {
                 return createJsonRequiredResponse();
             }
 
-            if (message.contains("El valor debe ser")) {
-                errors.put("error", ex.getCause() != null ? ex.getCause().getMessage() : message);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-            }
-
-            if (message.contains("Cannot deserialize") || message.contains("StrictStringDeserializer") ||
-                message.contains("StrictIntegerDeserializer") || message.contains("StrictFloatDeserializer")) {
+            if (message.contains("Cannot deserialize")) {
                 errors.put("error", "Error en el tipo de datos");
                 errors.put("message", "Verifique que todos los campos tengan el tipo de dato correcto (texto, número entero, número decimal)");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
