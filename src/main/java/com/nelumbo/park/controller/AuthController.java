@@ -26,12 +26,7 @@ public class AuthController {
         try {
             TokenResponse tokenResponse = userService.login(request);
             return ResponseEntity.ok(tokenResponse);
-        } catch (ResponseStatusException e) {
-            logger.error("Error en login para email: {} - Status: {} - Mensaje: {}", 
-                request.getEmail(), e.getStatusCode(), e.getReason());
-            throw e;
         } catch (Exception e) {
-            logger.error("Error inesperado en login para email: {}", request.getEmail(), e);
             throw e;
         }
     }
