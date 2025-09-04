@@ -1,7 +1,7 @@
 package com.nelumbo.park.service;
 
-import com.nelumbo.park.configuration.security.exception.exceptions.ParkingNotFoundException;
-import com.nelumbo.park.configuration.security.exception.exceptions.VehicleOutParkingException;
+import com.nelumbo.park.exception.exceptions.ParkingNotFoundException;
+import com.nelumbo.park.exception.exceptions.VehicleOutParkingException;
 import com.nelumbo.park.dto.request.VehicleCreateRequest;
 import com.nelumbo.park.dto.request.VehicleUpdateRequest;
 import com.nelumbo.park.dto.response.VehicleCreateResponse;
@@ -9,9 +9,9 @@ import com.nelumbo.park.dto.response.VehicleExitResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Parking;
-import com.nelumbo.park.configuration.security.exception.exceptions.InsufficientPermissionsException;
-import com.nelumbo.park.configuration.security.exception.exceptions.VehicleNotFoundException;
-import com.nelumbo.park.configuration.security.exception.exceptions.VehicleAlreadyInParkingException;
+import com.nelumbo.park.exception.exceptions.InsufficientPermissionsException;
+import com.nelumbo.park.exception.exceptions.VehicleNotFoundException;
+import com.nelumbo.park.exception.exceptions.VehicleAlreadyInParkingException;
 import com.nelumbo.park.enums.VehicleStatus;
 import com.nelumbo.park.mapper.VehicleMapper;
 import com.nelumbo.park.repository.VehicleRepository;

@@ -4,7 +4,7 @@ import com.nelumbo.park.dto.request.ParkingRequest;
 import com.nelumbo.park.dto.request.ParkingUpdateRequest;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.entity.User;
-import com.nelumbo.park.configuration.security.exception.exceptions.UserNotFoundException;
+import com.nelumbo.park.exception.exceptions.UserNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

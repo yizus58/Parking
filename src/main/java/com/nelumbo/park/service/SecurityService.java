@@ -1,7 +1,7 @@
 package com.nelumbo.park.service;
 
 import com.nelumbo.park.entity.User;
-import com.nelumbo.park.configuration.security.exception.exceptions.JwtUserNotFoundException;
+import com.nelumbo.park.exception.exceptions.JwtUserNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

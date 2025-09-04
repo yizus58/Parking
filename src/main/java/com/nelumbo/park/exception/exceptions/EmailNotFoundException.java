@@ -1,4 +1,4 @@
-package com.nelumbo.park.configuration.security.exception.exceptions;
+package com.nelumbo.park.exception.exceptions;
 
 public class EmailNotFoundException extends RuntimeException {
     public EmailNotFoundException() {
