@@ -17,4 +17,5 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
     List<Vehicle> findByParking(Parking parking);
     List<Vehicle> findByAdminAndParking(User admin, Parking parking);
     Optional<Vehicle> findByPlateNumberAndStatus(String plateNumber, VehicleStatus status);
+    Optional<Vehicle> findByParkingAndPlateNumberAndStatus(Parking parking, String plateNumber, VehicleStatus status);
 }

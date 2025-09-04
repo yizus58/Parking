@@ -1,10 +1,14 @@
 package com.nelumbo.park.service;
 
+import com.nelumbo.park.configuration.security.exception.exceptions.ParkingNotFoundException;
+import com.nelumbo.park.configuration.security.exception.exceptions.VehicleOutParkingException;
 import com.nelumbo.park.dto.request.VehicleCreateRequest;
 import com.nelumbo.park.dto.request.VehicleUpdateRequest;
-import com.nelumbo.park.dto.response.VehicleSimpleResponse;
+import com.nelumbo.park.dto.response.VehicleCreateResponse;
+import com.nelumbo.park.dto.response.VehicleExitResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
+import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.configuration.security.exception.exceptions.InsufficientPermissionsException;
 import com.nelumbo.park.configuration.security.exception.exceptions.VehicleNotFoundException;
 import com.nelumbo.park.configuration.security.exception.exceptions.VehicleAlreadyInParkingException;
@@ -12,6 +16,7 @@ import com.nelumbo.park.enums.VehicleStatus;
 import com.nelumbo.park.mapper.VehicleMapper;
 import com.nelumbo.park.repository.VehicleRepository;
 import com.nelumbo.park.repository.UserRepository;
+import com.nelumbo.park.repository.ParkingRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -24,17 +29,20 @@ public class VehicleService {
     private final VehicleMapper vehicleMapper;
     private final SecurityService securityService;
     private final UserRepository userRepository;
+    private final ParkingRepository parkingRepository;
 
     public VehicleService(
             VehicleRepository vehicleRepository,
             VehicleMapper vehicleMapper,
             SecurityService securityService,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ParkingRepository parkingRepository
     ) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleMapper = vehicleMapper;
         this.securityService = securityService;
         this.userRepository = userRepository;
+        this.parkingRepository = parkingRepository;
     }
 
     public List<Vehicle> getAllVehicles() {
@@ -63,7 +71,7 @@ public class VehicleService {
         return vehicle;
     }
 
-    public VehicleSimpleResponse createVehicle(VehicleCreateRequest vehicleCreateRequest) {
+    public VehicleCreateResponse createVehicle(VehicleCreateRequest vehicleCreateRequest) {
         Vehicle vehicle = vehicleMapper.toEntity(vehicleCreateRequest);
 
         vehicleRepository.findByPlateNumberAndStatus(vehicle.getPlateNumber(), VehicleStatus.IN)
@@ -88,8 +96,13 @@ public class VehicleService {
         return vehicleMapper.toSimpleResponse(savedVehicle);
     }
 
-    public Vehicle updateVehicle(String id, VehicleUpdateRequest vehicleUpdateRequest) {
-        Vehicle existingVehicle = vehicleRepository.findById(id).orElseThrow(() -> new VehicleNotFoundException());
+    public VehicleExitResponse exitVehicle(VehicleUpdateRequest vehicleUpdateRequest) {
+        String vehiclePlate = vehicleUpdateRequest.getPlate_number().toUpperCase();
+        List<Vehicle> vehicles = vehicleRepository.findByPlateNumber(vehiclePlate);
+        if (vehicles.isEmpty()) {
+            throw new VehicleNotFoundException();
+        }
+        Vehicle existingVehicle = vehicles.get(0);
 
         User currentUser = securityService.getCurrentUser();
 
@@ -99,10 +112,31 @@ public class VehicleService {
             }
         }
 
-        Vehicle updatedVehicle = vehicleMapper.toEntity(vehicleUpdateRequest);
-        updatedVehicle.setId(id);
+        Parking parking = existingVehicle.getParking();
+        if (parking == null) {
+            throw new ParkingNotFoundException();
+        }
 
-        return vehicleRepository.save(updatedVehicle);
+        if (existingVehicle.getStatus() != VehicleStatus.IN) {
+            throw new VehicleOutParkingException();
+        }
+
+        Date currentTime = new Date();
+        Date exitTime = new Date(currentTime.getTime() - (5 * 60 * 60 * 1000));
+
+        Float costParking = existingVehicle.getCostPerHour();
+        Date entryTime = new Date(existingVehicle.getEntryTime().getTime() - (5 * 60 * 60 * 1000));
+
+        long timeDifference = Math.abs(exitTime.getTime() - entryTime.getTime());
+        long minutesParked = timeDifference / (1000 * 60);
+        long hoursParked = (long) Math.ceil((double) minutesParked / 60);
+        Float totalCost = hoursParked * costParking;
+
+        existingVehicle.setExitTime(currentTime);
+        existingVehicle.setStatus(VehicleStatus.OUT);
+        Vehicle savedVehicle = vehicleRepository.save(existingVehicle);
+
+        return vehicleMapper.toExitResponse(savedVehicle, entryTime, exitTime, totalCost);
     }
 
     public void deleteVehicle(String id) {

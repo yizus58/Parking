@@ -2,7 +2,8 @@ package com.nelumbo.park.mapper;
 
 import com.nelumbo.park.dto.request.VehicleCreateRequest;
 import com.nelumbo.park.dto.request.VehicleUpdateRequest;
-import com.nelumbo.park.dto.response.VehicleSimpleResponse;
+import com.nelumbo.park.dto.response.VehicleCreateResponse;
+import com.nelumbo.park.dto.response.VehicleExitResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Parking;
@@ -15,6 +16,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class VehicleMapper {
@@ -45,7 +48,21 @@ public abstract class VehicleMapper {
     @Mapping(target = "admin", source = "id_admin", qualifiedByName = "mapAdmin")
     public abstract Vehicle toEntity(VehicleUpdateRequest dto);
 
-    public abstract VehicleSimpleResponse toSimpleResponse(Vehicle vehicle);
+    public abstract VehicleCreateResponse toSimpleResponse(Vehicle vehicle);
+
+    public VehicleExitResponse toExitResponse(Vehicle vehicle, Date entryTime, Date exitTime, Float totalCost) {
+        VehicleExitResponse response = new VehicleExitResponse();
+        response.setPlateNumber(vehicle.getPlateNumber());
+        response.setModel(vehicle.getModel());
+        response.setEntryTime(entryTime);
+        response.setExitTime(exitTime);
+        response.setCostPerHour(vehicle.getCostPerHour());
+        response.setStatus(vehicle.getStatus());
+        response.setTotalCost(totalCost);
+        response.setMsg("Salida registrada");
+        response.setResult(true);
+        return response;
+    }
 
     @Named("mapAdmin")
     protected User mapAdmin(String id_admin) {

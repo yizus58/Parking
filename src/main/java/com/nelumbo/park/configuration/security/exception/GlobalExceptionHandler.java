@@ -12,6 +12,7 @@ import com.nelumbo.park.configuration.security.exception.exceptions.ParkingNotFo
 import com.nelumbo.park.configuration.security.exception.exceptions.VehicleNotFoundException;
 import com.nelumbo.park.configuration.security.exception.exceptions.VehicleAlreadyInParkingException;
 import com.nelumbo.park.configuration.security.exception.exceptions.JwtUserNotFoundException;
+import com.nelumbo.park.configuration.security.exception.exceptions.VehicleOutParkingException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -227,6 +228,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleVehicleNotFoundException(VehicleNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap("error", "El vehículo no existe"));
+    }
+    
+    @ExceptionHandler(VehicleOutParkingException.class)
+    public ResponseEntity<Map<String, String>> handleVehicleOutParkingException(VehicleOutParkingException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap("error", "El vehículo ya tiene salida registrada"));
     }
 
     @ExceptionHandler(VehicleAlreadyInParkingException.class)

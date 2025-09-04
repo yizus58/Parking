@@ -1,14 +1,13 @@
 package com.nelumbo.park.controller;
 
 import com.nelumbo.park.dto.request.VehicleCreateRequest;
+import com.nelumbo.park.dto.response.VehicleCreateResponse;
+import com.nelumbo.park.dto.response.VehicleExitResponse;
 import com.nelumbo.park.dto.response.VehicleResponse;
-import com.nelumbo.park.dto.response.VehicleSimpleResponse;
 import com.nelumbo.park.dto.request.VehicleUpdateRequest;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.mapper.VehicleResponseMapper;
-import com.nelumbo.park.service.ParkingService;
 import com.nelumbo.park.service.VehicleService;
-import com.nelumbo.park.service.SecurityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -51,15 +50,14 @@ public class VehicleController {
 
     @PostMapping("/")
     @PreAuthorize("hasAuthority('EMPLEADO')")
-    public VehicleSimpleResponse createVehicle(@Validated @RequestBody VehicleCreateRequest vehicle) {
+    public VehicleCreateResponse createVehicle(@Validated @RequestBody VehicleCreateRequest vehicle) {
         return vehicleService.createVehicle(vehicle);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/")
     @PreAuthorize("hasAuthority('EMPLEADO')")
-    public VehicleResponse updateVehicle(@PathVariable String id, @Validated @RequestBody VehicleUpdateRequest vehicle) {
-        Vehicle updatedVehicle = vehicleService.updateVehicle(id, vehicle);
-        return vehicleResponseMapper.toResponse(updatedVehicle);
+    public VehicleExitResponse exitVehicle(@Validated @RequestBody VehicleUpdateRequest vehicle) {
+        return vehicleService.exitVehicle(vehicle);
     }
 
     @DeleteMapping("/{id}")

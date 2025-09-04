@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VehicleSimpleResponse {
+public class VehicleCreateResponse {
     private String plateNumber;
     private String model;
     private Date entryTime;
