@@ -15,19 +15,11 @@ public class CronScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(CronScheduler.class);
 
-    @Scheduled(cron = "${cron.seconds}", zone = "America/Bogota")
+    @Scheduled(cron = "${cron.determination}", zone = "America/Bogota")
     public void executeDailyTask() {
         if (!cronService.runDailyTask()) {
             System.out.println("La tarea no se pudo ejecutar correctamente");
         }
         System.out.println("La tarea se ejecuto correctamente");
-    }
-
-
-    @Scheduled(cron = "${cron.determination}", zone = "America/Bogota")
-    public void executeReportTask() {
-        if (!cronService.executeReportTask()) {
-            logger.warn("No se pudo ejecutar la tarea de reporte");
-        }
     }
 }
