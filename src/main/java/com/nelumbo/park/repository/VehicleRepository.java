@@ -1,5 +1,6 @@
 package com.nelumbo.park.repository;
 
+import com.nelumbo.park.dto.response.TopParkingResponse;
 import com.nelumbo.park.dto.response.TopPartnerResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
@@ -57,4 +58,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
     List<TopPartnerResponse> findTopPartnersByWeek(@Param("startOfWeek") Date startOfWeek,
                                                    @Param("endOfWeek") Date endOfWeek,
                                                    Pageable pageable);
+        @Query("SELECT v FROM Vehicle v WHERE v.exitTime IS NOT NULL AND v.exitTime >= :startDate AND v.exitTime <= :endDate")
+        List<Vehicle> findVehiclesWithExitTimeBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 }
