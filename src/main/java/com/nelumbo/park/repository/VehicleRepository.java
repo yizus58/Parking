@@ -1,14 +1,17 @@
 package com.nelumbo.park.repository;
 
-import com.nelumbo.park.dto.response.TopVehicleResponse;
+import com.nelumbo.park.dto.response.TopPartnerResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.enums.VehicleStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Pageable;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,4 +48,13 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
            "ORDER BY COUNT(v) DESC " +
            "LIMIT 10")
     List<Object[]> findTopVehicleById(String id);
+
+    @Query("SELECT new com.nelumbo.park.dto.response.TopPartnerResponse(p.owner.username, COUNT(v.id)) " +
+            "FROM Vehicle v JOIN v.parking p " +
+            "WHERE p.owner.role = 'SOCIO' AND v.entryTime >= :startOfWeek AND v.entryTime <= :endOfWeek " +
+            "GROUP BY p.owner.id, p.owner.username " +
+            "ORDER BY COUNT(v.id) DESC")
+    List<TopPartnerResponse> findTopPartnersByWeek(@Param("startOfWeek") Date startOfWeek,
+                                                   @Param("endOfWeek") Date endOfWeek,
+                                                   Pageable pageable);
 }
