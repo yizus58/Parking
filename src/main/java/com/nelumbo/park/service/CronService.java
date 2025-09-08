@@ -1,10 +1,15 @@
 package com.nelumbo.park.service;
 
 import com.nelumbo.park.dto.FileUploadResult;
+import com.nelumbo.park.dto.response.RabbitMQResponse;
 import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
+import com.nelumbo.park.dto.response.EmailAttachmentResponse;
+import com.nelumbo.park.dto.response.EmailDataResponse;
 import com.nelumbo.park.utils.Excel;
 import com.nelumbo.park.utils.ExcelComponent;
+import com.nelumbo.park.utils.HtmlGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -24,19 +29,28 @@ public class CronService {
     private final Excel excel;
     private final ExcelComponent excelGenerator;
     private final S3Service s3Service;
+    private final RabbitMQService rabbitMQService;
 
     private final List<FileUploadResult> uploadedFiles = new ArrayList<>();
+
+    @Value("${app.subject}")
+    private String subject;
+
+    @Value("${type.message}")
+    private String typeMessage;
 
     public CronService(
             VehicleReportService vehicleReportService,
             Excel excel,
             ExcelComponent excelGenerator,
-            S3Service s3Service
+            S3Service s3Service,
+            RabbitMQService rabbitMQService
     ) {
         this.vehicleReportService = vehicleReportService;
         this.excel = excel;
         this.excelGenerator = excelGenerator;
         this.s3Service = s3Service;
+        this.rabbitMQService = rabbitMQService;
     }
 
     public boolean runDailyTask() {
@@ -74,7 +88,16 @@ public class CronService {
                 }
 
                 if (uploadResult != null && uploadResult.containsKey("Key")) {
-                    // Se implementara el rabbitMQ tras crear el html para el envio
+                    FileUploadResult.FileInfo fileInfo = new FileUploadResult.FileInfo(fileName, nameS3);
+                    FileUploadResult uploadInfo = new FileUploadResult(userId, email, fileInfo);
+                    uploadedFiles.add(uploadInfo);
+
+                    String htmlContent = HtmlGenerator.generateHtmlContent(vehicleOutDetailResponse);
+
+                    EmailAttachmentResponse attachment = new EmailAttachmentResponse(fileName, nameS3);
+                    EmailDataResponse data = new EmailDataResponse(email, htmlContent, subject, List.of(attachment));
+                    RabbitMQResponse response = new RabbitMQResponse(typeMessage, data);
+                    this.rabbitMQService.publishMessageBackoff(response);
                 }
 
             } catch (IOException e) {

@@ -1,7 +1,7 @@
 package com.nelumbo.park.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nelumbo.park.model.QueueMessage;
+import com.nelumbo.park.dto.response.QueueMessageResponse;
 import com.nelumbo.park.utils.BackoffExecutor;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -38,13 +38,32 @@ public class RabbitMQService implements DisposableBean {
         String dlqFinalName = queueName + ".dlq.final";
 
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setUri(rabbitUrl);
-        connection = factory.newConnection();
-        channel = connection.createChannel();
+
+        try {
+            factory.setUri(rabbitUrl);
+
+            if (factory.getVirtualHost() == null || factory.getVirtualHost().isEmpty()) {
+                factory.setVirtualHost("/");
+            }
+
+            factory.setConnectionTimeout(30000);
+            factory.setRequestedHeartbeat(60);
+            factory.setNetworkRecoveryInterval(5000);
+            factory.setAutomaticRecoveryEnabled(true);
+
+            connection = factory.newConnection();
+            channel = connection.createChannel();
+        } catch (Exception e) {
+            System.err.println("Error estableciendo conexión a RabbitMQ: " + e.getMessage());
+            System.err.println("URL: " + rabbitUrl);
+            System.err.println("Virtual host: " + (factory.getVirtualHost() != null ? factory.getVirtualHost() : "null"));
+            throw e;
+        }
 
         try {
             channel.queueDeclarePassive(queueName);
         } catch (IOException e) {
+
             channel.queueDeclare(dlqFinalName, true, false, false, null);
 
             Map<String, Object> retryArgs = new HashMap<>();
@@ -56,10 +75,9 @@ public class RabbitMQService implements DisposableBean {
 
             Map<String, Object> mainArgs = new HashMap<>();
             mainArgs.put("x-dead-letter-exchange", "");
-            mainArgs.put("x-dead-letter-routing-key", queueName);
+            mainArgs.put("x-dead-letter-routing-key", QUEUE_RETRY);
 
             channel.queueDeclare(queueName, true, false, false, mainArgs);
-            System.out.println("Created queues DLQ Final: " + e.getMessage());
         }
     }
 
@@ -69,22 +87,22 @@ public class RabbitMQService implements DisposableBean {
         channel.basicPublish("", queueName, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBytes);
     }
 
-    public void publishToDeadLetterQueue(QueueMessage message) throws Exception {
+    public void publishToDeadLetterQueue(QueueMessageResponse message) throws Exception {
         sendToQueue(QUEUE_RETRY, message);
     }
 
-    public void publishToFinalDLQ(QueueMessage message) throws Exception {
+    public void publishToFinalDLQ(QueueMessageResponse message) throws Exception {
         message.setFailedAt(new Date());
         message.setFinalFailure(true);
         sendToQueue(defaultQueueName + ".dlq.final", message);
     }
 
-    public void consumeFromQueue(String queueName, Consumer<QueueMessage> callback) throws Exception {
+    public void consumeFromQueue(String queueName, Consumer<QueueMessageResponse> callback) throws Exception {
         if (channel == null) connect(null);
 
         channel.basicConsume(queueName, false, (consumerTag, delivery) -> {
             try {
-                QueueMessage msg = objectMapper.readValue(delivery.getBody(), QueueMessage.class);
+                QueueMessageResponse msg = objectMapper.readValue(delivery.getBody(), QueueMessageResponse.class);
                 callback.accept(msg);
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             } catch (Exception e) {
@@ -94,7 +112,7 @@ public class RabbitMQService implements DisposableBean {
         }, consumerTag -> {});
     }
 
-    public void consumeFromFinalDLQ(Consumer<QueueMessage> callback) throws Exception {
+    public void consumeFromFinalDLQ(Consumer<QueueMessageResponse> callback) throws Exception {
         consumeFromQueue(defaultQueueName + ".dlq.final", callback);
     }
 
@@ -115,10 +133,25 @@ public class RabbitMQService implements DisposableBean {
     }
 
     private boolean _publishMessageInternal(Object message) throws Exception {
-        if (channel == null) connect(null);
+
+        if (channel == null || !channel.isOpen()) {
+            connect(null);
+        }
+
+        if (connection == null || !connection.isOpen()) {
+            connect(null);
+        }
+
         byte[] messageBytes = objectMapper.writeValueAsBytes(message);
-        channel.basicPublish("", defaultQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBytes);
-        return true;
+
+        try {
+            channel.basicPublish("", defaultQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBytes);
+            return true;
+        } catch (Exception e) {
+            connect(null);
+            channel.basicPublish("", defaultQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBytes);
+            return true;
+        }
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.nelumbo.park.model;
+package com.nelumbo.park.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class QueueMessage {
+public class QueueMessageResponse {
 
     private String id;
     private String content;
@@ -27,7 +27,7 @@ public class QueueMessage {
     private boolean finalFailure = false;
     private String errorMessage;
 
-    public QueueMessage(String id, String content, String messageType) {
+    public QueueMessageResponse(String id, String content, String messageType) {
         this.id = id;
         this.content = content;
         this.messageType = messageType;
