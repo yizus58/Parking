@@ -9,6 +9,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.util.Map;
 
@@ -30,8 +31,6 @@ public class S3Service {
      * @return Mapa con la clave del archivo subido
      */
     public Map<String, String> uploadFile(byte[] buffer, String contentType, String fileName) {
-        getFile(fileName);
-
         if (buffer == null || buffer.length == 0) {
             throw new IllegalArgumentException("El parámetro buffer debe ser un array de bytes válido");
         }
@@ -44,8 +43,6 @@ public class S3Service {
                     .build();
 
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(buffer));
-
-            log.info("Archivo subido exitosamente: {}", fileName);
             return Map.of("Key", fileName);
         } catch (Exception error) {
             log.error("Error subiendo archivo \"{}\": {}", fileName, error.getMessage());
@@ -76,9 +73,44 @@ public class S3Service {
                 "key", filename,
                 "exists", false
             );
+        } catch (S3Exception error) {
+            log.error("Error de S3 verificando existencia del archivo {}: {}", filename, error.getMessage());
+            throw new RuntimeException("Error de S3: " + error.getMessage(), error);
         } catch (Exception error) {
-            log.error("Error verificando existencia del archivo: {}", error.getMessage());
-            throw new RuntimeException("Error verificando existencia del archivo: " + error.getMessage(), error);
+            if (error.getCause() instanceof java.net.UnknownHostException) {
+                log.error("Error de conectividad verificando archivo {}: No se puede resolver el host S3", filename);
+                throw new RuntimeException("Error de conectividad con S3: Verifique la configuración del endpoint y la conectividad de red", error);
+            } else {
+                log.error("Error inesperado verificando existencia del archivo {}: {}", filename, error.getMessage());
+                throw new RuntimeException("Error verificando existencia del archivo: " + error.getMessage(), error);
+            }
+        }
+    }
+
+    /**
+     * Sube un archivo directamente a S3 sin verificación previa de existencia
+     * @param buffer Array de bytes del archivo
+     * @param contentType Tipo de contenido del archivo
+     * @param fileName Nombre del archivo
+     * @return Mapa con la clave del archivo subido
+     */
+    public Map<String, String> uploadFileDirectly(byte[] buffer, String contentType, String fileName) {
+        if (buffer == null || buffer.length == 0) {
+            throw new IllegalArgumentException("El parámetro buffer debe ser un array de bytes válido");
+        }
+
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .contentType(contentType)
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(buffer));
+            return Map.of("Key", fileName);
+        } catch (Exception error) {
+            log.error("Error subiendo archivo directamente \"{}\": {}", fileName, error.getMessage());
+            throw new RuntimeException("Error subiendo archivo: " + error.getMessage(), error);
         }
     }
 }

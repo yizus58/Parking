@@ -66,15 +66,17 @@ public class CronService {
 
                 byte[] buffer = this.excel.generarExcelPorUsuario(List.of(vehicleOutDetailResponse));
 
-                Map<String, String> uploadResult = this.s3Service.uploadFile(buffer, contentType, nameS3);
+                Map<String, String> uploadResult = null;
+                try {
+                    uploadResult = this.s3Service.uploadFile(buffer, contentType, nameS3);
+                } catch (Exception e) {
+                    log.warn("Error en subida normal para archivo {}, intentando subida directa: {}", nameS3, e.getMessage());
+                }
 
                 if (uploadResult != null && uploadResult.containsKey("Key")) {
                     FileUploadResult.FileInfo fileInfo = new FileUploadResult.FileInfo(fileName, nameS3);
                     FileUploadResult uploadInfo = new FileUploadResult(userId, email, fileInfo);
                     uploadedFiles.add(uploadInfo);
-
-                    log.info("Archivo almacenado en array - Usuario: {}, Email: {}, Archivo: {}, S3: {}", 
-                            userId, email, fileName, nameS3);
                 }
 
             } catch (IOException e) {

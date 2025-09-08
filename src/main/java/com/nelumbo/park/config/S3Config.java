@@ -7,6 +7,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import java.net.URI;
 
 @Configuration
 public class S3Config {
@@ -31,7 +32,9 @@ public class S3Config {
         AwsBasicCredentials awsCreds = AwsBasicCredentials.create(bucketAccessKey, bucketSecretKey);
         return S3Client.builder()
                 .region(Region.of(bucketRegion))
+                .endpointOverride(URI.create("https://" + accountId + ".r2.cloudflarestorage.com"))
                 .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+                .forcePathStyle(true)
                 .build();
     }
 }

@@ -126,18 +126,17 @@ public class VehicleService {
             throw new VehicleOutParkingException();
         }
 
-        Date currentTime = new Date();
-        Date exitTime = new Date(currentTime.getTime() - (5 * 60 * 60 * 1000));
+        Date exitTime = new Date();
 
         Float costParking = existingVehicle.getCostPerHour();
-        Date entryTime = new Date(existingVehicle.getEntryTime().getTime() - (5 * 60 * 60 * 1000));
+        Date entryTime = existingVehicle.getEntryTime();
 
         long timeDifference = Math.abs(exitTime.getTime() - entryTime.getTime());
         long minutesParked = timeDifference / (1000 * 60);
         long hoursParked = (long) Math.ceil((double) minutesParked / 60);
         Float totalCost = hoursParked * costParking;
 
-        existingVehicle.setExitTime(currentTime);
+        existingVehicle.setExitTime(exitTime);
         existingVehicle.setStatus(VehicleStatus.OUT);
         Vehicle savedVehicle = vehicleRepository.save(existingVehicle);
 
