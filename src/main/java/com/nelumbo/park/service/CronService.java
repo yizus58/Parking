@@ -74,9 +74,7 @@ public class CronService {
                 }
 
                 if (uploadResult != null && uploadResult.containsKey("Key")) {
-                    FileUploadResult.FileInfo fileInfo = new FileUploadResult.FileInfo(fileName, nameS3);
-                    FileUploadResult uploadInfo = new FileUploadResult(userId, email, fileInfo);
-                    uploadedFiles.add(uploadInfo);
+                    // Se implementara el rabbitMQ tras crear el html para el envio
                 }
 
             } catch (IOException e) {
@@ -89,23 +87,7 @@ public class CronService {
                 e.printStackTrace();
             }
         }
-
         log.info("Proceso completado. Total de archivos subidos: {}", uploadedFiles.size());
         return true;
-    }
-
-    /**
-     * Obtiene la lista de archivos subidos en la última ejecución
-     * @return Lista de resultados de archivos subidos
-     */
-    public List<FileUploadResult> getUploadedFiles() {
-        return new ArrayList<>(uploadedFiles);
-    }
-
-    /**
-     * Limpia la lista de archivos subidos
-     */
-    public void clearUploadedFiles() {
-        uploadedFiles.clear();
     }
 }
