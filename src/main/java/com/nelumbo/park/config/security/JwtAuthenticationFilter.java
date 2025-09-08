@@ -1,4 +1,4 @@
-package com.nelumbo.park.configuration.security;
+package com.nelumbo.park.config.security;
 
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.repository.UserRepository;

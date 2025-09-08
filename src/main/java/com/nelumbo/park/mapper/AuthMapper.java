@@ -2,7 +2,7 @@ package com.nelumbo.park.mapper;
 
 import com.nelumbo.park.dto.response.TokenResponse;
 import com.nelumbo.park.entity.User;
-import com.nelumbo.park.configuration.security.JwtService;
+import com.nelumbo.park.config.security.JwtService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

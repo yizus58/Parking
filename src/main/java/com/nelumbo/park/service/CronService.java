@@ -1,35 +1,42 @@
 package com.nelumbo.park.service;
 
+import com.nelumbo.park.dto.FileUploadResult;
 import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
 import com.nelumbo.park.utils.Excel;
 import com.nelumbo.park.utils.ExcelComponent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class CronService {
 
     private final VehicleReportService vehicleReportService;
     private final Excel excel;
     private final ExcelComponent excelGenerator;
+    private final S3Service s3Service;
+
+    private final List<FileUploadResult> uploadedFiles = new ArrayList<>();
 
     public CronService(
             VehicleReportService vehicleReportService,
             Excel excel,
-            ExcelComponent excelGenerator
+            ExcelComponent excelGenerator,
+            S3Service s3Service
     ) {
         this.vehicleReportService = vehicleReportService;
         this.excel = excel;
         this.excelGenerator = excelGenerator;
+        this.s3Service = s3Service;
     }
 
     public boolean runDailyTask() {
@@ -37,6 +44,8 @@ public class CronService {
         if (dataVehicleOutParking == null || dataVehicleOutParking.isEmpty()) {
             return false;
         }
+
+        uploadedFiles.clear();
 
         for (VehicleOutDetailResponse vehicleOutDetailResponse : dataVehicleOutParking) {
             try {
@@ -46,9 +55,9 @@ public class CronService {
                 String shortId = userId != null && userId.length() >= 8 ? userId.substring(0, 8) : "undefined";
                 safeName = safeName.length() > 50 ? safeName.substring(0, 50) : safeName;
                 String dateGenerate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-                String filename = String.format("reporte_%s_%s_%s.xlsx", safeName, shortId, dateGenerate).toLowerCase();
-                //String nameS3 = UUID.randomUUID().toString().replace("-", ""); // Generar el nombre de archivo aleatorio para S3
-
+                String fileName = String.format("reporte_%s_%s_%s.xlsx", safeName, shortId, dateGenerate).toLowerCase();
+                String nameS3 = UUID.randomUUID().toString().replace("-", "");
+                String email = Optional.ofNullable(vehicleOutDetailResponse.getEmail()).orElse("");
                 String contentType = this.excelGenerator.getContentType();
 
                 if (contentType == null || contentType.isEmpty()) {
@@ -57,14 +66,44 @@ public class CronService {
 
                 byte[] buffer = this.excel.generarExcelPorUsuario(List.of(vehicleOutDetailResponse));
 
-                // Guardar en disco, luego se reemplazara con s3
-                Path outputPath = Paths.get("C:/Users/NelumboDev/Desktop/reportes/", filename);
-                Files.write(outputPath, buffer);
+                Map<String, String> uploadResult = this.s3Service.uploadFile(buffer, contentType, nameS3);
+
+                if (uploadResult != null && uploadResult.containsKey("Key")) {
+                    FileUploadResult.FileInfo fileInfo = new FileUploadResult.FileInfo(fileName, nameS3);
+                    FileUploadResult uploadInfo = new FileUploadResult(userId, email, fileInfo);
+                    uploadedFiles.add(uploadInfo);
+
+                    log.info("Archivo almacenado en array - Usuario: {}, Email: {}, Archivo: {}, S3: {}", 
+                            userId, email, fileName, nameS3);
+                }
+
             } catch (IOException e) {
+                log.error("Error procesando archivo para usuario {}: {}", 
+                        vehicleOutDetailResponse.getUserId(), e.getMessage());
+                e.printStackTrace();
+            } catch (Exception e) {
+                log.error("Error inesperado procesando archivo para usuario {}: {}", 
+                        vehicleOutDetailResponse.getUserId(), e.getMessage());
                 e.printStackTrace();
             }
         }
 
+        log.info("Proceso completado. Total de archivos subidos: {}", uploadedFiles.size());
         return true;
+    }
+
+    /**
+     * Obtiene la lista de archivos subidos en la última ejecución
+     * @return Lista de resultados de archivos subidos
+     */
+    public List<FileUploadResult> getUploadedFiles() {
+        return new ArrayList<>(uploadedFiles);
+    }
+
+    /**
+     * Limpia la lista de archivos subidos
+     */
+    public void clearUploadedFiles() {
+        uploadedFiles.clear();
     }
 }

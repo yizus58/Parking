@@ -1,4 +1,4 @@
-package com.nelumbo.park.configuration;
+package com.nelumbo.park.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

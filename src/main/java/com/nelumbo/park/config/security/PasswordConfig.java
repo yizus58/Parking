@@ -1,4 +1,4 @@
-package com.nelumbo.park.configuration.security;
+package com.nelumbo.park.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

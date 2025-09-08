@@ -1,4 +1,4 @@
-package com.nelumbo.park.configuration.security;
+package com.nelumbo.park.config.security;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,0 +1,37 @@
+package com.nelumbo.park.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+
+@Configuration
+public class S3Config {
+
+    @Value("${r2.bucket.path}")
+    private String bucketPath;
+
+    @Value("${r2.bucket.access.key}")
+    private String bucketAccessKey;
+
+    @Value("${r2.bucket.secret.key}")
+    private String bucketSecretKey;
+
+    @Value("${r2.bucket.region}")
+    private String bucketRegion;
+
+    @Value("${r2.account.id}")
+    private String accountId;
+
+    @Bean
+    public S3Client S3Config() {
+        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(bucketAccessKey, bucketSecretKey);
+        return S3Client.builder()
+                .region(Region.of(bucketRegion))
+                .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+                .build();
+    }
+}

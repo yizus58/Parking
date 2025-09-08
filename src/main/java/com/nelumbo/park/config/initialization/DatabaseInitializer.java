@@ -1,4 +1,4 @@
-package com.nelumbo.park.configuration.initialization;
+package com.nelumbo.park.config.initialization;
 
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.repository.UserRepository;

@@ -1,4 +1,4 @@
-package com.nelumbo.park.configuration.security;
+package com.nelumbo.park.config.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
