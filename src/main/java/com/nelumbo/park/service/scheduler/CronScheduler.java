@@ -9,14 +9,19 @@ import org.slf4j.LoggerFactory;
 @Service
 public class CronScheduler {
 
-    private CronService cronService;
+    private final CronService cronService;
 
     private static final Logger logger = LoggerFactory.getLogger(CronScheduler.class);
 
-    @Scheduled(cron = "${cron.determination}", zone = "America/Bogota")
+    public CronScheduler(CronService cronService) {
+        this.cronService = cronService;
+    }
+
+    @Scheduled(cron = "${cron.thirty.seconds}", zone = "America/Bogota")
     public void executeDailyTask() {
         if (!cronService.runDailyTask()) {
             logger.error("Error en la ejecucion de la tarea");
+            return;
         }
         logger.info("Ejecucion de la tarea exitosa");
     }

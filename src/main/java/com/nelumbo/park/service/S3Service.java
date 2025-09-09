@@ -20,10 +20,14 @@ import java.util.Map;
 @Slf4j
 public class S3Service {
 
-    private S3Client s3Client;
+    private final S3Client s3Client;
 
     @Value("${r2.bucket.name}")
     private String bucketName;
+
+    public S3Service(S3Client s3Client) {
+        this.s3Client = s3Client;
+    }
 
     /**
      * Sube un archivo al bucket S3
