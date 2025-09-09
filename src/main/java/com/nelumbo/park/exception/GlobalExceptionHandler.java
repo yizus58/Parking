@@ -14,6 +14,8 @@ import com.nelumbo.park.exception.exceptions.VehicleAlreadyInParkingException;
 import com.nelumbo.park.exception.exceptions.JwtUserNotFoundException;
 import com.nelumbo.park.exception.exceptions.VehicleOutParkingException;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -23,8 +25,10 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -242,8 +246,12 @@ public class GlobalExceptionHandler {
                 .body(Collections.singletonMap("error", "El usuario no existe"));
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
+        logger.error("Error inesperado: ", ex);
+
         if (ex.getMessage() != null &&
                 (ex.getMessage().toLowerCase().contains("content type") ||
                         (ex.getMessage().toLowerCase().contains("media type") && !ex.getMessage().contains("application/json")))) {

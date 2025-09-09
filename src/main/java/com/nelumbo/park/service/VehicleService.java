@@ -190,7 +190,7 @@ public class VehicleService {
         return parkingStatsService.getPartnersRanking();
     }
 
-    public WeeklyParkingStatsResponse getParkingRaking() {
+    public WeeklyParkingStatsResponse getParkingRanking() {
         return parkingStatsService.getParkingRanking();
     }
 }

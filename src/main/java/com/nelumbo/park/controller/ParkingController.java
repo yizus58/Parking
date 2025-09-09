@@ -7,6 +7,11 @@ import com.nelumbo.park.dto.response.ParkingWithVehiclesResponse;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.mapper.ParkingResponseMapper;
 import com.nelumbo.park.service.ParkingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +28,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/parkings")
+@Tag(name = "Parkings", description = "Parking API")
 public class ParkingController {
 
     private final ParkingService parkingService;
@@ -36,16 +42,35 @@ public class ParkingController {
         this.parkingResponseMapper = parkingResponseMapper;
     }
 
+    @Operation(summary = "Obtiene todos los parkings")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Parkings encontrados", content = @Content),
+            @ApiResponse(responseCode = "401", description = "No tienes parkings asociados", content = @Content),
+            @ApiResponse(responseCode = "404", description = "El parking no existe", content = @Content)
+    })
     @GetMapping("/")
+    @PreAuthorize("hasAuthority('ADMIN') || hasAuthority('SOCIO')")
     public List<ParkingResponse> getParkings() {
         return parkingService.getAllParkings();
     }
 
+    @Operation(summary = "Obtiene un parking por su id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Parking encontrado", content = @Content),
+            @ApiResponse(responseCode = "401", description = "No tienes permisos para acceder al parking", content = @Content),
+            @ApiResponse(responseCode = "404", description = "El parking no existe", content = @Content)
+    })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') || hasAuthority('SOCIO')")
     public ParkingWithVehiclesResponse getParkingById(@PathVariable String id) {
         return parkingService.getParkingById(id);
     }
 
+    @Operation(summary = "Crea un parking")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Parking creado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta acción", content = @Content)
+    })
     @PostMapping("/")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ParkingResponse createParking(@Validated @RequestBody ParkingRequest parking) {
@@ -53,6 +78,12 @@ public class ParkingController {
         return parkingResponseMapper.toCreateResponse(createdParking);
     }
 
+    @Operation(summary = "Actualiza un parking")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Parking actualizado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta acción", content = @Content),
+            @ApiResponse(responseCode = "404", description = "El parking no existe", content = @Content)
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ParkingResponse updateParking(@PathVariable String id, @Validated @RequestBody ParkingUpdateRequest parking) {
@@ -60,6 +91,12 @@ public class ParkingController {
         return parkingResponseMapper.toResponse(updatedParking);
     }
 
+    @Operation(summary = "Elimina un parking")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Parking eliminado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta acción", content = @Content),
+            @ApiResponse(responseCode = "404", description = "El parking no existe", content = @Content)
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> deleteParking(@PathVariable String id) {

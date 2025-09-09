@@ -15,7 +15,7 @@ public class CronScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(CronScheduler.class);
 
-    @Scheduled(cron = "${cron.thirty.seconds}", zone = "America/Bogota")
+    @Scheduled(cron = "${cron.determination}", zone = "America/Bogota")
     public void executeDailyTask() {
         if (!cronService.runDailyTask()) {
             System.out.println("La tarea no se pudo ejecutar correctamente");
