@@ -18,7 +18,7 @@ public class LoginRequest {
     private String email;
 
     @NotBlank(message = "La password no puede ser nula")
-    @Size(min = 4, max = 255, message = "La password debe tener entre 4 y 255 caracteres")
+    @Size(min = 6, max = 255, message = "La password debe tener entre 6 y 255 caracteres")
     private String password;
 
 }
