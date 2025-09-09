@@ -31,6 +31,6 @@ public abstract class ParkingMapper {
         if (idOwner == null) {
             return null;
         }
-        return userRepository.findById(idOwner).orElseThrow(() -> new UserNotFoundException());
+        return userRepository.findById(idOwner).orElseThrow(UserNotFoundException::new);
     }
 }

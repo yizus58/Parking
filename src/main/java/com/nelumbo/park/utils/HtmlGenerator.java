@@ -4,6 +4,8 @@ import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
 
 public class HtmlGenerator {
 
+    private HtmlGenerator() {}
+
     public static String generateHtmlContent(VehicleOutDetailResponse vehicle) {
         return String.format("""
             <body style="margin: 0px; padding: 0px; background: rgb(245, 245, 247); font-family: Arial, sans-serif;">

@@ -7,7 +7,6 @@ import com.nelumbo.park.entity.Vehicle;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @Component
 public class ParkingWithVehiclesMapper {
@@ -23,7 +22,7 @@ public class ParkingWithVehiclesMapper {
         if (parking.getVehicles() != null && !parking.getVehicles().isEmpty()) {
             response.setVehicles(parking.getVehicles().stream()
                     .map(this::toVehicleSimpleResponse)
-                    .collect(Collectors.toList()));
+                    .toList());
         } else {
             response.setVehicles(new ArrayList<>());
         }

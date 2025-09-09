@@ -1,6 +1,7 @@
 package com.nelumbo.park.config.security;
 
 import com.nelumbo.park.entity.User;
+import com.nelumbo.park.exception.exceptions.JwtProcessingException;
 import com.nelumbo.park.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +24,12 @@ import java.util.Optional;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    @Value("${application.json}")
+    private String applicationJson;
+    
+    @Value("${character.encoding}")
+    private String applicationJsonCharset;
+    
     private static final Logger loggers = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
     private final UserRepository userRepository;
@@ -48,64 +56,91 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
-            try {
-                username = jwtService.extractUid(jwt);
-            } catch (Exception e) {
-                loggers.error("Error al extraer username del token: {}", e.getMessage());
+            username = extractUsernameFromJwt(jwt, response);
+            if (username == null) {
+                return;
+            }
+        }
 
-                if (e.getMessage().contains("JWT signature does not match") || 
-                    e.getMessage().contains("signature") || 
-                    e.getMessage().contains("SignatureException")) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
-                    response.getWriter().write("{\"error\":\"Token JWT inválido o firma no válida\"}");
+        if (username != null && !validateUserExists(username, response)) {
+            return;
+        }
+
+        if (username != null) {
+            boolean isNotAuthenticated = SecurityContextHolder.getContext().getAuthentication() == null;
+            if (isNotAuthenticated) {
+                boolean authenticationFailed = !processAuthentication(jwt, username, response);
+                if (authenticationFailed) {
                     return;
                 }
             }
         }
 
-        if (username != null) {
-            Optional<User> userOptional = userRepository.findById(username);
-            if (userOptional.isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.setContentType("application/json");
-                response.setCharacterEncoding("UTF-8");
-                response.getWriter().write("{\"error\":\"Usuario no encontrado\"}");
-                return;
-            }
-        }
-
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            try {
-
-                if (!jwtService.isTokenExpired(jwt)) {
-                    String role = jwtService.extractRole(jwt);
-
-                    List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                            new SimpleGrantedAuthority(role)
-                    );
-
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(username, null, authorities);
-
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                } else {
-                    loggers.warn("Token expirado para usuario: {}", username);
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
-                    response.getWriter().write("{\"error\":\"Token expirado\"}");
-                }
-            } catch (Exception e) {
-                loggers.error("Error al validar token: {}", e.getMessage());
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.setContentType("application/json");
-                response.setCharacterEncoding("UTF-8");
-                response.getWriter().write("{\"error\":\"Error al validar token\"}");
-            }
-        }
-
         filterChain.doFilter(request, response);
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, int status, String errorMessage) throws IOException {
+        response.setStatus(status);
+        response.setContentType(applicationJson);
+        response.setCharacterEncoding(applicationJsonCharset);
+        response.getWriter().write("{\"error\":\"" + errorMessage + "\"}");
+    }
+
+    private String extractUsernameFromJwt(String jwt, HttpServletResponse response) throws IOException {
+        try {
+            return jwtService.extractUid(jwt);
+        } catch (RuntimeException e) {
+            if (isSignatureError(e)) {
+                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                        "Token JWT inválido o firma no válida");
+                return null;
+            }
+            throw new JwtProcessingException("Error al procesar token JWT para extracción de username", e);
+        }
+    }
+
+    private boolean isSignatureError(Exception e) {
+        String message = e.getMessage();
+        return message.contains("JWT signature does not match") || 
+               message.contains("signature") || 
+               message.contains("SignatureException");
+    }
+
+    private boolean validateUserExists(String username, HttpServletResponse response) throws IOException {
+        Optional<User> userOptional = userRepository.findById(username);
+        if (userOptional.isEmpty()) {
+            writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Usuario no encontrado");
+            return false;
+        }
+        return true;
+    }
+
+
+    private boolean processAuthentication(String jwt, String username, HttpServletResponse response) throws IOException {
+        try {
+            boolean tokenNotExpired = !jwtService.isTokenExpired(jwt);
+            if (tokenNotExpired) {
+                setAuthentication(jwt, username);
+                return true;
+            } else {
+                loggers.warn("Token expirado para usuario: {}", username);
+                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Token expirado");
+                return false;
+            }
+        } catch (Exception e) {
+            loggers.error("Error al validar token: {}", e.getMessage());
+            writeErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al validar token");
+            return false;
+        }
+    }
+
+    private void setAuthentication(String jwt, String username) {
+        String role = jwtService.extractRole(jwt);
+        List<SimpleGrantedAuthority> authorities = Collections.singletonList(
+                new SimpleGrantedAuthority(role)
+        );
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(username, null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }

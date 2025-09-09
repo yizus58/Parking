@@ -63,7 +63,7 @@ public abstract class VehicleMapper {
         if (idAdmin == null) {
             return null;
         }
-        return userRepository.findById(idAdmin).orElseThrow(() -> new UserNotFoundException());
+       return userRepository.findById(idAdmin).orElseThrow(UserNotFoundException::new);
     }
 
     @Named("mapParking")

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 public class VehicleReportService {
@@ -52,7 +51,7 @@ public class VehicleReportService {
                         endOfDay.getTime()
                 ).stream()
                 .filter(vehicle -> VehicleStatus.OUT.equals(vehicle.getStatus()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<VehicleOutDetailResponse> processVehiclesOutDetails(List<Vehicle> vehiclesOut) {
@@ -77,9 +76,7 @@ public class VehicleReportService {
             Float totalCost = hoursParked * costPerHour;
             String day = formatDate(exitTime, false);
 
-            if (!parkingEarnings.containsKey(userId)) {
-                parkingEarnings.put(userId, new HashMap<>());
-            }
+            parkingEarnings.computeIfAbsent(userId, k -> new HashMap<>());
 
             if (!parkingEarnings.get(userId).containsKey(parkingId)) {
                 parkingEarnings.get(userId).put(parkingId, new HashMap<>());

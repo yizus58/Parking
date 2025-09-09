@@ -1,5 +1,6 @@
 package com.nelumbo.park.config.security;
 
+import com.nelumbo.park.exception.exceptions.JwtExtractException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -79,7 +80,7 @@ public class JwtService {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            throw new RuntimeException("Error al parsear token JWT: " + e.getMessage(), e);
+            throw new JwtExtractException("Error al parsear token JWT: " + e.getMessage(), e);
         }
     }
 

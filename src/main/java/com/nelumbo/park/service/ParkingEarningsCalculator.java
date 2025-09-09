@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class ParkingEarningsCalculator {
@@ -39,7 +38,7 @@ public class ParkingEarningsCalculator {
                 .sorted((a, b) -> Float.compare(b.getTotalEarnings(), a.getTotalEarnings()))
                 .limit(3)
                 .map(this::toTopParkingResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Float calculateVehicleCost(Date entryTime, Date exitTime, Float costPerHour) {
