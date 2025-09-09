@@ -1,6 +1,6 @@
 package com.nelumbo.park.service;
 
-import com.nelumbo.park.dto.FileUploadResult;
+import com.nelumbo.park.dto.response.FileUploadResultResponse;
 import com.nelumbo.park.dto.response.RabbitMQResponse;
 import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
 import com.nelumbo.park.dto.response.EmailAttachmentResponse;
@@ -31,7 +31,7 @@ public class CronService {
     private final S3Service s3Service;
     private final RabbitMQService rabbitMQService;
 
-    private final List<FileUploadResult> uploadedFiles = new ArrayList<>();
+    private final List<FileUploadResultResponse> uploadedFiles = new ArrayList<>();
 
     @Value("${app.subject}")
     private String subject;
@@ -147,8 +147,8 @@ public class CronService {
     private void addToUploadedFiles(VehicleOutDetailResponse vehicleOutDetailResponse, FileNameInfo fileNameInfo) {
         String userId = vehicleOutDetailResponse.getUserId();
         String email = Optional.ofNullable(vehicleOutDetailResponse.getEmail()).orElse("");
-        FileUploadResult.FileInfo fileInfo = new FileUploadResult.FileInfo(fileNameInfo.fileName, fileNameInfo.nameS3);
-        FileUploadResult uploadInfo = new FileUploadResult(userId, email, fileInfo);
+        FileUploadResultResponse.FileInfo fileInfo = new FileUploadResultResponse.FileInfo(fileNameInfo.fileName, fileNameInfo.nameS3);
+        FileUploadResultResponse uploadInfo = new FileUploadResultResponse(userId, email, fileInfo);
         uploadedFiles.add(uploadInfo);
     }
 

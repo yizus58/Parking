@@ -1,4 +1,4 @@
-package com.nelumbo.park.dto;
+package com.nelumbo.park.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileUploadResult {
+public class FileUploadResultResponse {
     private String idUser;
     private String email;
     private FileInfo files;

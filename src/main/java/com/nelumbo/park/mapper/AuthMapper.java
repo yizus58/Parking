@@ -1,6 +1,7 @@
 package com.nelumbo.park.mapper;
 
 import com.nelumbo.park.dto.response.TokenResponse;
+import com.nelumbo.park.dto.response.UserLoginResponse;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.config.security.JwtService;
 import org.mapstruct.Mapper;
@@ -22,6 +23,12 @@ public abstract class AuthMapper {
     @Mapping(target = "tokenType", constant = "Bearer")
     @Mapping(target = "accessToken", expression = "java(generateJwtToken(user))")
     public abstract TokenResponse toTokenResponse(User user);
+
+    @Mapping(target = "tokenType", constant = "Bearer")
+    @Mapping(target = "accessToken", expression = "java(generateJwtToken(user))")
+    @Mapping(target = "role", source = "user.role")
+    public abstract UserLoginResponse toUserLoginResponse(User user);
+
 
     protected String generateJwtToken(User user) {
 

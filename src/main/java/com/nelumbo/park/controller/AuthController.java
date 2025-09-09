@@ -1,7 +1,7 @@
 package com.nelumbo.park.controller;
 
 import com.nelumbo.park.dto.request.LoginRequest;
-import com.nelumbo.park.dto.response.TokenResponse;
+import com.nelumbo.park.dto.response.UserLoginResponse;
 import com.nelumbo.park.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,8 +29,8 @@ public class AuthController {
             @ApiResponse(responseCode = "403", description = "No se encontro el usuario", content = @Content)
     })
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
-        TokenResponse tokenResponse = userService.login(request);
+    public ResponseEntity<UserLoginResponse> login(@RequestBody LoginRequest request) {
+        UserLoginResponse tokenResponse = userService.login(request);
         return ResponseEntity.ok(tokenResponse);
     }
 }

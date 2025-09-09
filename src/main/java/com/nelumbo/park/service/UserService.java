@@ -1,7 +1,7 @@
 package com.nelumbo.park.service;
 
 import com.nelumbo.park.dto.request.LoginRequest;
-import com.nelumbo.park.dto.response.TokenResponse;
+import com.nelumbo.park.dto.response.UserLoginResponse;
 import com.nelumbo.park.dto.response.UserResponse;
 import com.nelumbo.park.dto.request.UserCreateRequest;
 import com.nelumbo.park.entity.User;
@@ -65,7 +65,7 @@ public class UserService {
         return userMapper.toResponse(savedUser);
     }
 
-    public TokenResponse login(LoginRequest loginRequest) {
+    public UserLoginResponse login(LoginRequest loginRequest) {
 
         User user = userRepository.findByEmail(loginRequest.getEmail());
 
@@ -80,6 +80,6 @@ public class UserService {
             throw new InvalidPasswordException();
         }
 
-        return authMapper.toTokenResponse(user);
+        return authMapper.toUserLoginResponse(user);
     }
 }
