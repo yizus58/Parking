@@ -22,7 +22,7 @@ import java.util.Optional;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final Logger loggers = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 username = jwtService.extractUid(jwt);
             } catch (Exception e) {
-                logger.error("Error al extraer username del token: {}", e.getMessage());
+                loggers.error("Error al extraer username del token: {}", e.getMessage());
 
                 if (e.getMessage().contains("JWT signature does not match") || 
                     e.getMessage().contains("signature") || 
@@ -91,14 +91,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {
-                    logger.warn("Token expirado para usuario: {}", username);
+                    loggers.warn("Token expirado para usuario: {}", username);
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json");
                     response.setCharacterEncoding("UTF-8");
                     response.getWriter().write("{\"error\":\"Token expirado\"}");
                 }
             } catch (Exception e) {
-                logger.error("Error al validar token: {}", e.getMessage());
+                loggers.error("Error al validar token: {}", e.getMessage());
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");

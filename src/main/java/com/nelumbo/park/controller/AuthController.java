@@ -30,12 +30,7 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
-
-        try {
-            TokenResponse tokenResponse = userService.login(request);
-            return ResponseEntity.ok(tokenResponse);
-        } catch (Exception e) {
-            throw e;
-        }
+        TokenResponse tokenResponse = userService.login(request);
+        return ResponseEntity.ok(tokenResponse);
     }
 }

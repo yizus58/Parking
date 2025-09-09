@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.net.URI;
 
 @Configuration
-public class S3Config {
+public class CloudFlareConfig {
 
     @Value("${r2.bucket.path}")
     private String bucketPath;
@@ -28,7 +28,7 @@ public class S3Config {
     private String accountId;
 
     @Bean
-    public S3Client S3Config() {
+    public S3Client cloudFlare() {
         AwsBasicCredentials awsCreds = AwsBasicCredentials.create(bucketAccessKey, bucketSecretKey);
         return S3Client.builder()
                 .region(Region.of(bucketRegion))

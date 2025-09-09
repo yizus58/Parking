@@ -1,5 +1,7 @@
 package com.nelumbo.park.utils;
 
+import com.nelumbo.park.exception.exceptions.BackoffExecutionFailedException;
+
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -24,7 +26,7 @@ public class BackoffExecutor<T> {
         this.onRetry = onRetry;
     }
 
-    public void execute(T input) throws Exception {
+    public void executeBackoff(T input) throws BackoffExecutionFailedException {
         Exception lastError = null;
         for (int attempt = 0; attempt <= maxRetries; attempt++) {
             try {
@@ -34,14 +36,29 @@ public class BackoffExecutor<T> {
             } catch (Exception e) {
                 lastError = e;
                 if (attempt == maxRetries) {
-                    if (onFinalError != null) onFinalError.accept(e, input);
-                    throw e;
+                    handleFinalError(e, input);
                 }
                 if (onRetry != null) onRetry.accept(e, input);
-                long delay = baseDelay * (1L << attempt);
-                Thread.sleep(delay);
+                waitWithBackoff(attempt);
             }
         }
-        throw lastError;
+        throw new BackoffExecutionFailedException("La ejecución con backoff falló después de " + maxRetries + " intentos", lastError);
+    }
+
+    private void handleFinalError(Exception e, T input) throws BackoffExecutionFailedException {
+        if (onFinalError != null) onFinalError.accept(e, input);
+        throw new BackoffExecutionFailedException("La ejecución con backoff falló después de " + maxRetries + " intentos", e);
+    }
+
+    private void waitWithBackoff(int attempt) throws BackoffExecutionFailedException {
+        if (attempt < maxRetries) {
+            try {
+                long delay = baseDelay * (1L << attempt);
+                Thread.sleep(delay);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw new BackoffExecutionFailedException("La ejecución con backoff fue interrumpida", ie);
+            }
+        }
     }
 }

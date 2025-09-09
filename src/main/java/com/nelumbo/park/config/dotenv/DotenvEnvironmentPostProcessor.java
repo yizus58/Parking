@@ -1,6 +1,7 @@
 package com.nelumbo.park.config.dotenv;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.slf4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -10,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor {
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DotenvEnvironmentPostProcessor.class);
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -22,16 +25,16 @@ public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor 
 
             Map<String, Object> dotenvProperties = new HashMap<>();
 
-            dotenv.entries().forEach(entry -> {
-                dotenvProperties.put(entry.getKey(), entry.getValue());
-            });
+            dotenv.entries().forEach(entry -> 
+                dotenvProperties.put(entry.getKey(), entry.getValue())
+            );
 
             if (!dotenvProperties.isEmpty()) {
                 environment.getPropertySources().addLast(new MapPropertySource("dotenv", dotenvProperties));
             }
 
         } catch (Exception e) {
-            System.out.println("Error cargando .env: " + e.getMessage());
+            logger.error("Error cargando .env: {} ", e.getMessage());
             e.printStackTrace();
         }
     }

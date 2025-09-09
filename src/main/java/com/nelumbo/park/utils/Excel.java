@@ -4,7 +4,6 @@ import com.nelumbo.park.dto.response.VehicleDetailResponse;
 import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -17,91 +16,121 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-@Component("/views/report.xlsx")
+@Component("report")
 public class Excel {
 
     public byte[] generarExcelPorUsuario(List<VehicleOutDetailResponse> data) throws IOException {
         if (data == null || data.isEmpty()) {
             throw new IllegalArgumentException("generarExcelPorUsuario: 'data' vacío o inválido");
         }
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        CreationHelper createHelper = workbook.getCreationHelper();
 
-        for (VehicleOutDetailResponse item : data) {
-            String sheetName = Optional.ofNullable(item.getUsername()).orElse("usuario");
-            sheetName = sheetName.length() > 31 ? sheetName.substring(0, 31) : sheetName;
+        try (XSSFWorkbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-            XSSFSheet sheet = workbook.createSheet(sheetName);
-            String nameParking = Optional.ofNullable(item.getParking()).orElse("").toLowerCase();
-
-            // Estilo de encabezado
-            CellStyle boldStyle = workbook.createCellStyle();
-            XSSFFont boldFont = workbook.createFont();
-            boldFont.setBold(true);
-            boldFont.setFontHeightInPoints((short) 12);
-            boldStyle.setFont(boldFont);
-
-            // Fila título
-            Row titleRow = sheet.createRow(0);
-            Cell titleCell = titleRow.createCell(0);
-            titleCell.setCellValue("Usuario: " + item.getUsername() + "  |  Parqueadero a cargo: " + nameParking);
-            titleCell.setCellStyle(boldStyle);
-            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
-
-            // Encabezados
-            sheet.createRow(1);
-            Row headerRow = sheet.createRow(2);
-            String[] headers = {"#", "Placa", "Modelo", "Fecha", "Costo"};
-            for (int i = 0; i < headers.length; i++) {
-                Cell cell = headerRow.createCell(i);
-                cell.setCellValue(headers[i]);
-                cell.setCellStyle(boldStyle);
+            for (VehicleOutDetailResponse item : data) {
+                createUserSheet(workbook, item);
             }
 
-            int rowIndex = 3;
-            List<VehicleDetailResponse> vehicles = item.getVehicles();
+            workbook.write(out);
+            return out.toByteArray();
+        }
+    }
 
-            if (vehicles != null && !vehicles.isEmpty()) {
-                for (int i = 0; i < vehicles.size(); i++) {
-                    VehicleDetailResponse v = vehicles.get(i);
-                    Row row = sheet.createRow(rowIndex++);
-                    row.createCell(0).setCellValue(i + 1);
-                    row.createCell(1).setCellValue(Optional.ofNullable(v.getPlateNumber()).orElse(""));
-                    row.createCell(2).setCellValue(Optional.ofNullable(v.getModelVehicle()).orElse(""));
-                    row.createCell(3).setCellValue(Optional.ofNullable(v.getDay()).orElse(""));
-                    row.createCell(4).setCellValue(v.getTotalCost());
-                }
+    private void createUserSheet(XSSFWorkbook workbook, VehicleOutDetailResponse item) {
+        String sheetName = Optional.ofNullable(item.getUsername()).orElse("usuario");
+        sheetName = sheetName.length() > 31 ? sheetName.substring(0, 31) : sheetName;
 
-                // Subtotal
-                Row subtotalRow = sheet.createRow(rowIndex++);
-                subtotalRow.createCell(3).setCellValue("Subtotal:");
-                Cell subtotalCell = subtotalRow.createCell(4);
-                if (item.getTotalEarnings() != null) {
-                    subtotalCell.setCellValue(item.getTotalEarnings());
-                } else {
-                    String formula = String.format("SUM(E4:E%d)", rowIndex - 2);
-                    subtotalCell.setCellFormula(formula);
-                }
-                subtotalCell.setCellStyle(boldStyle);
-            } else {
-                sheet.createRow(rowIndex++);
-                sheet.createRow(rowIndex).createCell(0).setCellValue("Sin registros de vehículos");
-            }
+        XSSFSheet sheet = workbook.createSheet(sheetName);
+        CellStyle boldStyle = createBoldStyle(workbook);
 
-            // Ancho de columnas
-            int[] colWidths = {5, 15, 25, 15, 15};
-            for (int i = 0; i < colWidths.length; i++) {
-                sheet.setColumnWidth(i, colWidths[i] * 256);
-            }
+        createSheetHeaders(sheet, item, boldStyle);
+        processVehicleData(sheet, item, boldStyle);
+        configureColumnWidths(sheet);
+        sheet.setAutoFilter(new CellRangeAddress(2, 2, 0, 4));
+    }
 
-            // Filtro
-            sheet.setAutoFilter(new CellRangeAddress(2, 2, 0, 4));
+    private CellStyle createBoldStyle(XSSFWorkbook workbook) {
+        CellStyle boldStyle = workbook.createCellStyle();
+        XSSFFont boldFont = workbook.createFont();
+        boldFont.setBold(true);
+        boldFont.setFontHeightInPoints((short) 12);
+        boldStyle.setFont(boldFont);
+        return boldStyle;
+    }
+
+    private void createSheetHeaders(XSSFSheet sheet, VehicleOutDetailResponse item, CellStyle boldStyle) {
+        String nameParking = Optional.ofNullable(item.getParking()).orElse("").toLowerCase();
+
+        // Fila título
+        Row titleRow = sheet.createRow(0);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue("Usuario: " + item.getUsername() + "  |  Parqueadero a cargo: " + nameParking);
+        titleCell.setCellStyle(boldStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
+
+        // Encabezados
+        sheet.createRow(1);
+        Row headerRow = sheet.createRow(2);
+        String[] headers = {"#", "Placa", "Modelo", "Fecha", "Costo"};
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(boldStyle);
+        }
+    }
+
+    private int processVehicleData(XSSFSheet sheet, VehicleOutDetailResponse item, CellStyle boldStyle) {
+        int rowIndex = 3;
+        List<VehicleDetailResponse> vehicles = item.getVehicles();
+
+        if (vehicles != null && !vehicles.isEmpty()) {
+            rowIndex = addVehicleRows(sheet, vehicles, rowIndex);
+            addSubtotalRow(sheet, item, rowIndex, boldStyle);
+        } else {
+            addNoDataMessage(sheet, rowIndex);
         }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        workbook.write(out);
-        workbook.close();
-        return out.toByteArray();
+        return rowIndex;
+    }
+
+    private int addVehicleRows(XSSFSheet sheet, List<VehicleDetailResponse> vehicles, int startRowIndex) {
+        int rowIndex = startRowIndex;
+        for (int i = 0; i < vehicles.size(); i++) {
+            VehicleDetailResponse v = vehicles.get(i);
+            Row row = sheet.createRow(rowIndex++);
+            row.createCell(0).setCellValue((double) i + 1);
+            row.createCell(1).setCellValue(Optional.ofNullable(v.getPlateNumber()).orElse(""));
+            row.createCell(2).setCellValue(Optional.ofNullable(v.getModelVehicle()).orElse(""));
+            row.createCell(3).setCellValue(Optional.ofNullable(v.getDay()).orElse(""));
+            row.createCell(4).setCellValue(v.getTotalCost());
+        }
+        return rowIndex;
+    }
+
+    private void addSubtotalRow(XSSFSheet sheet, VehicleOutDetailResponse item, int rowIndex, CellStyle boldStyle) {
+        Row subtotalRow = sheet.createRow(rowIndex);
+        subtotalRow.createCell(3).setCellValue("Subtotal:");
+        Cell subtotalCell = subtotalRow.createCell(4);
+
+        if (item.getTotalEarnings() != null) {
+            subtotalCell.setCellValue(item.getTotalEarnings());
+        } else {
+            String formula = String.format("SUM(E4:E%d)", (int) ((double) rowIndex - 1));
+            subtotalCell.setCellFormula(formula);
+        }
+        subtotalCell.setCellStyle(boldStyle);
+    }
+
+    private void addNoDataMessage(XSSFSheet sheet, int rowIndex) {
+        sheet.createRow(rowIndex);
+        sheet.createRow((int) ((double) rowIndex + 1)).createCell(0).setCellValue("Sin registros de vehículos");
+    }
+
+    private void configureColumnWidths(XSSFSheet sheet) {
+        int[] colWidths = {5, 15, 25, 15, 15};
+        for (int i = 0; i < colWidths.length; i++) {
+            sheet.setColumnWidth(i, (int) (colWidths[i] * 256.0));
+        }
     }
 
 

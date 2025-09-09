@@ -1,6 +1,7 @@
 package com.nelumbo.park.config.dotenv;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.slf4j.Logger;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -10,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DotenvConfig implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DotenvConfig.class);
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -31,7 +34,7 @@ public class DotenvConfig implements ApplicationContextInitializer<ConfigurableA
             environment.getPropertySources().addFirst(new MapPropertySource("dotenv", dotenvProperties));
 
         } catch (Exception e) {
-            System.out.println("ERROR al cargar el archivo .env: " + e.getMessage());
+            logger.error("ERROR al cargar el archivo .env: {}", e.getMessage());
             e.printStackTrace();
         }
     }

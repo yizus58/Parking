@@ -1,7 +1,5 @@
 package com.nelumbo.park.service;
 
-import com.nelumbo.park.dto.response.TopParkingResponse;
-import com.nelumbo.park.dto.response.TopPartnerResponse;
 import com.nelumbo.park.dto.response.WeeklyParkingStatsResponse;
 import com.nelumbo.park.dto.response.WeeklyPartnerStatsResponse;
 import com.nelumbo.park.exception.exceptions.ParkingNotFoundException;
@@ -22,13 +20,10 @@ import com.nelumbo.park.enums.VehicleStatus;
 import com.nelumbo.park.mapper.VehicleMapper;
 import com.nelumbo.park.repository.VehicleRepository;
 import com.nelumbo.park.repository.UserRepository;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class VehicleService {
@@ -66,14 +61,12 @@ public class VehicleService {
     }
 
     public Vehicle getVehicleById(String id) {
-        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new VehicleNotFoundException());
+        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(VehicleNotFoundException::new);
 
         User currentUser = securityService.getCurrentUser();
 
-        if (securityService.isSocio()) {
-            if (!vehicle.getAdmin().getId().equals(currentUser.getId())) {
-                throw new InsufficientPermissionsException();
-            }
+        if (securityService.isSocio() && !vehicle.getAdmin().getId().equals(currentUser.getId())) {
+            throw new InsufficientPermissionsException();
         }
 
         return vehicle;
@@ -107,14 +100,12 @@ public class VehicleService {
     public VehicleExitResponse exitVehicle(VehicleUpdateRequest vehicleUpdateRequest) {
         String vehiclePlate = vehicleUpdateRequest.getPlateNumber().toUpperCase();
         Vehicle existingVehicle = vehicleRepository.findByPlateNumberAndStatus(vehiclePlate, VehicleStatus.IN)
-                .orElseThrow(() -> new VehicleNotFoundException());
+                .orElseThrow(VehicleNotFoundException::new);
 
         User currentUser = securityService.getCurrentUser();
 
-        if (securityService.isSocio()) {
-            if (!existingVehicle.getAdmin().getId().equals(currentUser.getId())) {
-                throw new InsufficientPermissionsException();
-            }
+        if (securityService.isSocio() && !existingVehicle.getAdmin().getId().equals(currentUser.getId())) {
+            throw new InsufficientPermissionsException();
         }
 
         Parking parking = existingVehicle.getParking();
@@ -144,7 +135,7 @@ public class VehicleService {
     }
 
     public void deleteVehicle(String id) {
-        Vehicle existingVehicle = vehicleRepository.findById(id).orElseThrow(() -> new VehicleNotFoundException());
+        Vehicle existingVehicle = vehicleRepository.findById(id).orElseThrow(VehicleNotFoundException::new);
 
         vehicleRepository.delete(existingVehicle);
     }
@@ -160,19 +151,18 @@ public class VehicleService {
                         vehicle.getExitTime(),
                         new IndicatorResponse.ParkingSimpleResponse(vehicle.getParking().getName())
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<TopVehicleResponse> getTopVehicles() {
         List<Object[]> topVehiclesData = vehicleRepository.findTopVehiclesByVisits();
 
-        List<TopVehicleResponse> topVehicles = topVehiclesData.stream()
+        return topVehiclesData.stream()
                 .map(data -> new TopVehicleResponse(
                         (String) data[0],
                         ((Number) data[1]).longValue()
                 ))
-                .collect(Collectors.toList());
-        return topVehicles;
+                .toList();
     }
 
     public List<TopVehicleResponse> getTopVehicleById(String id) {
@@ -183,7 +173,7 @@ public class VehicleService {
                         (String) data[0],
                         ((Number) data[1]).longValue()
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
     
     public WeeklyPartnerStatsResponse getPartnersRanking() {

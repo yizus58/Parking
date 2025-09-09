@@ -6,7 +6,6 @@ import com.nelumbo.park.config.security.JwtService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,7 +15,6 @@ import java.util.Map;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class AuthMapper {
 
-    @Autowired
     protected JwtService jwtService;
 
     @Mapping(target = "tokenType", constant = "Bearer")

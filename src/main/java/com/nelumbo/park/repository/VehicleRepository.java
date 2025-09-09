@@ -1,6 +1,5 @@
 package com.nelumbo.park.repository;
 
-import com.nelumbo.park.dto.response.TopParkingResponse;
 import com.nelumbo.park.dto.response.TopPartnerResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;

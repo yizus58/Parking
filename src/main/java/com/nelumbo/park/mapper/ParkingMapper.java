@@ -10,12 +10,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class ParkingMapper {
 
-    @Autowired
     protected UserRepository userRepository;
 
     @Mapping(target = "id", ignore = true)
