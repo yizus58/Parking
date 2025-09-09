@@ -168,6 +168,10 @@ public class VehicleService {
     public List<TopVehicleResponse> getTopVehicleById(String id) {
         List<Object[]> topVehiclesData = vehicleRepository.findTopVehicleById(id);
 
+        if (topVehiclesData.isEmpty()) {
+            throw new ParkingNotFoundException();
+        }
+
         return topVehiclesData.stream()
                 .map(data -> new TopVehicleResponse(
                         (String) data[0],

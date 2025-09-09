@@ -45,6 +45,7 @@ public class RankingController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ranking encontrado", content = @Content),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content),
+            @ApiResponse(responseCode = "404", description = "El parqueadero no existe", content = @Content)
     })
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN') || hasAuthority('SOCIO')")
