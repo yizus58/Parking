@@ -11,9 +11,6 @@ import java.util.List;
 @Repository
 public interface ParkingRepository extends JpaRepository<Parking, Long> {
     Parking findById(String id);
-    boolean existsById(String id);
-
-    Parking findByName(String name);
 
     @Query("SELECT p FROM Parking p WHERE p.owner = :owner")
     List<Parking> findByOwner(User owner);

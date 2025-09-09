@@ -1,5 +1,6 @@
 package com.nelumbo.park.service;
 
+import com.nelumbo.park.dto.response.ParkingEarningsResponse;
 import com.nelumbo.park.dto.response.TopParkingResponse;
 import com.nelumbo.park.entity.Vehicle;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ import java.util.Map;
 public class ParkingEarningsCalculator {
 
     public List<TopParkingResponse> calculateParkingEarnings(List<Vehicle> vehicles) {
-        Map<String, ParkingEarnings> parkingEarningsMap = new HashMap<>();
+        Map<String, ParkingEarningsResponse> parkingEarningsMap = new HashMap<>();
 
         vehicles.forEach(vehicle -> {
             String parkingId = vehicle.getParking().getId();
@@ -26,8 +27,8 @@ public class ParkingEarningsCalculator {
             if (entryTime != null && exitTime != null) {
                 Float totalCost = calculateVehicleCost(entryTime, exitTime, costPerHour);
 
-                parkingEarningsMap.computeIfAbsent(parkingId, 
-                    k -> new ParkingEarnings(parkingId, parkingName, 0.0f, 0L))
+                parkingEarningsMap.computeIfAbsent(parkingId,
+                    k -> new ParkingEarningsResponse(parkingId, parkingName, 0.0f, 0L))
                     .addEarnings(totalCost);
             }
         });
@@ -48,7 +49,7 @@ public class ParkingEarningsCalculator {
         return hoursParked * costPerHour;
     }
 
-    private TopParkingResponse toTopParkingResponse(ParkingEarnings earnings) {
+    private TopParkingResponse toTopParkingResponse(ParkingEarningsResponse earnings) {
         return new TopParkingResponse(
                 earnings.getId(),
                 earnings.getName(),
@@ -57,27 +58,4 @@ public class ParkingEarningsCalculator {
         );
     }
 
-    private static class ParkingEarnings {
-        private final String id;
-        private final String name;
-        private Float totalEarnings;
-        private Long vehicleCount;
-
-        public ParkingEarnings(String id, String name, Float totalEarnings, Long vehicleCount) {
-            this.id = id;
-            this.name = name;
-            this.totalEarnings = totalEarnings;
-            this.vehicleCount = vehicleCount;
-        }
-
-        public void addEarnings(Float amount) {
-            this.totalEarnings += amount;
-            this.vehicleCount += 1;
-        }
-
-        public String getId() { return id; }
-        public String getName() { return name; }
-        public Float getTotalEarnings() { return totalEarnings; }
-        public Long getVehicleCount() { return vehicleCount; }
-    }
 }

@@ -168,13 +168,25 @@ public class RabbitMQService implements DisposableBean {
             connect(null);
         }
 
+        if (connection == null || !connection.isOpen() || channel == null || !channel.isOpen()) {
+            logger.error("No se pudo establecer conexión con RabbitMQ");
+            return false;
+        }
+
         try {
             byte[] messageBytes = objectMapper.writeValueAsBytes(message);
             channel.basicPublish("", defaultQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBytes);
             return true;
         } catch (IOException e) {
+            logger.warn("Error en primer intento de publicación, reintentando con reconexión: {}", e.getMessage());
             try {
                 connect(null);
+
+                if (connection == null || !connection.isOpen() || channel == null || !channel.isOpen()) {
+                    logger.error("No se pudo reestablecer conexión con RabbitMQ");
+                    return false;
+                }
+
                 byte[] messageBytes = objectMapper.writeValueAsBytes(message);
                 channel.basicPublish("", defaultQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBytes);
                 return true;

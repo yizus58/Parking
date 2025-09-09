@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileUploadResultResponse {
-    private String idUser;
-    private String email;
-    private FileInfoResponse files;
+public class FileInfoResponse {
+    private String nameFile;
+    private String s3Name;
 }

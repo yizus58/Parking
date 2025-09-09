@@ -1,5 +1,6 @@
 package com.nelumbo.park.service;
 
+import com.nelumbo.park.dto.response.FileInfoResponse;
 import com.nelumbo.park.dto.response.FileUploadResultResponse;
 import com.nelumbo.park.dto.response.RabbitMQResponse;
 import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
@@ -71,7 +72,7 @@ public class CronService {
 
     private void processVehicleReport(VehicleOutDetailResponse vehicleOutDetailResponse) {
         try {
-            FileNameInfo fileNameInfo = generateFileNames(vehicleOutDetailResponse);
+            FileInfoResponse fileNameInfo = generateFileNames(vehicleOutDetailResponse);
             String contentType = getContentType();
             byte[] buffer = this.excel.generarExcelPorUsuario(List.of(vehicleOutDetailResponse));
 
@@ -90,7 +91,7 @@ public class CronService {
         }
     }
 
-    private FileNameInfo generateFileNames(VehicleOutDetailResponse vehicleOutDetailResponse) {
+    private FileInfoResponse generateFileNames(VehicleOutDetailResponse vehicleOutDetailResponse) {
         String rawName = Optional.ofNullable(vehicleOutDetailResponse.getParking()).orElse("diario");
         String safeName = rawName.replaceAll("[^\\w\\-]+", "_");
         String userId = vehicleOutDetailResponse.getUserId();
@@ -101,7 +102,7 @@ public class CronService {
         String fileName = String.format("reporte_%s_%s_%s.xlsx", safeName, shortId, dateGenerate).toLowerCase();
         String nameS3 = UUID.randomUUID().toString().replace("-", "");
 
-        return new FileNameInfo(fileName, nameS3);
+        return new FileInfoResponse(fileName, nameS3);
     }
 
     private String getContentType() {
@@ -112,14 +113,14 @@ public class CronService {
         return contentType;
     }
 
-    private boolean uploadFileAndSendEmail(VehicleOutDetailResponse vehicleOutDetailResponse, 
-                                         FileNameInfo fileNameInfo, byte[] buffer, String contentType) {
+    private boolean uploadFileAndSendEmail(VehicleOutDetailResponse vehicleOutDetailResponse,
+                                           FileInfoResponse fileNameInfo, byte[] buffer, String contentType) {
         Map<String, String> uploadResult = null;
         try {
-            uploadResult = this.s3Service.uploadFile(buffer, contentType, fileNameInfo.nameS3);
+            uploadResult = this.s3Service.uploadFile(buffer, contentType, fileNameInfo.getS3Name());
         } catch (Exception e) {
             log.warn("Error en subida normal para archivo {}, intentando subida directa: {}", 
-                    fileNameInfo.nameS3, e.getMessage());
+                    fileNameInfo.getS3Name(), e.getMessage());
         }
 
         if (uploadResult != null && uploadResult.containsKey("Key")) {
@@ -129,12 +130,12 @@ public class CronService {
         return false;
     }
 
-    private void sendEmailNotification(VehicleOutDetailResponse vehicleOutDetailResponse, FileNameInfo fileNameInfo) {
+    private void sendEmailNotification(VehicleOutDetailResponse vehicleOutDetailResponse, FileInfoResponse fileNameInfo) {
         try {
             String email = Optional.ofNullable(vehicleOutDetailResponse.getEmail()).orElse("");
             String htmlContent = HtmlGenerator.generateHtmlContent(vehicleOutDetailResponse);
 
-            EmailAttachmentResponse attachment = new EmailAttachmentResponse(fileNameInfo.fileName, fileNameInfo.nameS3);
+            EmailAttachmentResponse attachment = new EmailAttachmentResponse(fileNameInfo.getNameFile(), fileNameInfo.getS3Name());
             EmailDataResponse data = new EmailDataResponse(email, htmlContent, subject, List.of(attachment));
             RabbitMQResponse response = new RabbitMQResponse(typeMessage, data);
             this.rabbitMQService.publishMessageBackoff(response);
@@ -144,21 +145,11 @@ public class CronService {
         }
     }
 
-    private void addToUploadedFiles(VehicleOutDetailResponse vehicleOutDetailResponse, FileNameInfo fileNameInfo) {
+    private void addToUploadedFiles(VehicleOutDetailResponse vehicleOutDetailResponse, FileInfoResponse fileNameInfo) {
         String userId = vehicleOutDetailResponse.getUserId();
         String email = Optional.ofNullable(vehicleOutDetailResponse.getEmail()).orElse("");
-        FileUploadResultResponse.FileInfo fileInfo = new FileUploadResultResponse.FileInfo(fileNameInfo.fileName, fileNameInfo.nameS3);
+        FileInfoResponse fileInfo = new FileInfoResponse(fileNameInfo.getNameFile(), fileNameInfo.getS3Name());
         FileUploadResultResponse uploadInfo = new FileUploadResultResponse(userId, email, fileInfo);
         uploadedFiles.add(uploadInfo);
-    }
-
-    private static class FileNameInfo {
-        final String fileName;
-        final String nameS3;
-
-        FileNameInfo(String fileName, String nameS3) {
-            this.fileName = fileName;
-            this.nameS3 = nameS3;
-        }
     }
 }
