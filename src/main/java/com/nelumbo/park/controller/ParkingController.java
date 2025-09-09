@@ -9,6 +9,7 @@ import com.nelumbo.park.mapper.ParkingResponseMapper;
 import com.nelumbo.park.service.ParkingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,7 +45,9 @@ public class ParkingController {
 
     @Operation(summary = "Obtiene todos los parkings")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Parkings encontrados", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Parkings encontrados",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ParkingResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes parkings asociados", content = @Content),
             @ApiResponse(responseCode = "404", description = "El parking no existe", content = @Content)
     })
@@ -56,7 +59,9 @@ public class ParkingController {
 
     @Operation(summary = "Obtiene un parking por su id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Parking encontrado", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Parking encontrado",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ParkingWithVehiclesResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para acceder al parking", content = @Content),
             @ApiResponse(responseCode = "404", description = "El parking no existe", content = @Content)
     })
@@ -68,7 +73,9 @@ public class ParkingController {
 
     @Operation(summary = "Crea un parking")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Parking creado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Parking creado exitosamente",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ParkingResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta acción", content = @Content)
     })
     @PostMapping("/")
@@ -80,7 +87,9 @@ public class ParkingController {
 
     @Operation(summary = "Actualiza un parking")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Parking actualizado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Parking actualizado exitosamente",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ParkingResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta acción", content = @Content),
             @ApiResponse(responseCode = "404", description = "El parking no existe", content = @Content)
     })
@@ -93,7 +102,9 @@ public class ParkingController {
 
     @Operation(summary = "Elimina un parking")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Parking eliminado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Parking eliminado exitosamente",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseEntity.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta acción", content = @Content),
             @ApiResponse(responseCode = "404", description = "El parking no existe", content = @Content)
     })

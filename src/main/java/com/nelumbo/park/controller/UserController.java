@@ -5,6 +5,7 @@ import com.nelumbo.park.dto.response.UserResponse;
 import com.nelumbo.park.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +34,9 @@ public class UserController {
 
     @Operation(summary = "Obtiene todos los usuarios")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuarios encontrados", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Usuarios encontrados",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content)
     })
     @GetMapping("/")
@@ -44,7 +47,9 @@ public class UserController {
 
     @Operation(summary = "Crea un nuevo usuario")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuario creado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Usuario creado exitosamente",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content),
             @ApiResponse(responseCode = "409", description = "El usuario o el email ya existe", content = @Content)
     })

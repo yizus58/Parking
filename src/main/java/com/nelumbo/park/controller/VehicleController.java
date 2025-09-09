@@ -10,6 +10,7 @@ import com.nelumbo.park.mapper.VehicleResponseMapper;
 import com.nelumbo.park.service.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,7 +45,9 @@ public class VehicleController {
 
     @Operation(summary = "Obtiene todos los vehiculos")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Vehiculos encontrados", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Vehiculos encontrados",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = VehicleResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content)
     })
     @GetMapping("/")
@@ -56,7 +59,9 @@ public class VehicleController {
 
     @Operation(summary = "Obtiene un vehiculo por su id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Vehiculo encontrado", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Vehiculo encontrado",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = VehicleResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content),
             @ApiResponse(responseCode = "404", description = "El vehiculo no existe", content = @Content)
     })
@@ -69,7 +74,9 @@ public class VehicleController {
 
     @Operation(summary = "Registra un vehiculo")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Vehiculo registrado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Vehiculo registrado exitosamente",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = VehicleCreateResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content),
             @ApiResponse(responseCode = "409", description = "El vehiculo ya esta registrado", content = @Content)
     })
@@ -81,7 +88,9 @@ public class VehicleController {
 
     @Operation(summary = "Actualiza un vehiculo")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "El estado del vehiculo ha sido actualizado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "200", description = "El estado del vehiculo ha sido actualizado exitosamente",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = VehicleExitResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content),
             @ApiResponse(responseCode = "404", description = "El vehiculo o el parqueadero no existe", content = @Content),
             @ApiResponse(responseCode = "409", description = "El vehículo ya tiene salida registrada", content = @Content)
@@ -94,7 +103,9 @@ public class VehicleController {
 
     @Operation(summary = "Elimina un vehiculo")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Vehiculo eliminado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Vehiculo eliminado exitosamente",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseEntity.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content),
             @ApiResponse(responseCode = "404", description = "El vehiculo no existe", content = @Content)
     })

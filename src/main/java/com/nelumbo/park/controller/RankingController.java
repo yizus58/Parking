@@ -4,6 +4,7 @@ import com.nelumbo.park.dto.response.TopVehicleResponse;
 import com.nelumbo.park.service.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,7 +32,9 @@ public class RankingController {
     @Operation(summary = "Obtiene el top 10 vehículos que más veces se han registrado en los diferentes \n" +
             "parqueaderos y cuantas veces han sido")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ranking encontrado", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Ranking encontrado",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = TopVehicleResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content)
     })
     @GetMapping("/")
@@ -43,7 +46,9 @@ public class RankingController {
     @Operation(summary = "Obtiene el top 10 vehículos que más veces se han registrado en un \n" +
             "parqueadero especifico y cuantas veces han sido")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ranking encontrado", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Ranking encontrado",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = TopVehicleResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content),
             @ApiResponse(responseCode = "404", description = "El parqueadero no existe", content = @Content)
     })
