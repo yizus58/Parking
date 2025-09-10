@@ -63,10 +63,8 @@ class AuthControllerTest {
 
     @Test
     void login_WithValidCredentials_ShouldReturnTokenResponse() throws Exception {
-        // Given
         when(userService.login(any(LoginRequest.class))).thenReturn(userLoginResponse);
 
-        // When & Then
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
@@ -84,10 +82,8 @@ class AuthControllerTest {
 
     @Test
     void login_WithInvalidRequestBody_ShouldReturnBadRequest() throws Exception {
-        // Given
         String invalidJson = "{ invalid json }";
 
-        // When & Then
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
@@ -98,10 +94,8 @@ class AuthControllerTest {
 
     @Test
     void login_WithEmptyRequestBody_ShouldReturnBadRequest() throws Exception {
-        // Given
         String emptyJson = "{}";
 
-        // When & Then
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(emptyJson))
@@ -112,7 +106,6 @@ class AuthControllerTest {
 
     @Test
     void login_WithMissingContentType_ShouldReturnUnsupportedMediaType() throws Exception {
-        // When & Then
         mockMvc.perform(post("/auth/login")
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest());
@@ -122,10 +115,8 @@ class AuthControllerTest {
 
     @Test
     void login_WithInvalidEmail_ShouldReturnBadRequest() throws Exception {
-        // Given
         loginRequest.setEmail("invalid-email");
 
-        // When & Then
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
@@ -136,10 +127,8 @@ class AuthControllerTest {
 
     @Test
     void login_WithBlankPassword_ShouldReturnBadRequest() throws Exception {
-        // Given
         loginRequest.setPassword("");
 
-        // When & Then
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
@@ -150,11 +139,9 @@ class AuthControllerTest {
 
     @Test
     void login_WithPasswordTooShort_ShouldReturnBadRequest() throws Exception {
-        // Given
         loginRequest.setPassword("admin");
         loginRequest.setEmail("admin@mail.com");
 
-        // When & Then
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
