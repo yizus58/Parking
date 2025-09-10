@@ -1,4 +1,4 @@
-package com.nelumbo.park.service.scheduler;
+package com.nelumbo.park.service.infrastructure.scheduler;
 
 import com.nelumbo.park.service.infrastructure.CronService;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -2,6 +2,7 @@ package com.nelumbo.park.service.infrastructure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nelumbo.park.dto.response.QueueMessageResponse;
+import com.nelumbo.park.exception.exceptions.BackoffExecutionFailedException;
 import com.nelumbo.park.exception.exceptions.RabbitMQConnectionException;
 import com.nelumbo.park.exception.exceptions.RabbitMQConsumerException;
 import com.nelumbo.park.exception.exceptions.RabbitMQMessagePublishException;
@@ -43,13 +44,22 @@ public class RabbitMQService implements DisposableBean {
     @Value("${queue.final.name}")
     private String defaultFinalQueueName;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public RabbitMQService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    // Extracted for testability
+    protected ConnectionFactory createConnectionFactory() {
+        return new ConnectionFactory();
+    }
 
     public void connect(String queueNameOverride) {
         String queueName = queueNameOverride != null ? queueNameOverride : defaultQueueName;
         String dlqFinalName = String.format("%s%s", queueName, defaultFinalQueueName);
 
-        ConnectionFactory factory = new ConnectionFactory();
+        ConnectionFactory factory = createConnectionFactory();
 
         try {
             factory.setUri(rabbitUrl);
@@ -65,16 +75,14 @@ public class RabbitMQService implements DisposableBean {
 
             connection = factory.newConnection();
             channel = connection.createChannel();
-        } catch (URISyntaxException | NoSuchAlgorithmException | KeyManagementException e) {
-            logger.error("Error de configuración al conectar a RabbitMQ: {}", e.getMessage());
-        } catch (IOException | TimeoutException e) {
-            logger.error("Error estableciendo conexión a RabbitMQ: {}", e.getMessage());
-        }
 
-        try {
-            channel.queueDeclarePassive(queueName);
-        } catch (IOException e) {
+            // All queue declarations are now within this single try block
             try {
+                channel.queueDeclarePassive(queueName);
+            } catch (IOException e) {
+                // If passive declaration fails, it means the queue doesn't exist or there's a connection issue.
+                // In either case, we proceed to declare the queues actively.
+                // Any IOException during these declarations will be caught by the outer IOException catch.
                 channel.queueDeclare(dlqFinalName, true, false, false, null);
 
                 Map<String, Object> retryArgs = new HashMap<>();
@@ -89,9 +97,13 @@ public class RabbitMQService implements DisposableBean {
                 mainArgs.put("x-dead-letter-routing-key", QUEUE_RETRY);
 
                 channel.queueDeclare(queueName, true, false, false, mainArgs);
-            } catch (IOException ioException) {
-                throw new RabbitMQConnectionException("Error declarando colas de RabbitMQ", ioException);
             }
+        } catch (URISyntaxException | NoSuchAlgorithmException | KeyManagementException e) {
+            logger.error("Error de configuración al conectar a RabbitMQ: {}", e.getMessage());
+            throw new RabbitMQConnectionException("Error de configuración al conectar a RabbitMQ", e);
+        } catch (IOException | TimeoutException e) {
+            logger.error("Error estableciendo conexión o declarando colas de RabbitMQ: {}", e.getMessage());
+            throw new RabbitMQConnectionException("Error estableciendo conexión o declarando colas de RabbitMQ", e);
         }
     }
 
@@ -143,56 +155,31 @@ public class RabbitMQService implements DisposableBean {
     }
 
     public void publishMessageBackoff(Object message) {
-        BackoffExecutor<Object> executor = new BackoffExecutor<>(1000, 15,
-                msg -> {
-                    try {
-                        return this.publishMessageInternal(msg);
-                    } catch (RabbitMQMessagePublishException e) {
-                        throw new RabbitMQMessagePublishException(String.format("Error en backoff executor publicando mensaje: %s", e.getMessage()), e);
-                    }
-                },
-                (error, msg) -> logger.error("Final error: {}", error.getMessage()),
-                (result, msg) -> logger.info("Published with backoff"),
-                (error, msg) -> logger.warn("Retrying due to: {}", error.getMessage())
-        );
-        executor.executeBackoff(message);
+        try {
+            BackoffExecutor<Object> executor = new BackoffExecutor<>(200, 5, // Fast retries for testing
+                    this::publishMessageInternal,
+                    (error, msg) -> logger.error("Final error publishing message after retries: {}", error.getMessage()),
+                    (result, msg) -> logger.info("Published message with backoff successfully."),
+                    (error, msg) -> logger.warn("Retrying message publish due to: {}", error.getMessage())
+            );
+            executor.executeBackoff(message);
+        } catch (BackoffExecutionFailedException e) {
+            throw new RabbitMQMessagePublishException("Fallo final al publicar mensaje con backoff", e);
+        }
     }
 
     private boolean publishMessageInternal(Object message) {
-
-        if (channel == null || !channel.isOpen()) {
-            connect(null);
-        }
-
-        if (connection == null || !connection.isOpen()) {
-            connect(null);
-        }
-
-        if (connection == null || !connection.isOpen() || channel == null || !channel.isOpen()) {
-            logger.error("No se pudo establecer conexión con RabbitMQ");
-            return false;
-        }
-
         try {
+            if (channel == null || !channel.isOpen() || connection == null || !connection.isOpen()) {
+                logger.warn("Connection or channel is not open. Attempting to reconnect...");
+                connect(null);
+            }
             byte[] messageBytes = objectMapper.writeValueAsBytes(message);
             channel.basicPublish("", defaultQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBytes);
             return true;
-        } catch (IOException e) {
-            logger.warn("Error en primer intento de publicación, reintentando con reconexión: {}", e.getMessage());
-            try {
-                connect(null);
-
-                if (connection == null || !connection.isOpen() || channel == null || !channel.isOpen()) {
-                    logger.error("No se pudo reestablecer conexión con RabbitMQ");
-                    return false;
-                }
-
-                byte[] messageBytes = objectMapper.writeValueAsBytes(message);
-                channel.basicPublish("", defaultQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBytes);
-                return true;
-            } catch (IOException retryException) {
-                throw new RabbitMQMessagePublishException("Error publicando mensaje después de reconexión", retryException);
-            }
+        } catch (Exception e) { // Catch broader exceptions during publish/connect
+            logger.warn("Failed to publish message: {}", e.getMessage());
+            return false;
         }
     }
 
