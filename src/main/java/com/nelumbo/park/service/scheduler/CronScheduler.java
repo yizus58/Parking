@@ -1,6 +1,6 @@
 package com.nelumbo.park.service.scheduler;
 
-import com.nelumbo.park.service.CronService;
+import com.nelumbo.park.service.infrastructure.CronService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;

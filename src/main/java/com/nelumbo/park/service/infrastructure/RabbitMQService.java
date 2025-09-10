@@ -1,4 +1,4 @@
-package com.nelumbo.park.service;
+package com.nelumbo.park.service.infrastructure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nelumbo.park.dto.response.QueueMessageResponse;

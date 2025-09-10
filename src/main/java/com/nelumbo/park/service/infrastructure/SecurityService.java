@@ -1,4 +1,4 @@
-package com.nelumbo.park.service;
+package com.nelumbo.park.service.infrastructure;
 
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.exception.exceptions.JwtUserNotFoundException;

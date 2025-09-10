@@ -1,4 +1,4 @@
-package com.nelumbo.park.service;
+package com.nelumbo.park.service.infrastructure;
 
 import com.nelumbo.park.exception.exceptions.S3ConnectivityException;
 import com.nelumbo.park.exception.exceptions.S3FileRetrievalException;

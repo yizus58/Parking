@@ -16,6 +16,7 @@ import com.nelumbo.park.exception.exceptions.VehicleNotFoundException;
 import com.nelumbo.park.mapper.VehicleMapper;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.repository.VehicleRepository;
+import com.nelumbo.park.service.infrastructure.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

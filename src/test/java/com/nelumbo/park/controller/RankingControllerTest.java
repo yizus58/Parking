@@ -1,6 +1,5 @@
 package com.nelumbo.park.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nelumbo.park.config.TestSecurityConfig;
 import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.response.TopVehicleResponse;

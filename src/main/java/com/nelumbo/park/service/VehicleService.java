@@ -20,6 +20,7 @@ import com.nelumbo.park.enums.VehicleStatus;
 import com.nelumbo.park.mapper.VehicleMapper;
 import com.nelumbo.park.repository.VehicleRepository;
 import com.nelumbo.park.repository.UserRepository;
+import com.nelumbo.park.service.infrastructure.SecurityService;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;

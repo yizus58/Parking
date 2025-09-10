@@ -13,6 +13,7 @@ import com.nelumbo.park.mapper.ParkingMapper;
 import com.nelumbo.park.mapper.ParkingResponseMapper;
 import com.nelumbo.park.mapper.ParkingWithVehiclesMapper;
 import com.nelumbo.park.repository.ParkingRepository;
+import com.nelumbo.park.service.infrastructure.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
