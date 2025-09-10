@@ -79,21 +79,19 @@ class VehicleServiceTest {
         vehicle.setStatus(VehicleStatus.IN);
         vehicle.setAdmin(socioUser);
         vehicle.setParking(parking);
-        vehicle.setEntryTime(new Date(System.currentTimeMillis() - 3600 * 1000)); // 1 hour ago
+        vehicle.setEntryTime(new Date(System.currentTimeMillis() - 3600 * 1000));
         vehicle.setCostPerHour(10.0f);
 
         createRequest = new VehicleCreateRequest();
         createRequest.setPlateNumber("NEW-456");
-        createRequest.setIdParking(parking.getId()); // Corrected: Use parking ID
+        createRequest.setIdParking(parking.getId());
 
         updateRequest = new VehicleUpdateRequest();
         updateRequest.setPlateNumber("ABC-123");
     }
 
-    // Tests for createVehicle
     @Test
     void createVehicle_WhenNotAlreadyParked_ShouldCreateVehicle() {
-        // Given: A more realistic vehicle object returned by the mapper
         Vehicle vehicleFromMapper = new Vehicle();
         vehicleFromMapper.setPlateNumber(createRequest.getPlateNumber());
         vehicleFromMapper.setParking(parking);
@@ -101,14 +99,12 @@ class VehicleServiceTest {
         when(vehicleRepository.findByPlateNumberAndStatus(createRequest.getPlateNumber(), VehicleStatus.IN)).thenReturn(Optional.empty());
         when(securityService.getCurrentUser()).thenReturn(socioUser);
         when(userRepository.findById(socioUser.getId())).thenReturn(Optional.of(socioUser));
-        when(vehicleMapper.toEntity(createRequest)).thenReturn(vehicleFromMapper); // Corrected: Return a vehicle with data
+        when(vehicleMapper.toEntity(createRequest)).thenReturn(vehicleFromMapper);
         when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
         when(vehicleMapper.toSimpleResponse(vehicle)).thenReturn(new VehicleCreateResponse());
 
-        // When
         VehicleCreateResponse response = vehicleService.createVehicle(createRequest);
 
-        // Then
         assertNotNull(response);
         verify(vehicleRepository).save(any(Vehicle.class));
     }
@@ -125,7 +121,6 @@ class VehicleServiceTest {
         verify(vehicleRepository, never()).save(any());
     }
 
-    // Tests for exitVehicle
     @Test
     void exitVehicle_WhenVehicleExistsAndIsOwner_ShouldProcessExit() {
         when(vehicleRepository.findByPlateNumberAndStatus(anyString(), eq(VehicleStatus.IN))).thenReturn(Optional.of(vehicle));
@@ -159,7 +154,6 @@ class VehicleServiceTest {
         assertThrows(InsufficientPermissionsException.class, () -> vehicleService.exitVehicle(updateRequest));
     }
 
-    // Tests for getAllVehicles
     @Test
     void getAllVehicles_AsAdmin_ShouldReturnAll() {
         when(securityService.isAdmin()).thenReturn(true);
@@ -184,7 +178,6 @@ class VehicleServiceTest {
         verify(vehicleRepository).findByAdmin(socioUser);
     }
 
-    // Tests for getVehicleById
     @Test
     void getVehicleById_AsSocioAndOwner_ShouldReturnVehicle() {
         when(vehicleRepository.findById(vehicle.getId())).thenReturn(Optional.of(vehicle));
@@ -209,7 +202,6 @@ class VehicleServiceTest {
         assertThrows(InsufficientPermissionsException.class, () -> vehicleService.getVehicleById(vehicle.getId()));
     }
 
-    // Tests for Indicator and Ranking methods
     @Test
     void getFirstTimeParkedVehicles_ShouldReturnMappedResponse() {
         when(vehicleRepository.findFirstTimeParkedVehicles(VehicleStatus.IN)).thenReturn(Collections.singletonList(vehicle));
@@ -233,7 +225,7 @@ class VehicleServiceTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals("ABC-123", result.get(0).getPlateNumber());
-        assertEquals(5L, result.get(0).getTotalVisits()); // Corrected: Use getTotalVisits()
+        assertEquals(5L, result.get(0).getTotalVisits());
     }
 
     @Test
@@ -248,7 +240,6 @@ class VehicleServiceTest {
         verify(parkingStatsService, times(1)).getParkingRanking();
     }
 
-    // Tests for deleteVehicle
     @Test
     void deleteVehicle_WhenFound_ShouldDelete() {
         when(vehicleRepository.findById(vehicle.getId())).thenReturn(Optional.of(vehicle));

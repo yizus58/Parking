@@ -76,10 +76,8 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "ADMIN")
     void getAllUsers_WithAdminRole_ShouldReturnUsersList() throws Exception {
-        // Given
         when(userService.getAllUsers()).thenReturn(usersList);
 
-        // When & Then
         mockMvc.perform(get("/users/")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -101,7 +99,6 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "SOCIO")
     void getAllUsers_WithNonAdminRole_ShouldReturnForbidden() throws Exception {
-        // When & Then
         mockMvc.perform(get("/users/")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
@@ -111,7 +108,6 @@ class UserControllerTest {
 
     @Test
     void getAllUsers_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
-        // When & Then
         mockMvc.perform(get("/users/")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
@@ -122,10 +118,8 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "ADMIN")
     void createUser_WithValidData_ShouldReturnCreatedUser() throws Exception {
-        // Given
         when(userService.createUser(any(UserCreateRequest.class))).thenReturn(userResponse);
 
-        // When & Then
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
@@ -142,7 +136,6 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "SOCIO")
     void createUser_WithNonAdminRole_ShouldReturnForbidden() throws Exception {
-        // When & Then
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
@@ -153,7 +146,6 @@ class UserControllerTest {
 
     @Test
     void createUser_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
-        // When & Then
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
@@ -165,10 +157,8 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "ADMIN")
     void createUser_WithInvalidEmail_ShouldReturnBadRequest() throws Exception {
-        // Given
         userCreateRequest.setEmail("invalid-email");
 
-        // When & Then
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
@@ -180,10 +170,8 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "ADMIN")
     void createUser_WithBlankUsername_ShouldReturnBadRequest() throws Exception {
-        // Given
         userCreateRequest.setUsername("");
 
-        // When & Then
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
@@ -195,10 +183,8 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "ADMIN")
     void createUser_WithPasswordTooShort_ShouldReturnBadRequest() throws Exception {
-        // Given
         userCreateRequest.setPassword("123");
 
-        // When & Then
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
@@ -210,10 +196,8 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "ADMIN")
     void createUser_WithInvalidUsernameCharacters_ShouldReturnBadRequest() throws Exception {
-        // Given
         userCreateRequest.setUsername("invalid@username");
 
-        // When & Then
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
@@ -225,10 +209,8 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "ADMIN")
     void createUser_WithUsernameTooLong_ShouldReturnBadRequest() throws Exception {
-        // Given
         userCreateRequest.setUsername("a".repeat(51));
 
-        // When & Then
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
@@ -240,10 +222,8 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "ADMIN")
     void createUser_WithEmptyRequestBody_ShouldReturnBadRequest() throws Exception {
-        // Given
         String emptyJson = "{}";
 
-        // When & Then
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(emptyJson))

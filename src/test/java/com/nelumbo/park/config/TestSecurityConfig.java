@@ -29,13 +29,18 @@ public class TestSecurityConfig {
     @Primary
     public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(jwtService, userRepository);
-        
+
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/users/**").hasAuthority("ADMIN")
+                        .requestMatchers("/parkings/**").hasAnyAuthority("ADMIN", "SOCIO")
+                        .requestMatchers("/parking-rankings/**").hasAuthority("ADMIN")
+                        .requestMatchers("/partners-rankings/**").hasAuthority("ADMIN")
+                        .requestMatchers("/rankings/**").hasAnyAuthority("ADMIN", "SOCIO")
+                        .requestMatchers("/vehicles/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
