@@ -32,14 +32,12 @@ class BackoffExecutorTest {
     @Test
     @DisplayName("Should succeed on the first attempt when function returns true")
     void executeBackoff_SuccessFirstAttempt() {
-        // Given
+
         when(mockFunction.apply("input")).thenReturn(true);
         BackoffExecutor<String> executor = new BackoffExecutor<>(10, 3, mockFunction, mockOnFinalError, mockOnSuccess, mockOnRetry);
 
-        // When & Then
         assertDoesNotThrow(() -> executor.executeBackoff("input"));
 
-        // Verify
         verify(mockFunction, times(1)).apply("input");
         verify(mockOnSuccess, times(1)).accept(true, "input");
         verify(mockOnRetry, never()).accept(any(), any());
@@ -49,14 +47,12 @@ class BackoffExecutorTest {
     @Test
     @DisplayName("Should succeed after one retry when function returns false then true")
     void executeBackoff_SuccessAfterOneFalseRetry() {
-        // Given
+
         when(mockFunction.apply("input")).thenReturn(false, true);
         BackoffExecutor<String> executor = new BackoffExecutor<>(10, 3, mockFunction, mockOnFinalError, mockOnSuccess, mockOnRetry);
 
-        // When & Then
         assertDoesNotThrow(() -> executor.executeBackoff("input"));
 
-        // Verify
         verify(mockFunction, times(2)).apply("input");
         verify(mockOnSuccess, times(1)).accept(true, "input");
         verify(mockOnRetry, times(1)).accept(any(Exception.class), eq("input"));
@@ -66,15 +62,13 @@ class BackoffExecutorTest {
     @Test
     @DisplayName("Should succeed after one retry when function throws exception then returns true")
     void executeBackoff_SuccessAfterOneExceptionRetry() {
-        // Given
+
         RuntimeException testException = new RuntimeException("Test Exception");
         when(mockFunction.apply("input")).thenThrow(testException).thenReturn(true);
         BackoffExecutor<String> executor = new BackoffExecutor<>(10, 3, mockFunction, mockOnFinalError, mockOnSuccess, mockOnRetry);
 
-        // When & Then
         assertDoesNotThrow(() -> executor.executeBackoff("input"));
 
-        // Verify
         verify(mockFunction, times(2)).apply("input");
         verify(mockOnSuccess, times(1)).accept(true, "input");
         verify(mockOnRetry, times(1)).accept(eq(testException), eq("input"));
@@ -84,14 +78,12 @@ class BackoffExecutorTest {
     @Test
     @DisplayName("Should fail after all retries when function always returns false")
     void executeBackoff_FailAfterAllRetries_AlwaysReturnsFalse() {
-        // Given
+
         when(mockFunction.apply("input")).thenReturn(false);
         BackoffExecutor<String> executor = new BackoffExecutor<>(10, 2, mockFunction, mockOnFinalError, mockOnSuccess, mockOnRetry);
 
-        // When & Then
         assertThrows(BackoffExecutionFailedException.class, () -> executor.executeBackoff("input"));
 
-        // Verify (1 initial attempt + 2 retries = 3 calls)
         verify(mockFunction, times(3)).apply("input");
         verify(mockOnSuccess, never()).accept(any(), any());
         verify(mockOnRetry, times(3)).accept(any(Exception.class), eq("input"));
@@ -101,15 +93,13 @@ class BackoffExecutorTest {
     @Test
     @DisplayName("Should fail after all retries when function always throws exception")
     void executeBackoff_FailAfterAllRetries_AlwaysThrowsException() {
-        // Given
+
         RuntimeException testException = new RuntimeException("Test Exception");
         when(mockFunction.apply("input")).thenThrow(testException);
         BackoffExecutor<String> executor = new BackoffExecutor<>(10, 2, mockFunction, mockOnFinalError, mockOnSuccess, mockOnRetry);
 
-        // When & Then
         assertThrows(BackoffExecutionFailedException.class, () -> executor.executeBackoff("input"));
 
-        // Verify (1 initial attempt + 2 retries = 3 calls)
         verify(mockFunction, times(3)).apply("input");
         verify(mockOnSuccess, never()).accept(any(), any());
         verify(mockOnRetry, times(3)).accept(eq(testException), eq("input"));

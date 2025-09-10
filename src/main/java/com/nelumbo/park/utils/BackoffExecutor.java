@@ -30,17 +30,26 @@ public class BackoffExecutor<T> {
         Exception lastError = null;
         for (int attempt = 0; attempt <= maxRetries; attempt++) {
             try {
-                boolean result = fn.apply(input);
-                if (onSuccess != null) onSuccess.accept(result, input);
-                return;
+                if (fn.apply(input)) {
+                    if (onSuccess != null) {
+                        onSuccess.accept(true, input);
+                    }
+                    return;
+                }
+                lastError = new Exception("Function returned false");
             } catch (Exception e) {
                 lastError = e;
-                if (attempt == maxRetries) {
-                    handleFinalError(e, input);
-                }
-                if (onRetry != null) onRetry.accept(e, input);
-                waitWithBackoff(attempt);
             }
+
+            if (onRetry != null) {
+                onRetry.accept(lastError, input);
+            }
+
+            if (attempt >= maxRetries) {
+                handleFinalError(lastError, input);
+            }
+
+            waitWithBackoff(attempt);
         }
         throw new BackoffExecutionFailedException("La ejecución con backoff falló después de " + maxRetries + " intentos", lastError);
     }

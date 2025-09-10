@@ -50,7 +50,6 @@ public class RabbitMQService implements DisposableBean {
         this.objectMapper = objectMapper;
     }
 
-    // Extracted for testability
     protected ConnectionFactory createConnectionFactory() {
         return new ConnectionFactory();
     }
@@ -76,13 +75,9 @@ public class RabbitMQService implements DisposableBean {
             connection = factory.newConnection();
             channel = connection.createChannel();
 
-            // All queue declarations are now within this single try block
             try {
                 channel.queueDeclarePassive(queueName);
             } catch (IOException e) {
-                // If passive declaration fails, it means the queue doesn't exist or there's a connection issue.
-                // In either case, we proceed to declare the queues actively.
-                // Any IOException during these declarations will be caught by the outer IOException catch.
                 channel.queueDeclare(dlqFinalName, true, false, false, null);
 
                 Map<String, Object> retryArgs = new HashMap<>();
@@ -156,7 +151,7 @@ public class RabbitMQService implements DisposableBean {
 
     public void publishMessageBackoff(Object message) {
         try {
-            BackoffExecutor<Object> executor = new BackoffExecutor<>(200, 5, // Fast retries for testing
+            BackoffExecutor<Object> executor = new BackoffExecutor<>(200, 5,
                     this::publishMessageInternal,
                     (error, msg) -> logger.error("Final error publishing message after retries: {}", error.getMessage()),
                     (result, msg) -> logger.info("Published message with backoff successfully."),
@@ -177,8 +172,9 @@ public class RabbitMQService implements DisposableBean {
             byte[] messageBytes = objectMapper.writeValueAsBytes(message);
             channel.basicPublish("", defaultQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBytes);
             return true;
-        } catch (Exception e) { // Catch broader exceptions during publish/connect
+        } catch (Exception e) {
             logger.warn("Failed to publish message: {}", e.getMessage());
+            this.channel = null;
             return false;
         }
     }
@@ -186,13 +182,16 @@ public class RabbitMQService implements DisposableBean {
     @Override
     public void destroy() {
         try {
-            if (channel != null) channel.close();
+            if (channel != null && channel.isOpen()) {
+                channel.close();
+            }
         } catch (IOException | TimeoutException e) {
             logger.warn("Error cerrando canal de RabbitMQ: {}", e.getMessage());
         }
-
         try {
-            if (connection != null) connection.close();
+            if (connection != null && connection.isOpen()) {
+                connection.close();
+            }
         } catch (IOException e) {
             logger.warn("Error cerrando conexión de RabbitMQ: {}", e.getMessage());
         }

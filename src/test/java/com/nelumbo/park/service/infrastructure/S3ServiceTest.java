@@ -53,14 +53,12 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should upload file successfully")
     void uploadFile_Success() {
-        // Given
+
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
-        // When
         Map<String, String> result = s3Service.uploadFile(BUFFER, CONTENT_TYPE, FILE_NAME);
 
-        // Then
         assertNotNull(result);
         assertEquals(FILE_NAME, result.get("Key"));
         verify(s3Client, times(1)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
@@ -69,7 +67,7 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when buffer is null in uploadFile")
     void uploadFile_NullBuffer_ThrowsIllegalArgumentException() {
-        // When / Then
+
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
             s3Service.uploadFile(null, CONTENT_TYPE, FILE_NAME);
         });
@@ -80,7 +78,7 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when buffer is empty in uploadFile")
     void uploadFile_EmptyBuffer_ThrowsIllegalArgumentException() {
-        // When / Then
+
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
             s3Service.uploadFile(new byte[0], CONTENT_TYPE, FILE_NAME);
         });
@@ -91,39 +89,33 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw S3FileUploadException when S3Exception occurs during uploadFile")
     void uploadFile_S3Exception_ThrowsS3FileUploadException() {
-        // Given
+
         String expectedS3ErrorMessage = "S3 error";
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenThrow(S3Exception.builder().message(expectedS3ErrorMessage).build());
 
-        // When / Then
         S3FileUploadException thrown = assertThrows(S3FileUploadException.class, () -> {
             s3Service.uploadFile(BUFFER, CONTENT_TYPE, FILE_NAME);
         });
 
-        // 1. Aseguramos que el mensaje de la S3FileUploadException es correcto
         assertTrue(thrown.getMessage().contains("Error de S3 subiendo archivo"));
 
-        // 2. Obtenemos la causa de la excepción
         Throwable cause = thrown.getCause();
-        assertNotNull(cause); // Aseguramos que la causa no es nula
+        assertNotNull(cause);
 
-        // 3. Aseguramos que la causa es una instancia de AwsServiceException (o S3Exception, si más específico)
         assertTrue(cause instanceof AwsServiceException);
 
-        // 4. Verificamos que el mensaje de la causa contiene el mensaje esperado
         assertTrue(cause.getMessage().contains(expectedS3ErrorMessage));
     }
 
     @Test
     @DisplayName("Should throw S3ConnectivityException when UnknownHostException occurs during uploadFile")
     void uploadFile_UnknownHostException_ThrowsS3ConnectivityException() {
-        // Given
+
         UnknownHostException unknownHostException = new UnknownHostException("Host not found");
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenThrow(new RuntimeException(unknownHostException));
 
-        // When / Then
         S3ConnectivityException thrown = assertThrows(S3ConnectivityException.class, () -> {
             s3Service.uploadFile(BUFFER, CONTENT_TYPE, FILE_NAME);
         });
@@ -134,12 +126,11 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw S3FileUploadException when generic Exception occurs during uploadFile")
     void uploadFile_GenericException_ThrowsS3FileUploadException() {
-        // Given
+
         RuntimeException genericException = new RuntimeException("Generic error");
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenThrow(genericException);
 
-        // When / Then
         S3FileUploadException thrown = assertThrows(S3FileUploadException.class, () -> {
             s3Service.uploadFile(BUFFER, CONTENT_TYPE, FILE_NAME);
         });
@@ -152,15 +143,12 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should return exists true when file is found")
     void getFile_Exists_ReturnsTrue() {
-        // Given
-        // The getObject method returns ResponseInputStream<GetObjectResponse>
+
         when(s3Client.getObject(any(GetObjectRequest.class)))
                 .thenReturn(mock(ResponseInputStream.class));
 
-        // When
         Map<String, Object> result = s3Service.getFile(FILE_NAME);
 
-        // Then
         assertNotNull(result);
         assertEquals(FILE_NAME, result.get("key"));
         assertTrue((Boolean) result.get("exists"));
@@ -170,14 +158,12 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should return exists false when NoSuchKeyException occurs")
     void getFile_NoSuchKeyException_ReturnsFalse() {
-        // Given
+
         when(s3Client.getObject(any(GetObjectRequest.class)))
                 .thenThrow(NoSuchKeyException.builder().message("Not found").build());
 
-        // When
         Map<String, Object> result = s3Service.getFile(FILE_NAME);
 
-        // Then
         assertNotNull(result);
         assertEquals(FILE_NAME, result.get("key"));
         assertFalse((Boolean) result.get("exists"));
@@ -187,11 +173,10 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw S3FileRetrievalException when S3Exception occurs during getFile")
     void getFile_S3Exception_ThrowsS3FileRetrievalException() {
-        // Given
+
         when(s3Client.getObject(any(GetObjectRequest.class)))
                 .thenThrow(S3Exception.builder().message("S3 error").build());
 
-        // When / Then
         S3FileRetrievalException thrown = assertThrows(S3FileRetrievalException.class, () -> {
             s3Service.getFile(FILE_NAME);
         });
@@ -203,12 +188,11 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw S3ConnectivityException when UnknownHostException occurs during getFile")
     void getFile_UnknownHostException_ThrowsS3ConnectivityException() {
-        // Given
+
         UnknownHostException unknownHostException = new UnknownHostException("Host not found");
         when(s3Client.getObject(any(GetObjectRequest.class)))
                 .thenThrow(new RuntimeException(unknownHostException));
 
-        // When / Then
         S3ConnectivityException thrown = assertThrows(S3ConnectivityException.class, () -> {
             s3Service.getFile(FILE_NAME);
         });
@@ -219,12 +203,11 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw S3FileRetrievalException when generic Exception occurs during getFile")
     void getFile_GenericException_ThrowsS3FileRetrievalException() {
-        // Given
+
         RuntimeException genericException = new RuntimeException("Generic error");
         when(s3Client.getObject(any(GetObjectRequest.class)))
                 .thenThrow(genericException);
 
-        // When / Then
         S3FileRetrievalException thrown = assertThrows(S3FileRetrievalException.class, () -> {
             s3Service.getFile(FILE_NAME);
         });
@@ -237,14 +220,12 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should upload file directly successfully")
     void uploadFileDirectly_Success() {
-        // Given
+
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
-        // When
         Map<String, String> result = s3Service.uploadFileDirectly(BUFFER, CONTENT_TYPE, FILE_NAME);
 
-        // Then
         assertNotNull(result);
         assertEquals(FILE_NAME, result.get("Key"));
         verify(s3Client, times(1)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
@@ -253,7 +234,7 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when buffer is null in uploadFileDirectly")
     void uploadFileDirectly_NullBuffer_ThrowsIllegalArgumentException() {
-        // When / Then
+
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
             s3Service.uploadFileDirectly(null, CONTENT_TYPE, FILE_NAME);
         });
@@ -264,7 +245,7 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when buffer is empty in uploadFileDirectly")
     void uploadFileDirectly_EmptyBuffer_ThrowsIllegalArgumentException() {
-        // When / Then
+
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
             s3Service.uploadFileDirectly(new byte[0], CONTENT_TYPE, FILE_NAME);
         });
@@ -275,11 +256,10 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw S3FileUploadException when S3Exception occurs during uploadFileDirectly")
     void uploadFileDirectly_S3Exception_ThrowsS3FileUploadException() {
-        // Given
+
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenThrow(S3Exception.builder().message("S3 error").build());
 
-        // When / Then
         S3FileUploadException thrown = assertThrows(S3FileUploadException.class, () -> {
             s3Service.uploadFileDirectly(BUFFER, CONTENT_TYPE, FILE_NAME);
         });
@@ -291,12 +271,11 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw S3ConnectivityException when UnknownHostException occurs during uploadFileDirectly")
     void uploadFileDirectly_UnknownHostException_ThrowsS3ConnectivityException() {
-        // Given
+
         UnknownHostException unknownHostException = new UnknownHostException("Host not found");
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenThrow(new RuntimeException(unknownHostException));
 
-        // When / Then
         S3ConnectivityException thrown = assertThrows(S3ConnectivityException.class, () -> {
             s3Service.uploadFileDirectly(BUFFER, CONTENT_TYPE, FILE_NAME);
         });
@@ -307,12 +286,11 @@ class S3ServiceTest {
     @Test
     @DisplayName("Should throw S3FileUploadException when generic Exception occurs during uploadFileDirectly")
     void uploadFileDirectly_GenericException_ThrowsS3FileUploadException() {
-        // Given
+
         RuntimeException genericException = new RuntimeException("Generic error");
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenThrow(genericException);
 
-        // When / Then
         S3FileUploadException thrown = assertThrows(S3FileUploadException.class, () -> {
             s3Service.uploadFileDirectly(BUFFER, CONTENT_TYPE, FILE_NAME);
         });
