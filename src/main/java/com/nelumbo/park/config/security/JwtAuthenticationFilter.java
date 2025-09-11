@@ -24,23 +24,23 @@ import java.util.Optional;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Value("${application.json}")
-    private String applicationJson;
-    
-    @Value("${character.encoding}")
-    private String applicationJsonCharset;
-    
     private static final Logger loggers = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final String applicationJson;
+    private final String applicationJsonCharset;
 
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
-            UserRepository userRepository
+            UserRepository userRepository,
+            @Value("${application.json}") String applicationJson,
+            @Value("${character.encoding}") String applicationJsonCharset
     ) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.applicationJson = applicationJson;
+        this.applicationJsonCharset = applicationJsonCharset;
     }
 
     @Override

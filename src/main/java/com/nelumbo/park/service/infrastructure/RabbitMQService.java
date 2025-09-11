@@ -75,30 +75,33 @@ public class RabbitMQService implements DisposableBean {
             connection = factory.newConnection();
             channel = connection.createChannel();
 
-            try {
-                channel.queueDeclarePassive(queueName);
-            } catch (IOException e) {
-                channel.queueDeclare(dlqFinalName, true, false, false, null);
+            declareQueues(queueName, dlqFinalName, channel);
 
-                Map<String, Object> retryArgs = new HashMap<>();
-                retryArgs.put("x-message-ttl", 60000);
-                retryArgs.put("x-dead-letter-exchange", "");
-                retryArgs.put("x-dead-letter-routing-key", queueName);
-
-                channel.queueDeclare(QUEUE_RETRY, true, false, false, retryArgs);
-
-                Map<String, Object> mainArgs = new HashMap<>();
-                mainArgs.put("x-dead-letter-exchange", "");
-                mainArgs.put("x-dead-letter-routing-key", QUEUE_RETRY);
-
-                channel.queueDeclare(queueName, true, false, false, mainArgs);
-            }
         } catch (URISyntaxException | NoSuchAlgorithmException | KeyManagementException e) {
-            logger.error("Error de configuración al conectar a RabbitMQ: {}", e.getMessage());
             throw new RabbitMQConnectionException("Error de configuración al conectar a RabbitMQ", e);
         } catch (IOException | TimeoutException e) {
-            logger.error("Error estableciendo conexión o declarando colas de RabbitMQ: {}", e.getMessage());
             throw new RabbitMQConnectionException("Error estableciendo conexión o declarando colas de RabbitMQ", e);
+        }
+    }
+
+    private void declareQueues(String queueName, String dlqFinalName, Channel channel) throws IOException {
+        try {
+            channel.queueDeclarePassive(queueName);
+        } catch (IOException e) {
+            channel.queueDeclare(dlqFinalName, true, false, false, null);
+
+            Map<String, Object> retryArgs = new HashMap<>();
+            retryArgs.put("x-message-ttl", 60000);
+            retryArgs.put("x-dead-letter-exchange", "");
+            retryArgs.put("x-dead-letter-routing-key", queueName);
+
+            channel.queueDeclare(QUEUE_RETRY, true, false, false, retryArgs);
+
+            Map<String, Object> mainArgs = new HashMap<>();
+            mainArgs.put("x-dead-letter-exchange", "");
+            mainArgs.put("x-dead-letter-routing-key", QUEUE_RETRY);
+
+            channel.queueDeclare(queueName, true, false, false, mainArgs);
         }
     }
 
