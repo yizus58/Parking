@@ -56,8 +56,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
-            username = extractUsernameFromJwt(jwt, response);
-            if (username == null) {
+            try {
+                username = extractUsernameFromJwt(jwt, response);
+                if (username == null) {
+                    return;
+                }
+            } catch (JwtProcessingException e) {
+                loggers.error("Error processing JWT: {}", e.getMessage());
+                writeErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al procesar token JWT");
                 return;
             }
         }
