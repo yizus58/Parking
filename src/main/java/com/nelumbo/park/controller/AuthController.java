@@ -33,7 +33,7 @@ public class AuthController {
             @ApiResponse(responseCode = "429", description = "Demasiados intentos", content = @Content)
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<Object> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpServletRequest) {
         return loginService.authenticate(request, httpServletRequest);
     }
 }

@@ -5,5 +5,5 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 
 public interface LoginService {
-    ResponseEntity<?> authenticate(LoginRequest request, HttpServletRequest httpServletRequest);
+    ResponseEntity<Object> authenticate(LoginRequest request, HttpServletRequest httpServletRequest);
 }

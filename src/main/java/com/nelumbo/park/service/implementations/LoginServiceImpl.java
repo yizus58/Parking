@@ -25,7 +25,7 @@ public class LoginServiceImpl implements LoginService {
     private final LoginAttemptService loginAttemptService;
 
     @Override
-    public ResponseEntity<?> authenticate(LoginRequest request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<Object> authenticate(LoginRequest request, HttpServletRequest httpServletRequest) {
         String ip = httpServletRequest.getRemoteAddr();
         Date date = new Date();
 

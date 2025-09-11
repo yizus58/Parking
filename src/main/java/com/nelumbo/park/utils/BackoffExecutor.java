@@ -30,7 +30,8 @@ public class BackoffExecutor<T> {
         Exception lastError = null;
         for (int attempt = 0; attempt <= maxRetries; attempt++) {
             try {
-                if (fn.apply(input)) {
+                Boolean fnResult = this.fn.apply(input);
+                if (Boolean.TRUE.equals(fnResult)) {
                     if (onSuccess != null) {
                         onSuccess.accept(true, input);
                     }
