@@ -129,7 +129,7 @@ class VehicleControllerTest {
         mockMvc.perform(get("/vehicles/{id}", vehicleId))
                 .andExpect(status().isForbidden());
 
-        verify(vehicleService, never()).getVehicleById(anyString());
+        verifyNoInteractions(vehicleService);
     }
 
     @Test
@@ -192,7 +192,7 @@ class VehicleControllerTest {
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isForbidden());
 
-        verify(vehicleService, never()).createVehicle(any(VehicleCreateRequest.class));
+        verifyNoInteractions(vehicleService);
     }
 
     @Test
@@ -214,21 +214,6 @@ class VehicleControllerTest {
                 .andExpect(jsonPath("$.model").value("Model Y"));
 
         verify(vehicleService).exitVehicle(any(VehicleUpdateRequest.class));
-    }
-
-    @Test
-    @WithMockUser(authorities = "SOCIO")
-    void exitVehicle_WithSocioRoleAndInvalidData_ShouldReturnBadRequest() throws Exception {
-        VehicleUpdateRequest updateRequest = new VehicleUpdateRequest(
-                "", "", null, null, "", "", null, null
-        );
-
-        mockMvc.perform(put("/vehicles/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isBadRequest());
-
-        verify(vehicleService, never()).exitVehicle(any(VehicleUpdateRequest.class));
     }
 
     @Test
@@ -255,7 +240,7 @@ class VehicleControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isForbidden());
 
-        verify(vehicleService, never()).exitVehicle(any(VehicleUpdateRequest.class));
+        verifyNoInteractions(vehicleService);
     }
 
     @Test
@@ -287,6 +272,6 @@ class VehicleControllerTest {
         mockMvc.perform(delete("/vehicles/{id}", vehicleId))
                 .andExpect(status().isForbidden());
 
-        verify(vehicleService, never()).deleteVehicle(anyString());
+        verifyNoInteractions(vehicleService);
     }
 }

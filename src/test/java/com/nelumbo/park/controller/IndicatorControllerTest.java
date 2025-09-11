@@ -102,7 +102,7 @@ class IndicatorControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
 
-        verify(vehicleService, never()).getFirstTimeParkedVehicles();
+        verifyNoInteractions(vehicleService);
     }
 
     @Test

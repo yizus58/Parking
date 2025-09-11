@@ -12,7 +12,6 @@ import com.nelumbo.park.exception.exceptions.InvalidPasswordException;
 import com.nelumbo.park.mapper.AuthMapper;
 import com.nelumbo.park.mapper.UserMapper;
 import com.nelumbo.park.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -166,7 +165,6 @@ class UserServiceTest {
 
     @Test
     void login_WithValidCredentials_ShouldReturnUserLoginResponse() {
-        // HttpServletRequest request = mock(HttpServletRequest.class);
         when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(user);
         when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(true);
         when(authMapper.toUserLoginResponse(user)).thenReturn(userLoginResponse);
@@ -180,7 +178,6 @@ class UserServiceTest {
 
     @Test
     void login_WithNonExistentEmail_ShouldThrowEmailNotFoundException() {
-        // HttpServletRequest request = mock(HttpServletRequest.class);
         when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(null);
 
         assertThrows(EmailNotFoundException.class, () -> userService.login(loginRequest));
@@ -189,7 +186,6 @@ class UserServiceTest {
 
     @Test
     void login_WithInvalidPassword_ShouldThrowInvalidPasswordException() {
-        // HttpServletRequest request = mock(HttpServletRequest.class);
         when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(user);
         when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(false);
 

@@ -12,7 +12,6 @@ import com.nelumbo.park.exception.exceptions.UserNotFoundException;
 import com.nelumbo.park.exception.exceptions.VehicleAlreadyInParkingException;
 import com.nelumbo.park.exception.exceptions.VehicleNotFoundException;
 import com.nelumbo.park.exception.exceptions.VehicleOutParkingException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +33,7 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
-public class GlobalExceptionHandlerTest {
+ class GlobalExceptionHandlerTest {
 
     @InjectMocks
     private GlobalExceptionHandler globalExceptionHandler;
@@ -44,10 +43,6 @@ public class GlobalExceptionHandlerTest {
 
     @Mock
     private BindingResult bindingResult;
-
-    @BeforeEach
-    void setUp() {
-    }
 
     @Test
     void handleSQLException_shouldReturnConflict() {

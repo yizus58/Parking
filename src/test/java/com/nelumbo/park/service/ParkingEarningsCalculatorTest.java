@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ParkingEarningsCalculatorTest {
+ class ParkingEarningsCalculatorTest {
 
     @InjectMocks
     private ParkingEarningsCalculator parkingEarningsCalculator;

@@ -15,7 +15,6 @@ import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
@@ -38,14 +37,14 @@ class S3ServiceTest {
     @InjectMocks
     private S3Service s3Service;
 
-    private final String BUCKET_NAME = "test-bucket";
-    private final String FILE_NAME = "test-file.txt";
-    private final String CONTENT_TYPE = "text/plain";
-    private final byte[] BUFFER = "test content".getBytes();
+    private final String bucketName = "test-bucket";
+    private final String fileName = "test-file.txt";
+    private final String contentType = "text/plain";
+    private final byte[] buffer = "test content".getBytes();
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(s3Service, "bucketName", BUCKET_NAME);
+        ReflectionTestUtils.setField(s3Service, "bucketName", bucketName);
     }
 
     // --- uploadFile tests ---
@@ -57,19 +56,19 @@ class S3ServiceTest {
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
-        Map<String, String> result = s3Service.uploadFile(BUFFER, CONTENT_TYPE, FILE_NAME);
+        Map<String, String> result = s3Service.uploadFile(buffer, contentType, fileName);
 
         assertNotNull(result);
-        assertEquals(FILE_NAME, result.get("Key"));
+        assertEquals(fileName, result.get("Key"));
         verify(s3Client, times(1)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
     }
 
     @Test
     @DisplayName("Should throw IllegalArgumentException when buffer is null in uploadFile")
-    void uploadFile_NullBuffer_ThrowsIllegalArgumentException() {
+    void uploadFile_Nullbuffer_ThrowsIllegalArgumentException() {
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            s3Service.uploadFile(null, CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFile(null, contentType, fileName);
         });
         assertEquals("El parámetro buffer debe ser un array de bytes válido", thrown.getMessage());
         verifyNoInteractions(s3Client);
@@ -77,10 +76,10 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should throw IllegalArgumentException when buffer is empty in uploadFile")
-    void uploadFile_EmptyBuffer_ThrowsIllegalArgumentException() {
+    void uploadFile_Emptybuffer_ThrowsIllegalArgumentException() {
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            s3Service.uploadFile(new byte[0], CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFile(new byte[0], contentType, fileName);
         });
         assertEquals("El parámetro buffer debe ser un array de bytes válido", thrown.getMessage());
         verifyNoInteractions(s3Client);
@@ -95,7 +94,7 @@ class S3ServiceTest {
                 .thenThrow(S3Exception.builder().message(expectedS3ErrorMessage).build());
 
         S3FileUploadException thrown = assertThrows(S3FileUploadException.class, () -> {
-            s3Service.uploadFile(BUFFER, CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFile(buffer, contentType, fileName);
         });
 
         assertTrue(thrown.getMessage().contains("Error de S3 subiendo archivo"));
@@ -117,7 +116,7 @@ class S3ServiceTest {
                 .thenThrow(new RuntimeException(unknownHostException));
 
         S3ConnectivityException thrown = assertThrows(S3ConnectivityException.class, () -> {
-            s3Service.uploadFile(BUFFER, CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFile(buffer, contentType, fileName);
         });
         assertTrue(thrown.getMessage().contains("Error de conectividad con S3"));
         assertEquals(unknownHostException, thrown.getCause().getCause());
@@ -132,7 +131,7 @@ class S3ServiceTest {
                 .thenThrow(genericException);
 
         S3FileUploadException thrown = assertThrows(S3FileUploadException.class, () -> {
-            s3Service.uploadFile(BUFFER, CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFile(buffer, contentType, fileName);
         });
         assertTrue(thrown.getMessage().contains("Error subiendo archivo"));
         assertEquals(genericException, thrown.getCause());
@@ -147,10 +146,10 @@ class S3ServiceTest {
         when(s3Client.getObject(any(GetObjectRequest.class)))
                 .thenReturn(mock(ResponseInputStream.class));
 
-        Map<String, Object> result = s3Service.getFile(FILE_NAME);
+        Map<String, Object> result = s3Service.getFile(fileName);
 
         assertNotNull(result);
-        assertEquals(FILE_NAME, result.get("key"));
+        assertEquals(fileName, result.get("key"));
         assertTrue((Boolean) result.get("exists"));
         verify(s3Client, times(1)).getObject(any(GetObjectRequest.class));
     }
@@ -162,10 +161,10 @@ class S3ServiceTest {
         when(s3Client.getObject(any(GetObjectRequest.class)))
                 .thenThrow(NoSuchKeyException.builder().message("Not found").build());
 
-        Map<String, Object> result = s3Service.getFile(FILE_NAME);
+        Map<String, Object> result = s3Service.getFile(fileName);
 
         assertNotNull(result);
-        assertEquals(FILE_NAME, result.get("key"));
+        assertEquals(fileName, result.get("key"));
         assertFalse((Boolean) result.get("exists"));
         verify(s3Client, times(1)).getObject(any(GetObjectRequest.class));
     }
@@ -178,7 +177,7 @@ class S3ServiceTest {
                 .thenThrow(S3Exception.builder().message("S3 error").build());
 
         S3FileRetrievalException thrown = assertThrows(S3FileRetrievalException.class, () -> {
-            s3Service.getFile(FILE_NAME);
+            s3Service.getFile(fileName);
         });
         assertTrue(thrown.getMessage().contains("Error de S3 verificando archivo"));
         assertTrue(thrown.getCause() instanceof S3Exception);
@@ -194,7 +193,7 @@ class S3ServiceTest {
                 .thenThrow(new RuntimeException(unknownHostException));
 
         S3ConnectivityException thrown = assertThrows(S3ConnectivityException.class, () -> {
-            s3Service.getFile(FILE_NAME);
+            s3Service.getFile(fileName);
         });
         assertTrue(thrown.getMessage().contains("Error de conectividad con S3"));
         assertEquals(unknownHostException, thrown.getCause().getCause());
@@ -209,7 +208,7 @@ class S3ServiceTest {
                 .thenThrow(genericException);
 
         S3FileRetrievalException thrown = assertThrows(S3FileRetrievalException.class, () -> {
-            s3Service.getFile(FILE_NAME);
+            s3Service.getFile(fileName);
         });
         assertTrue(thrown.getMessage().contains("Error verificando existencia del archivo"));
         assertEquals(genericException, thrown.getCause());
@@ -224,19 +223,19 @@ class S3ServiceTest {
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
-        Map<String, String> result = s3Service.uploadFileDirectly(BUFFER, CONTENT_TYPE, FILE_NAME);
+        Map<String, String> result = s3Service.uploadFileDirectly(buffer, contentType, fileName);
 
         assertNotNull(result);
-        assertEquals(FILE_NAME, result.get("Key"));
+        assertEquals(fileName, result.get("Key"));
         verify(s3Client, times(1)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
     }
 
     @Test
     @DisplayName("Should throw IllegalArgumentException when buffer is null in uploadFileDirectly")
-    void uploadFileDirectly_NullBuffer_ThrowsIllegalArgumentException() {
+    void uploadFileDirectly_Nullbuffer_ThrowsIllegalArgumentException() {
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            s3Service.uploadFileDirectly(null, CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFileDirectly(null, contentType, fileName);
         });
         assertEquals("El parámetro buffer debe ser un array de bytes válido", thrown.getMessage());
         verifyNoInteractions(s3Client);
@@ -244,10 +243,10 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should throw IllegalArgumentException when buffer is empty in uploadFileDirectly")
-    void uploadFileDirectly_EmptyBuffer_ThrowsIllegalArgumentException() {
+    void uploadFileDirectly_Emptybuffer_ThrowsIllegalArgumentException() {
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            s3Service.uploadFileDirectly(new byte[0], CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFileDirectly(new byte[0], contentType, fileName);
         });
         assertEquals("El parámetro buffer debe ser un array de bytes válido", thrown.getMessage());
         verifyNoInteractions(s3Client);
@@ -261,7 +260,7 @@ class S3ServiceTest {
                 .thenThrow(S3Exception.builder().message("S3 error").build());
 
         S3FileUploadException thrown = assertThrows(S3FileUploadException.class, () -> {
-            s3Service.uploadFileDirectly(BUFFER, CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFileDirectly(buffer, contentType, fileName);
         });
         assertTrue(thrown.getMessage().contains("Error de S3 subiendo archivo directamente"));
         assertTrue(thrown.getCause() instanceof S3Exception);
@@ -277,7 +276,7 @@ class S3ServiceTest {
                 .thenThrow(new RuntimeException(unknownHostException));
 
         S3ConnectivityException thrown = assertThrows(S3ConnectivityException.class, () -> {
-            s3Service.uploadFileDirectly(BUFFER, CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFileDirectly(buffer, contentType, fileName);
         });
         assertTrue(thrown.getMessage().contains("Error de conectividad con S3"));
         assertEquals(unknownHostException, thrown.getCause().getCause());
@@ -292,7 +291,7 @@ class S3ServiceTest {
                 .thenThrow(genericException);
 
         S3FileUploadException thrown = assertThrows(S3FileUploadException.class, () -> {
-            s3Service.uploadFileDirectly(BUFFER, CONTENT_TYPE, FILE_NAME);
+            s3Service.uploadFileDirectly(buffer, contentType, fileName);
         });
         assertTrue(thrown.getMessage().contains("Error subiendo archivo"));
         assertEquals(genericException, thrown.getCause());

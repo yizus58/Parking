@@ -182,7 +182,7 @@ class RabbitMQServiceTest {
 
         rabbitMQService.publishToDeadLetterQueue(message);
 
-        verify(rabbitMQService, times(1)).sendToQueue(eq("email_retry_queue"), eq(message));
+        verify(rabbitMQService, times(1)).sendToQueue("email_retry_queue", message);
     }
 
     @Test
@@ -196,7 +196,7 @@ class RabbitMQServiceTest {
 
         rabbitMQService.publishToFinalDLQ(message);
 
-        verify(rabbitMQService, times(1)).sendToQueue(eq("test_queue_final_dlq"), eq(message));
+        verify(rabbitMQService, times(1)).sendToQueue("test_queue_final_dlq", message);
         assertNotNull(message.getFailedAt());
         assertTrue(message.isFinalFailure());
     }
@@ -292,7 +292,7 @@ class RabbitMQServiceTest {
         rabbitMQService.consumeFromFinalDLQ(mockCallback);
 
 
-        verify(rabbitMQService, times(1)).consumeFromQueue(eq("test_queue_final_dlq"), eq(mockCallback));
+        verify(rabbitMQService, times(1)).consumeFromQueue("test_queue_final_dlq", mockCallback);
     }
 
     @Test
@@ -303,7 +303,7 @@ class RabbitMQServiceTest {
 
         rabbitMQService.connect(null);
 
-        verify(mockChannel, times(1)).queueDeclarePassive(eq("test_queue"));
+        verify(mockChannel, times(1)).queueDeclarePassive("test_queue");
 
         verify(mockChannel, times(1)).queueDeclare(eq("test_queue_final_dlq"), eq(true), eq(false), eq(false), isNull());
 
@@ -329,7 +329,7 @@ class RabbitMQServiceTest {
 
         rabbitMQService.connect(null);
 
-        verify(mockChannel, times(1)).queueDeclarePassive(eq("test_queue"));
+        verify(mockChannel, times(1)).queueDeclarePassive("test_queue");
 
         verify(mockChannel, never()).queueDeclare(anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any());
     }
@@ -369,7 +369,7 @@ class RabbitMQServiceTest {
         assertTrue(thrown.getMessage().contains("Error estableciendo conexión o declarando colas de RabbitMQ"));
         assertTrue(thrown.getCause() instanceof IOException);
 
-        verify(mockChannel, times(1)).queueDeclarePassive(eq("test_queue"));
+        verify(mockChannel, times(1)).queueDeclarePassive("test_queue");
         verify(mockChannel, times(1)).queueDeclare(
                 eq("test_queue_final_dlq"), anyBoolean(), anyBoolean(), anyBoolean(), isNull());
         verify(mockChannel, never()).queueDeclare(eq("email_retry_queue"), anyBoolean(), anyBoolean(), anyBoolean(), any());

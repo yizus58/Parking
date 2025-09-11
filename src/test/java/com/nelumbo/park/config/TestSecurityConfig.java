@@ -28,7 +28,8 @@ public class TestSecurityConfig {
     @Bean
     @Primary
     public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(jwtService, userRepository);
+        // Se añaden dos argumentos String vacíos para applicationJson y applicationJsonCharset
+        JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(jwtService, userRepository, "", "");
 
         return http
                 .csrf(csrf -> csrf.disable())
