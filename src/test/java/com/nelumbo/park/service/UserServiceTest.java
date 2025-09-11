@@ -166,12 +166,12 @@ class UserServiceTest {
 
     @Test
     void login_WithValidCredentials_ShouldReturnUserLoginResponse() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        // HttpServletRequest request = mock(HttpServletRequest.class);
         when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(user);
         when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(true);
         when(authMapper.toUserLoginResponse(user)).thenReturn(userLoginResponse);
 
-        UserLoginResponse result = userService.login(loginRequest, request);
+        UserLoginResponse result = userService.login(loginRequest);
 
         assertNotNull(result);
         assertEquals(userLoginResponse.getAccessToken(), result.getAccessToken());
@@ -180,20 +180,20 @@ class UserServiceTest {
 
     @Test
     void login_WithNonExistentEmail_ShouldThrowEmailNotFoundException() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        // HttpServletRequest request = mock(HttpServletRequest.class);
         when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(null);
 
-        assertThrows(EmailNotFoundException.class, () -> userService.login(loginRequest, request));
+        assertThrows(EmailNotFoundException.class, () -> userService.login(loginRequest));
         verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
 
     @Test
     void login_WithInvalidPassword_ShouldThrowInvalidPasswordException() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        // HttpServletRequest request = mock(HttpServletRequest.class);
         when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(user);
         when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(false);
 
-        assertThrows(InvalidPasswordException.class, () -> userService.login(loginRequest, request));
+        assertThrows(InvalidPasswordException.class, () -> userService.login(loginRequest));
         verify(authMapper, never()).toUserLoginResponse(any());
     }
 
