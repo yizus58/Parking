@@ -2,7 +2,7 @@ package com.nelumbo.park.controller;
 
 import com.nelumbo.park.dto.request.LoginRequest;
 import com.nelumbo.park.dto.response.UserLoginResponse;
-import com.nelumbo.park.service.LoginService;
+import com.nelumbo.park.interfaces.LoginService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

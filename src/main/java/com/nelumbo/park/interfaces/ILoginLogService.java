@@ -1,4 +1,4 @@
-package com.nelumbo.park.service;
+package com.nelumbo.park.interfaces;
 
 import java.util.Date;
 

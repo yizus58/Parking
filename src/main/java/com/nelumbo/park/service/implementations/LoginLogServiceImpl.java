@@ -1,8 +1,8 @@
-package com.nelumbo.park.service.impl;
+package com.nelumbo.park.service.implementations;
 
 import com.nelumbo.park.entity.LoginLog;
 import com.nelumbo.park.repository.LoginLogRepository;
-import com.nelumbo.park.service.ILoginLogService;
+import com.nelumbo.park.interfaces.ILoginLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

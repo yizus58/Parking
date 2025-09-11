@@ -1,10 +1,10 @@
-package com.nelumbo.park.service.impl;
+package com.nelumbo.park.service.implementations;
 
 import com.nelumbo.park.dto.request.LoginRequest;
 import com.nelumbo.park.dto.response.UserLoginResponse;
-import com.nelumbo.park.service.ILoginLogService;
-import com.nelumbo.park.service.LoginAttemptService;
-import com.nelumbo.park.service.LoginService;
+import com.nelumbo.park.interfaces.ILoginLogService;
+import com.nelumbo.park.interfaces.LoginAttemptService;
+import com.nelumbo.park.interfaces.LoginService;
 import com.nelumbo.park.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
