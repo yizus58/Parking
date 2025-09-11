@@ -70,7 +70,8 @@ class PartnersRankingControllerTest {
     @Test
     void getPartnersRanking_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/partners-rankings/"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(""));
 
         verify(vehicleService, never()).getPartnersRanking();
     }

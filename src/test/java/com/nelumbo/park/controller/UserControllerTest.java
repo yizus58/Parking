@@ -110,7 +110,8 @@ class UserControllerTest {
     void getAllUsers_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/users/")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(""));
 
         verify(userService, never()).getAllUsers();
     }
@@ -149,7 +150,8 @@ class UserControllerTest {
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(""));
 
         verify(userService, never()).createUser(any(UserCreateRequest.class));
     }

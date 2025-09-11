@@ -66,7 +66,7 @@ class RabbitMQServiceTest {
 
         when(mockConnection.isOpen()).thenReturn(true);
         when(mockChannel.isOpen()).thenReturn(true);
-        when(mockObjectMapper.writeValueAsBytes(any())).thenReturn("{}".getBytes());
+        when(mockObjectMapper.writeValueAsBytes(any(Object.class))).thenReturn("{}".getBytes());
     }
 
     @Test
@@ -85,7 +85,7 @@ class RabbitMQServiceTest {
 
     @Test
     @DisplayName("Should connect and send message if channel is null")
-    void sendToQueue_ChannelNull_ConnectsAndSends() throws IOException, TimeoutException {
+    void sendToQueue_ChannelNull_ConnectsAndSends() throws IOException {
 
         ReflectionTestUtils.setField(rabbitMQService, "channel", null);
         String queueName = "test_queue";
@@ -297,7 +297,7 @@ class RabbitMQServiceTest {
 
     @Test
     @DisplayName("connect should establish connection and declare queues if not passive")
-    void connect_EstablishesConnectionAndDeclaresQueues() throws Exception {
+    void connect_EstablishesConnectionAndDeclaresQueues() throws IOException {
 
         doThrow(new IOException("Queue not found")).when(mockChannel).queueDeclarePassive(anyString());
 
@@ -323,7 +323,7 @@ class RabbitMQServiceTest {
 
     @Test
     @DisplayName("connect should not declare queues if queueDeclarePassive succeeds")
-    void connect_QueueDeclarePassiveSuccess_NoQueueDeclarations() throws Exception {
+    void connect_QueueDeclarePassiveSuccess_NoQueueDeclarations() throws IOException {
 
         when(mockChannel.queueDeclarePassive(anyString())).thenReturn(mock(AMQP.Queue.DeclareOk.class));
 
@@ -355,7 +355,7 @@ class RabbitMQServiceTest {
 
     @Test
     @DisplayName("connect should throw RabbitMQConnectionException if queue declaration fails")
-    void connect_QueueDeclarationFails_ThrowsRabbitMQConnectionException() throws IOException, TimeoutException {
+    void connect_QueueDeclarationFails_ThrowsRabbitMQConnectionException() throws IOException {
 
         doThrow(new IOException("Passive declare failed")).when(mockChannel).queueDeclarePassive(anyString());
 
