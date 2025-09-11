@@ -5,8 +5,11 @@ import com.nelumbo.park.config.TestSecurityConfig;
 import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.request.LoginRequest;
 import com.nelumbo.park.dto.response.UserLoginResponse;
+import com.nelumbo.park.interfaces.ILoginLogService;
+import com.nelumbo.park.interfaces.LoginAttemptService;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.service.UserService;
+import com.nelumbo.park.service.implementations.LoginServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +21,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -25,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(AuthController.class)
-@Import(TestSecurityConfig.class)
+@Import({TestSecurityConfig.class, LoginServiceImpl.class})
 class AuthControllerTest {
 
     @Autowired
@@ -39,6 +44,12 @@ class AuthControllerTest {
 
     @MockBean
     private UserRepository userRepository;
+
+    @MockBean
+    private LoginAttemptService loginAttemptService;
+
+    @MockBean
+    private ILoginLogService loginLogService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -64,6 +75,7 @@ class AuthControllerTest {
     @Test
     void login_WithValidCredentials_ShouldReturnTokenResponse() throws Exception {
         when(userService.login(any(LoginRequest.class))).thenReturn(userLoginResponse);
+        when(loginAttemptService.isBlocked(anyString())).thenReturn(false);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,6 +90,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.accessToken").value("jwt-token-example"));
 
         verify(userService, times(1)).login(any(LoginRequest.class));
+        verify(loginAttemptService, times(1)).loginSucceeded(anyString());
+        verify(loginLogService, times(1)).save(anyString(), anyString(), anyString(), any());
     }
 
     @Test
@@ -148,5 +162,24 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(userService, never()).login(any(LoginRequest.class));
+    }
+
+    @Test
+    void login_WhenIpIsBlocked_ShouldReturnTooManyRequests() throws Exception {
+        when(loginAttemptService.isBlocked(anyString())).thenReturn(true);
+        when(loginAttemptService.getBlockedUntil(anyString())).thenReturn(LocalDateTime.now().plusMinutes(5));
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Lo sentimos no puedes hacer login")));
+
+        verify(userService, never()).login(any(LoginRequest.class));
+        verify(loginAttemptService, times(1)).isBlocked(anyString());
+        verify(loginAttemptService, times(1)).getBlockedUntil(anyString());
+        verify(loginAttemptService, never()).loginSucceeded(anyString());
+        verify(loginAttemptService, never()).loginFailed(anyString(), anyString());
+        verify(loginLogService, never()).save(anyString(), anyString(), anyString(), any());
     }
 }
