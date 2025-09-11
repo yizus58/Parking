@@ -43,10 +43,10 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
            "LIMIT 10")
     List<Object[]> findTopVehicleById(String id);
 
-    @Query("SELECT new com.nelumbo.park.dto.response.TopPartnerResponse(p.owner.username, COUNT(v.id)) " +
+    @Query("SELECT new com.nelumbo.park.dto.response.TopPartnerResponse(p.owner.username, COUNT(v.id), p.id) " +
             "FROM Vehicle v JOIN v.parking p " +
             "WHERE p.owner.role = 'SOCIO' AND v.entryTime >= :startOfWeek AND v.entryTime <= :endOfWeek " +
-            "GROUP BY p.owner.id, p.owner.username " +
+            "GROUP BY p.owner.id, p.owner.username, p.id " +
             "ORDER BY COUNT(v.id) DESC")
     List<TopPartnerResponse> findTopPartnersByWeek(@Param("startOfWeek") Date startOfWeek,
                                                    @Param("endOfWeek") Date endOfWeek,

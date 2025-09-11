@@ -36,7 +36,7 @@ class ParkingStatsServiceTest {
 
     @Test
     void getPartnersRanking_ShouldReturnWeeklyPartnerStatsResponse() {
-        List<TopPartnerResponse> mockTopPartners = Collections.singletonList(new TopPartnerResponse("partner1", 100L));
+        List<TopPartnerResponse> mockTopPartners = Collections.singletonList(new TopPartnerResponse("partner1", 100L, "1"));
         when(vehicleRepository.findTopPartnersByWeek(any(Date.class), any(Date.class), any(Pageable.class)))
                 .thenReturn(mockTopPartners);
 
@@ -52,7 +52,7 @@ class ParkingStatsServiceTest {
     void getParkingRanking_ShouldReturnWeeklyParkingStatsResponse() {
         List<Vehicle> mockVehicles = Collections.singletonList(new Vehicle());
 
-        List<TopParkingResponse> mockTopParkings = Collections.singletonList(new TopParkingResponse("parkingId1", "Parking Name 1", 10L, 200.0f));
+        List<TopParkingResponse> mockTopParkings = Collections.singletonList(new TopParkingResponse("1", "Parking Name 1", 10L, 200.0f));
 
         when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
                 .thenReturn(mockVehicles);

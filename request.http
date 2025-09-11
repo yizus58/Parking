@@ -1,9 +1,1 @@
-### GET request to example query params with to enginners
-POST http://localhost:8080/auth/login
-Content-Type: application/json
-
-{
-  "email": "admin@mail.com",
-  "password": "admin"
-}
 

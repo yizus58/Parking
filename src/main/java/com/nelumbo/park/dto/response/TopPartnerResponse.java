@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class TopPartnerResponse {
     private String partnerName;
     private Long vehicleCount;
+    private String parkingId;
 }
