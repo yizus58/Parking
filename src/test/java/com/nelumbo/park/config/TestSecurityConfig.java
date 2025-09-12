@@ -28,7 +28,6 @@ public class TestSecurityConfig {
     @Bean
     @Primary
     public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
-        // Se añaden dos argumentos String vacíos para applicationJson y applicationJsonCharset
         JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(jwtService, userRepository, "", "");
 
         return http

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.nelumbo.park.exception.exceptions.EmailNotFoundException;
 import com.nelumbo.park.exception.exceptions.InvalidPasswordException;
 import com.nelumbo.park.exception.exceptions.InsufficientPermissionsException;
+import com.nelumbo.park.exception.exceptions.LimitParkingFullException;
 import com.nelumbo.park.exception.exceptions.NoAssociatedParkingException;
 import com.nelumbo.park.exception.exceptions.UserNotFoundException;
 import com.nelumbo.park.exception.exceptions.DuplicateEmailException;
@@ -228,6 +229,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(VehicleAlreadyInParkingException.class)
     public ResponseEntity<Map<String, String>> handleVehicleAlreadyInParkingException(VehicleAlreadyInParkingException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap(ERROR_KEY, ex.getMessage()));
+    }
+
+    @ExceptionHandler(LimitParkingFullException.class)
+    public ResponseEntity<Map<String, String>> handleLimitParkingFullException(LimitParkingFullException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Collections.singletonMap(ERROR_KEY, ex.getMessage()));
     }

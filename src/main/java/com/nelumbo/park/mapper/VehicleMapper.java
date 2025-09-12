@@ -15,13 +15,16 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class VehicleMapper {
 
+    @Autowired
     protected UserRepository userRepository;
+    @Autowired
     protected ParkingRepository parkingRepository;
 
     @Mapping(target = "id", ignore = true)

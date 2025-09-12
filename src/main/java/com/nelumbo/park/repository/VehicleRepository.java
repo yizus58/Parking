@@ -27,23 +27,26 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
     List<Vehicle> findByAdmin(User admin);
     Optional<Vehicle> findByPlateNumberAndStatus(String plateNumber, VehicleStatus status);
 
-    @Query(value = "SELECT v.plateNumber, COUNT(*) as total_visits " +
+    @Query("SELECT COUNT(v), p.capacity " +
+           "FROM Vehicle v JOIN v.parking p " +
+           "WHERE p.id = :idParking AND v.status = :status " +
+           "GROUP BY p.capacity")
+    List<Object[]> findLimitParking(@Param("idParking") String idParking, @Param("status") VehicleStatus status);
+
+    @Query("SELECT v.plateNumber, COUNT(v) as total_visits " +
                   "FROM Vehicle v " +
                   "GROUP BY v.plateNumber " +
-                  "ORDER BY COUNT(*) DESC " +
-                  "LIMIT 10")
-    List<Object[]> findTopVehiclesByVisits();
+                  "ORDER BY COUNT(v) DESC")
+    List<Object[]> findTopVehiclesByVisits(Pageable pageable);
     
     @Query("SELECT v.plateNumber, COUNT(v) as total_visits " +
-           "FROM Vehicle v " + 
-           "INNER JOIN Parking p ON v.parking = p " +
+           "FROM Vehicle v JOIN v.parking p " +
            "WHERE p.id = :id " +
            "GROUP BY v.plateNumber " +
-           "ORDER BY COUNT(v) DESC " +
-           "LIMIT 10")
-    List<Object[]> findTopVehicleById(String id);
+           "ORDER BY COUNT(v) DESC")
+    List<Object[]> findTopVehicleById(String id, Pageable pageable);
 
-    @Query("SELECT new com.nelumbo.park.dto.response.TopPartnerResponse(p.owner.username, COUNT(v.id), p.id) " +
+    @Query("SELECT p.owner.username, COUNT(v.id), p.id " +
             "FROM Vehicle v JOIN v.parking p " +
             "WHERE p.owner.role = 'SOCIO' AND v.entryTime >= :startOfWeek AND v.entryTime <= :endOfWeek " +
             "GROUP BY p.owner.id, p.owner.username, p.id " +
@@ -51,6 +54,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
     List<TopPartnerResponse> findTopPartnersByWeek(@Param("startOfWeek") Date startOfWeek,
                                                    @Param("endOfWeek") Date endOfWeek,
                                                    Pageable pageable);
-        @Query("SELECT v FROM Vehicle v WHERE v.exitTime IS NOT NULL AND v.exitTime >= :startDate AND v.exitTime <= :endDate")
-        List<Vehicle> findVehiclesWithExitTimeBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    @Query("SELECT v FROM Vehicle v WHERE v.exitTime IS NOT NULL AND v.exitTime >= :startDate AND v.exitTime <= :endDate")
+    List<Vehicle> findVehiclesWithExitTimeBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 }

@@ -2,6 +2,7 @@ package com.nelumbo.park.service;
 
 import com.nelumbo.park.dto.response.WeeklyParkingStatsResponse;
 import com.nelumbo.park.dto.response.WeeklyPartnerStatsResponse;
+import com.nelumbo.park.exception.exceptions.LimitParkingFullException;
 import com.nelumbo.park.exception.exceptions.ParkingNotFoundException;
 import com.nelumbo.park.exception.exceptions.VehicleOutParkingException;
 import com.nelumbo.park.dto.request.VehicleCreateRequest;
@@ -21,6 +22,8 @@ import com.nelumbo.park.mapper.VehicleMapper;
 import com.nelumbo.park.repository.VehicleRepository;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.service.infrastructure.SecurityService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -84,6 +87,15 @@ public class VehicleService {
                     );
                 });
 
+        Boolean validateLimitParking = validateLimitParking(vehicle.getParking().getId());
+        if (Boolean.TRUE.equals(validateLimitParking)) {
+            throw new LimitParkingFullException(
+                    "El limite de vehiculos en parking "
+                            + vehicle.getParking().getName() +
+                            " ya ha sido alcanzado"
+            );
+        }
+
         User currentUser = securityService.getCurrentUser();
         String userId = currentUser.getId();
 
@@ -96,6 +108,17 @@ public class VehicleService {
         vehicle.setAdmin(admin);
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
         return vehicleMapper.toSimpleResponse(savedVehicle);
+    }
+
+    public Boolean validateLimitParking(String idParking) {
+        List<Object[]> limitParking = vehicleRepository.findLimitParking(idParking, VehicleStatus.IN);
+        if (limitParking.isEmpty() || limitParking.get(0).length < 2) {
+            return false;
+        }
+        Object[] data = limitParking.get(0);
+        long vehicleCount = ((Number) data[0]).longValue();
+        long vehicleLimit = ((Number) data[1]).longValue();
+        return vehicleCount >= vehicleLimit;
     }
 
     public VehicleExitResponse exitVehicle(VehicleUpdateRequest vehicleUpdateRequest) {
@@ -156,7 +179,8 @@ public class VehicleService {
     }
 
     public List<TopVehicleResponse> getTopVehicles() {
-        List<Object[]> topVehiclesData = vehicleRepository.findTopVehiclesByVisits();
+        Pageable topTen = PageRequest.of(0, 10);
+        List<Object[]> topVehiclesData = vehicleRepository.findTopVehiclesByVisits(topTen);
 
         return topVehiclesData.stream()
                 .map(data -> new TopVehicleResponse(
@@ -167,7 +191,8 @@ public class VehicleService {
     }
 
     public List<TopVehicleResponse> getTopVehicleById(String id) {
-        List<Object[]> topVehiclesData = vehicleRepository.findTopVehicleById(id);
+        Pageable topTen = PageRequest.of(0, 10);
+        List<Object[]> topVehiclesData = vehicleRepository.findTopVehicleById(id, topTen);
 
         if (topVehiclesData.isEmpty()) {
             throw new ParkingNotFoundException();

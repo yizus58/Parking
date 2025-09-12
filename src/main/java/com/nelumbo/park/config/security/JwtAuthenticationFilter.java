@@ -63,7 +63,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             } catch (JwtProcessingException e) {
                 loggers.error("Error processing JWT: {}", e.getMessage());
-                writeErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al procesar token JWT");
+                writeErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "Error al procesar token JWT, su token se debe encontrar vencido");
                 return;
             }
         }
@@ -101,7 +102,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         "Token JWT inválido o firma no válida");
                 return null;
             }
-            throw new JwtProcessingException("Error al procesar token JWT para extracción de username", e);
+            throw new JwtProcessingException("Error al procesar token JWT para extracción de username, su token se debe encontrar vencido", e);
         }
     }
 

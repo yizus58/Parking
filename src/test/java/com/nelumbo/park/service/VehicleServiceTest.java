@@ -11,6 +11,7 @@ import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.enums.VehicleStatus;
 import com.nelumbo.park.exception.exceptions.InsufficientPermissionsException;
+import com.nelumbo.park.exception.exceptions.ParkingNotFoundException;
 import com.nelumbo.park.exception.exceptions.VehicleAlreadyInParkingException;
 import com.nelumbo.park.exception.exceptions.VehicleNotFoundException;
 import com.nelumbo.park.mapper.VehicleMapper;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
 import java.util.Optional;
@@ -219,7 +221,7 @@ class VehicleServiceTest {
     @Test
     void getTopVehicles_ShouldReturnMappedResponse() {
         Object[] topVehicleData = {"ABC-123", 5L};
-        when(vehicleRepository.findTopVehiclesByVisits()).thenReturn(Collections.singletonList(topVehicleData));
+        when(vehicleRepository.findTopVehiclesByVisits(any(Pageable.class))).thenReturn(Collections.singletonList(topVehicleData));
 
         List<TopVehicleResponse> result = vehicleService.getTopVehicles();
 
@@ -227,6 +229,26 @@ class VehicleServiceTest {
         assertFalse(result.isEmpty());
         assertEquals("ABC-123", result.get(0).getPlateNumber());
         assertEquals(5L, result.get(0).getTotalVisits());
+    }
+
+    @Test
+    void getTopVehicleById_ShouldReturnMappedResponse() {
+        Object[] topVehicleData = {"ABC-123", 5L};
+        when(vehicleRepository.findTopVehicleById(anyString(), any(Pageable.class))).thenReturn(Collections.singletonList(topVehicleData));
+
+        List<TopVehicleResponse> result = vehicleService.getTopVehicleById("parking-id");
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals("ABC-123", result.get(0).getPlateNumber());
+        assertEquals(5L, result.get(0).getTotalVisits());
+    }
+
+    @Test
+    void getTopVehicleById_WhenNoVehicles_ShouldThrowParkingNotFoundException() {
+        when(vehicleRepository.findTopVehicleById(anyString(), any(Pageable.class))).thenReturn(Collections.emptyList());
+
+        assertThrows(ParkingNotFoundException.class, () -> vehicleService.getTopVehicleById("parking-id"));
     }
 
     @Test
