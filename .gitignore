@@ -19,7 +19,6 @@
 
 # Dependencias
 .m2/
-.gradle/
 /out/
 
 # Archivos de registro
