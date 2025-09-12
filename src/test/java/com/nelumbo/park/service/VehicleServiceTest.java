@@ -11,9 +11,11 @@ import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.enums.VehicleStatus;
 import com.nelumbo.park.exception.exceptions.InsufficientPermissionsException;
+import com.nelumbo.park.exception.exceptions.LimitParkingFullException;
 import com.nelumbo.park.exception.exceptions.ParkingNotFoundException;
 import com.nelumbo.park.exception.exceptions.VehicleAlreadyInParkingException;
 import com.nelumbo.park.exception.exceptions.VehicleNotFoundException;
+import com.nelumbo.park.exception.exceptions.VehicleOutParkingException;
 import com.nelumbo.park.mapper.VehicleMapper;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.repository.VehicleRepository;
@@ -30,6 +32,8 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -279,5 +283,95 @@ class VehicleServiceTest {
 
         assertThrows(VehicleNotFoundException.class, () -> vehicleService.deleteVehicle("non-existent-id"));
         verify(vehicleRepository, never()).delete(any());
+    }
+
+    @Test
+    void getAllVehicles_AsDefaultUser_ShouldReturnAll() {
+        when(securityService.isAdmin()).thenReturn(false);
+        when(securityService.isSocio()).thenReturn(false);
+        when(vehicleRepository.findAll()).thenReturn(Collections.singletonList(vehicle));
+
+        List<Vehicle> result = vehicleService.getAllVehicles();
+
+        assertFalse(result.isEmpty());
+        verify(vehicleRepository).findAll();
+    }
+
+    @Test
+    void createVehicle_WhenParkingLimitIsFull_ShouldThrowLimitParkingFullException() {
+        Vehicle vehicleFromMapper = new Vehicle();
+        vehicleFromMapper.setPlateNumber(createRequest.getPlateNumber());
+        vehicleFromMapper.setParking(parking);
+
+        when(vehicleRepository.findByPlateNumberAndStatus(createRequest.getPlateNumber(), VehicleStatus.IN)).thenReturn(Optional.empty());
+        when(vehicleMapper.toEntity(createRequest)).thenReturn(vehicleFromMapper);
+        when(vehicleRepository.findLimitParking(anyString(), eq(VehicleStatus.IN))).thenReturn(Arrays.<Object[]>asList(new Object[]{10L, 10L}));
+
+        assertThrows(LimitParkingFullException.class, () -> vehicleService.createVehicle(createRequest));
+        verify(vehicleRepository, never()).save(any());
+    }
+
+    @Test
+    void createVehicle_WhenAdminNotFound_ShouldCreateVehicleWithNullAdmin() {
+        Vehicle vehicleFromMapper = new Vehicle();
+        vehicleFromMapper.setPlateNumber(createRequest.getPlateNumber());
+        vehicleFromMapper.setParking(parking);
+
+        when(vehicleRepository.findByPlateNumberAndStatus(createRequest.getPlateNumber(), VehicleStatus.IN)).thenReturn(Optional.empty());
+        when(securityService.getCurrentUser()).thenReturn(socioUser);
+        when(userRepository.findById(socioUser.getId())).thenReturn(Optional.empty());
+        when(vehicleMapper.toEntity(createRequest)).thenReturn(vehicleFromMapper);
+        when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
+        when(vehicleMapper.toSimpleResponse(vehicle)).thenReturn(new VehicleCreateResponse());
+
+        VehicleCreateResponse response = vehicleService.createVehicle(createRequest);
+
+        assertNotNull(response);
+        verify(vehicleRepository).save(argThat(v -> v.getAdmin() == null));
+    }
+
+    @Test
+    void validateLimitParking_WhenLimitParkingIsEmpty_ShouldReturnFalse() {
+        when(vehicleRepository.findLimitParking(anyString(), eq(VehicleStatus.IN))).thenReturn(Collections.emptyList());
+
+        Boolean result = vehicleService.validateLimitParking("parking-id");
+
+        assertFalse(result);
+    }
+
+    @Test
+    void validateLimitParking_WhenLimitParkingDataIsInvalid_ShouldReturnFalse() {
+        when(vehicleRepository.findLimitParking(anyString(), eq(VehicleStatus.IN))).thenReturn(Arrays.<Object[]>asList(new Object[]{10L}));
+
+        Boolean result = vehicleService.validateLimitParking("parking-id");
+
+        assertFalse(result);
+    }
+
+    @Test
+    void validateLimitParking_WhenParkingIsNotFull_ShouldReturnFalse() {
+        when(vehicleRepository.findLimitParking(anyString(), eq(VehicleStatus.IN))).thenReturn(Arrays.<Object[]>asList(new Object[]{5L, 10L}));
+
+        Boolean result = vehicleService.validateLimitParking("parking-id");
+
+        assertFalse(result);
+    }
+
+    @Test
+    void exitVehicle_WhenParkingIsNull_ShouldThrowParkingNotFoundException() {
+        vehicle.setParking(null);
+        when(vehicleRepository.findByPlateNumberAndStatus(anyString(), eq(VehicleStatus.IN))).thenReturn(Optional.of(vehicle));
+        when(securityService.getCurrentUser()).thenReturn(socioUser);
+
+        assertThrows(ParkingNotFoundException.class, () -> vehicleService.exitVehicle(updateRequest));
+    }
+
+    @Test
+    void exitVehicle_WhenVehicleStatusIsNotIn_ShouldThrowVehicleOutParkingException() {
+        vehicle.setStatus(VehicleStatus.OUT);
+        when(vehicleRepository.findByPlateNumberAndStatus(anyString(), eq(VehicleStatus.IN))).thenReturn(Optional.of(vehicle));
+        when(securityService.getCurrentUser()).thenReturn(socioUser);
+
+        assertThrows(VehicleOutParkingException.class, () -> vehicleService.exitVehicle(updateRequest));
     }
 }

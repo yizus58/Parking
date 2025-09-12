@@ -107,7 +107,7 @@ public class VehicleReportService {
             Map<String, Map<String, VehicleDetailResponse>> userParkings = userEntry.getValue();
 
             Vehicle sampleVehicle = vehiclesOut.stream()
-                    .filter(v -> v.getAdmin().getId().equals(userId))
+                    .filter(v -> v.getAdmin() != null && v.getAdmin().getId() != null && v.getAdmin().getId().equals(userId))
                     .findFirst()
                     .orElse(null);
 
@@ -121,7 +121,7 @@ public class VehicleReportService {
                 Map<String, VehicleDetailResponse> parkingVehicles = parkingEntry.getValue();
 
                 String parkingName = vehiclesOut.stream()
-                        .filter(v -> v.getParking().getId().equals(parkingId))
+                        .filter(v -> v.getParking() != null && v.getParking().getId() != null && v.getParking().getId().equals(parkingId))
                         .map(v -> v.getParking().getName())
                         .findFirst()
                         .orElse("Unknown Parking");

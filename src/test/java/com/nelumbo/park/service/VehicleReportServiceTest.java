@@ -22,6 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -177,6 +178,133 @@ class VehicleReportServiceTest {
 
         assertNotNull(result);
         assertEquals(0, result.size());
+    }
+
+    @Test
+    void getVehiclesOutDetails_NullCostPerHour_ShouldCalculateZeroCost() {
+        Vehicle vehicle1 = new Vehicle();
+        vehicle1.setId("v1");
+        vehicle1.setPlateNumber("ABC-123");
+        vehicle1.setModel("Model A");
+        vehicle1.setCostPerHour(null);
+        vehicle1.setStatus(VehicleStatus.OUT);
+
+        Calendar entryCal1 = Calendar.getInstance();
+        entryCal1.set(2023, Calendar.JANUARY, 15, 8, 0, 0);
+        vehicle1.setEntryTime(entryCal1.getTime());
+
+        Calendar exitCal1 = Calendar.getInstance();
+        exitCal1.set(2023, Calendar.JANUARY, 15, 10, 0, 0);
+        vehicle1.setExitTime(exitCal1.getTime());
+
+        Parking parking1 = new Parking();
+        parking1.setId("p1");
+        parking1.setName("Parking One");
+        vehicle1.setParking(parking1);
+
+        User admin1 = new User();
+        admin1.setId("u1");
+        admin1.setUsername("adminUser");
+        admin1.setEmail("admin@example.com");
+        vehicle1.setAdmin(admin1);
+
+        List<Vehicle> mockVehicles = Collections.singletonList(vehicle1);
+
+        when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
+                .thenReturn(mockVehicles);
+
+        List<VehicleOutDetailResponse> result = vehicleReportService.getVehiclesOutDetails();
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+
+        VehicleOutDetailResponse report1 = result.get(0);
+        assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", "p1", "Parking One", 1, 1, 0.0f);
+        VehicleDetailResponse detail1 = report1.getVehicles().get(0);
+        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", 0.0f);
+    }
+
+    @Test
+    void testFlattenVehicleData_NullAdminId_ShouldSkipUser() {
+        Vehicle vehicle1 = new Vehicle();
+        vehicle1.setId("v1");
+        vehicle1.setPlateNumber("ABC-123");
+        vehicle1.setModel("Model A");
+        vehicle1.setCostPerHour(10.0f);
+        vehicle1.setStatus(VehicleStatus.OUT);
+
+        Calendar entryCal1 = Calendar.getInstance();
+        entryCal1.set(2023, Calendar.JANUARY, 15, 8, 0, 0);
+        vehicle1.setEntryTime(entryCal1.getTime());
+
+        Calendar exitCal1 = Calendar.getInstance();
+        exitCal1.set(2023, Calendar.JANUARY, 15, 10, 0, 0);
+        vehicle1.setExitTime(exitCal1.getTime());
+
+        Parking parking1 = new Parking();
+        parking1.setId("p1");
+        parking1.setName("Parking One");
+        vehicle1.setParking(parking1);
+
+        User admin1 = new User();
+        admin1.setId(null);
+        vehicle1.setAdmin(admin1);
+
+        List<Vehicle> mockVehicles = Collections.singletonList(vehicle1);
+
+        when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
+                .thenReturn(mockVehicles);
+
+        List<VehicleOutDetailResponse> result = vehicleReportService.getVehiclesOutDetails();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testFlattenVehicleData_NullParkingId_ShouldUseUnknownParking() {
+        Vehicle vehicle1 = new Vehicle();
+        vehicle1.setId("v1");
+        vehicle1.setPlateNumber("ABC-123");
+        vehicle1.setModel("Model A");
+        vehicle1.setCostPerHour(10.0f);
+        vehicle1.setStatus(VehicleStatus.OUT);
+
+        Calendar entryCal1 = Calendar.getInstance();
+        entryCal1.set(2023, Calendar.JANUARY, 15, 8, 0, 0);
+        vehicle1.setEntryTime(entryCal1.getTime());
+
+        Calendar exitCal1 = Calendar.getInstance();
+        exitCal1.set(2023, Calendar.JANUARY, 15, 10, 0, 0);
+        vehicle1.setExitTime(exitCal1.getTime());
+
+        Parking parking1 = new Parking();
+        parking1.setId(null);
+        parking1.setName("Parking One");
+        vehicle1.setParking(parking1);
+
+        User admin1 = new User();
+        admin1.setId("u1");
+        admin1.setUsername("adminUser");
+        admin1.setEmail("admin@example.com");
+        vehicle1.setAdmin(admin1);
+
+        List<Vehicle> mockVehicles = Collections.singletonList(vehicle1);
+
+        when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
+                .thenReturn(mockVehicles);
+
+        List<VehicleOutDetailResponse> result = vehicleReportService.getVehiclesOutDetails();
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+
+        VehicleOutDetailResponse report1 = result.get(0);
+        assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", null, "Unknown Parking", 1, 1, 20.0f);
+        VehicleDetailResponse detail1 = report1.getVehicles().get(0);
+        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", 20.0f);
     }
 
     private void assertVehicleOutDetailResponse(VehicleOutDetailResponse report, String userId, String username, String email, String parkingId, String parkingName, int vehiclesSize, int totalVehicles, float totalEarnings) {

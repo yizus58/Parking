@@ -125,4 +125,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         assertEquals("p2", result.get(2).getParkingId());
         assertEquals(20.0f, result.get(2).getTotalCost());
     }
+
+    @Test
+    void testCalculateParkingEarnings_ZeroEarnings() {
+        List<Vehicle> vehicles = new ArrayList<>();
+
+        Parking parking1 = new Parking();
+        parking1.setId("p1");
+        parking1.setName("Parking 1");
+
+        Date entryAndExit = new Date();
+
+        Vehicle vehicle1 = new Vehicle();
+        vehicle1.setParking(parking1);
+        vehicle1.setCostPerHour(10.0f);
+        vehicle1.setEntryTime(entryAndExit);
+        vehicle1.setExitTime(entryAndExit);
+        vehicles.add(vehicle1);
+
+        List<TopParkingResponse> result = parkingEarningsCalculator.calculateParkingEarnings(vehicles);
+
+        assertTrue(result.isEmpty(), "Parkings with zero earnings should be filtered out.");
+    }
 }
