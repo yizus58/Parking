@@ -1,6 +1,5 @@
 package com.nelumbo.park.service.infrastructure;
 
-import com.nelumbo.park.dto.response.EmailAttachmentResponse;
 import com.nelumbo.park.dto.response.EmailDataResponse;
 import com.nelumbo.park.dto.response.RabbitMQResponse;
 import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
@@ -20,7 +19,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
