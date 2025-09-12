@@ -1,40 +1,74 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Archivos de compilación y empaquetado
+/target/
+/build/
+.mvn
+*.jar
+*.war
+*.ear
+*.class
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# Archivos de configuración de IDEs
+.idea/
 .vscode/
+*.iml
+.project
+.classpath
+.settings/
+*.ipr
+*.iws
 
-### .ENV ###
+# Dependencias
+.m2/
+.gradle/
+/out/
+
+# Archivos de registro
+*.log
+logs/
+*.txt
+
+# Variables de entorno y secretos
 .env
 .env.development
 .env.test
 .env.production
 .env.local
+# application-dev.properties
+# application-prod.properties
+# application-*.yml
+# application-*.properties
+
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+!/.mvn/wrapper/maven-wrapper.properties
+
+# Gradle Wrapper
+.gradle/
+build/
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Otros
+pom.xml.versionsBackup
+*.bak
+*~
+# Archivos de backup de editores como Vim, Emacs
+*.swp
+*.swo
+*.swn
+
+# Archivos de cobertura de código
+/coverage/
+*.exec
+*.ec
+
+# Archivos de Docker
+# docker-compose.override.yml
+# .dockerignore
+
+# Archivos de configuración de Spring Boot Devtools
+.spring-boot-devtools.properties
