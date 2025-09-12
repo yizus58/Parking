@@ -49,12 +49,22 @@ Una aplicación completa de gestión de parqueaderos desarrollada con Spring Boo
 - Cuenta de AWS con acceso a S3 (o Cloudflare R2)
 - Servidor RabbitMQ
 
-## 🔧 Configuración del Entorno
+## ⚙️ Instalación y Configuración
 
-### 1. Variables de Entorno
+Sigue estos pasos para configurar y ejecutar el proyecto localmente.
 
-Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+### 1. Clonar el Repositorio
 
+```bash
+git clone https://github.com/tu-usuario/api-park.git # Reemplaza con la URL de tu repositorio
+cd api-park
+```
+
+### 2. Configurar Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables. Asegúrate de reemplazar los valores de ejemplo con tus credenciales y configuraciones reales.
+
+```ini
 # ================================
 # VARIABLES OBLIGATORIAS - CONFIGURAR
 # ================================
@@ -89,21 +99,118 @@ SPRING_DATASOURCE_PASSWORD=root
 # Configuración de aplicación (opcional)
 SPRING_APPLICATION_NAME=spring-boot
 LOGGING_LEVEL_ROOT=INFO
+```
 
-# Genera una clave secreta segura (recomendado: 256 bits)
-APP_SECURITY_JWT_SECRET=clave_muy_segura_de_al_menos_32_caracteres
+### 3. Iniciar Servicios con Docker Compose (Base de Datos y RabbitMQ)
 
-# Docker
-docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+Asegúrate de tener Docker y Docker Compose instalados. Desde la raíz del proyecto, ejecuta:
 
-# O instalación nativa según tu sistema operativo
-RABBITMQ_URL=amqp://guest:guest@localhost:5672/
+```bash
+docker-compose up -d
+```
+Esto levantará un contenedor de PostgreSQL y otro de RabbitMQ.
 
-# O para producción:
-RABBITMQ_URL=amqp://usuario:contraseña@tu-servidor:5672/
+### 4. Compilar y Ejecutar la Aplicación
 
-# O para local:
-RABBITMQ_URL=amqp://guest:guest@localhost:5672/
+Una vez que los servicios de Docker estén en funcionamiento, puedes compilar y ejecutar la aplicación Spring Boot:
 
-# O para producción:
-RABBITMQ_URL=amqp://usuario:contraseña@tu-servidor:5672/
+```bash
+mvn clean install
+mvn spring-boot:run
+```
+
+La aplicación estará disponible en `http://localhost:8080` (o el puerto configurado).
+
+## 📂 Estructura del Proyecto
+
+Una visión general de la estructura de directorios principal del proyecto:
+
+```
+.
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── nelumbo/
+│   │   │           └── park/
+│   │   │               ├── controller/       # Controladores REST
+│   │   │               ├── service/          # Lógica de negocio
+│   │   │               ├── repository/       # Acceso a datos
+│   │   │               ├── model/            # Entidades de base de datos
+│   │   │               ├── dto/              # Objetos de transferencia de datos
+│   │   │               ├── config/           # Configuraciones de la aplicación
+│   │   │               └── ...
+│   │   └── resources/      # Archivos de configuración, estáticos, etc.
+│   └── test/               # Pruebas unitarias e de integración
+├── .env.example          # Ejemplo de archivo de variables de entorno
+├── pom.xml                 # Archivo de configuración de Maven
+├── docker-compose.yml      # Configuración de Docker Compose
+└── README.md               # Este archivo
+```
+
+## 💡 Ejemplos de Uso
+
+Aquí hay algunos ejemplos de cómo interactuar con la API una vez que la aplicación esté en funcionamiento.
+
+### Autenticación de Usuario
+
+**Endpoint:** `POST /api/auth/login`
+**Body:**
+```json
+{
+  "username": "usuario@example.com",
+  "password": "password123"
+}
+```
+**Respuesta (ejemplo):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "type": "Bearer"
+}
+```
+
+### Registrar un Vehículo (requiere autenticación)
+
+**Endpoint:** `POST /api/vehicles`
+**Headers:** `Authorization: Bearer <your_jwt_token>`
+**Body:**
+```json
+{
+  "licensePlate": "ABC-123",
+  "type": "CAR",
+  "userId": 1
+}
+```
+
+### Obtener Lista de Parqueaderos
+
+**Endpoint:** `GET /api/parkings`
+**Headers:** `Authorization: Bearer <your_jwt_token>`
+
+### Documentación de la API
+
+Puedes acceder a la documentación interactiva de la API a través de Swagger UI en:
+`http://localhost:8080/swagger-ui.html`
+
+## 🤝 Cómo Contribuir
+
+¡Nos encantaría recibir tus contribuciones! Si deseas mejorar este proyecto, sigue estos pasos:
+
+1.  Haz un "fork" de este repositorio.
+2.  Crea una nueva rama para tu característica (`git checkout -b feature/nueva-caracteristica`).
+3.  Realiza tus cambios y asegúrate de que las pruebas pasen.
+4.  Haz "commit" de tus cambios (`git commit -am 'feat: Añade nueva característica X'`).
+5.  Sube tu rama (`git push origin feature/nueva-caracteristica`).
+6.  Abre un "Pull Request" detallando tus cambios.
+
+Por favor, asegúrate de seguir las convenciones de código existentes y de escribir pruebas para tus nuevas funcionalidades.
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+
+## 📧 Contacto
+
+Si tienes alguna pregunta o sugerencia, no dudes en contactar a
+`Jesus Cantor / jedacan58@gmail.com`.
