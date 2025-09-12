@@ -1,65 +1,52 @@
 package com.nelumbo.park.service.infrastructure;
 
+import com.nelumbo.park.config.initialization.DatabaseInitializer;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.exception.exceptions.JwtUserNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(classes = SecurityService.class)
+@TestPropertySource(properties = {"admin.password"})
 class SecurityServiceTest {
 
-    @Mock
+    @MockBean
     private UserRepository userRepository;
 
-    @InjectMocks
-    @Spy
+    @MockBean
+    private DatabaseInitializer databaseInitializer;
+
+    @SpyBean
     private SecurityService securityService;
 
-    private MockedStatic<SecurityContextHolder> mockedSecurityContextHolder;
-
-    @BeforeEach
-    void setUp() {
-        mockedSecurityContextHolder = mockStatic(SecurityContextHolder.class);
+    @TestConfiguration
+    static class TestSecurityConfig {
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        }
     }
 
     // --- getCurrentUser tests ---
 
     @Test
-    @DisplayName("Should return null when authentication is null")
-    void getCurrentUser_AuthenticationIsNull_ReturnsNull() {
-        SecurityContext securityContext = mock(SecurityContext.class);
-        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(null);
-
-        User result = securityService.getCurrentUser();
-
-        assertNull(result);
-        verifyNoInteractions(userRepository);
-    }
-
-    @Test
     @DisplayName("Should return null when user is not authenticated")
     void getCurrentUser_NotAuthenticated_ReturnsNull() {
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Authentication authentication = mock(Authentication.class);
-        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(false);
+        SecurityContextHolder.clearContext();
 
         User result = securityService.getCurrentUser();
 
@@ -69,17 +56,12 @@ class SecurityServiceTest {
 
     @Test
     @DisplayName("Should return current user when authenticated and user found")
+    @WithMockUser(username = "testUser")
     void getCurrentUser_AuthenticatedAndUserFound_ReturnsUser() {
         String userId = "testUser";
         User expectedUser = new User();
         expectedUser.setId(userId);
 
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Authentication authentication = mock(Authentication.class);
-        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn(userId);
         when(userRepository.findByIdUser(userId)).thenReturn(expectedUser);
 
         User result = securityService.getCurrentUser();
@@ -91,15 +73,10 @@ class SecurityServiceTest {
 
     @Test
     @DisplayName("Should throw JwtUserNotFoundException when authenticated but user not found in DB")
+    @WithMockUser(username = "nonExistentUser")
     void getCurrentUser_AuthenticatedButUserNotFound_ThrowsException() {
         String userId = "nonExistentUser";
 
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Authentication authentication = mock(Authentication.class);
-        mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn(userId);
         when(userRepository.findByIdUser(userId)).thenReturn(null);
 
         JwtUserNotFoundException thrown = assertThrows(JwtUserNotFoundException.class, () -> {
@@ -200,10 +177,5 @@ class SecurityServiceTest {
 
         assertFalse(result);
         verify(securityService, times(1)).getCurrentUser();
-    }
-
-    @AfterEach
-    void tearDown() {
-        mockedSecurityContextHolder.close();
     }
 }

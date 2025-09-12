@@ -6,19 +6,13 @@ import com.nelumbo.park.exception.exceptions.S3FileUploadException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.util.ReflectionTestUtils;
-import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
-import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 import java.net.UnknownHostException;
@@ -28,13 +22,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(classes = {S3Service.class})
 class S3ServiceTest {
 
-    @Mock
+    @MockBean
     private S3Client s3Client;
 
-    @InjectMocks
+    @Autowired
     private S3Service s3Service;
 
     private final String bucketName = "test-bucket";
@@ -144,7 +138,7 @@ class S3ServiceTest {
     void getFile_Exists_ReturnsTrue() {
 
         when(s3Client.getObject(any(GetObjectRequest.class)))
-                .thenReturn(mock(ResponseInputStream.class));
+                .thenReturn(null);
 
         Map<String, Object> result = s3Service.getFile(fileName);
 
