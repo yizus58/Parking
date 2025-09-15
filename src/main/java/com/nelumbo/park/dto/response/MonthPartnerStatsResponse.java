@@ -11,11 +11,11 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MonthParkingStatsResponse {
+public class MonthPartnerStatsResponse {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime monthStart;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime monthEnd;
-    private List<TopParkingResponse> topParking;
+    private List<TopPartnerResponse> topPartners;
 }

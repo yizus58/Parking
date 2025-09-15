@@ -1,5 +1,6 @@
 package com.nelumbo.park.controller;
 
+import com.nelumbo.park.dto.response.MonthParkingStatsResponse;
 import com.nelumbo.park.dto.response.WeeklyParkingStatsResponse;
 import com.nelumbo.park.service.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,9 +34,22 @@ public class ParkingRankingController {
                     schema = @Schema(implementation = WeeklyParkingStatsResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content)
     })
-    @GetMapping("/")
+    @GetMapping("/week")
     @PreAuthorize("hasAuthority('ADMIN')")
     public WeeklyParkingStatsResponse getParkingRanking() {
         return vehicleService.getParkingRanking();
+    }
+
+    @Operation(summary = "Obtiene los top 3 de parqueaderos con mayor ganancia")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ranking encontrado",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = WeeklyParkingStatsResponse.class))),
+            @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content)
+    })
+    @GetMapping("/month")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public MonthParkingStatsResponse getParkingRankingMonth() {
+        return vehicleService.getParkingRankingMonth();
     }
 }
