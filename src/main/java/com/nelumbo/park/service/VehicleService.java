@@ -1,5 +1,6 @@
 package com.nelumbo.park.service;
 
+import com.nelumbo.park.dto.response.MonthParkingStatsResponse;
 import com.nelumbo.park.dto.response.WeeklyParkingStatsResponse;
 import com.nelumbo.park.dto.response.WeeklyPartnerStatsResponse;
 import com.nelumbo.park.exception.exceptions.LimitParkingFullException;
@@ -218,6 +219,10 @@ public class VehicleService {
     
     public WeeklyPartnerStatsResponse getPartnersRanking() {
         return parkingStatsService.getPartnersRanking();
+    }
+
+    public MonthParkingStatsResponse getPartnersRankingMonth() {
+        return parkingStatsService.getPartnersRankingMonth();
     }
 
     public WeeklyParkingStatsResponse getParkingRanking() {

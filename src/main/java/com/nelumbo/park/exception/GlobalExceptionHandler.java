@@ -26,6 +26,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -210,6 +211,14 @@ public class GlobalExceptionHandler {
         errors.put(ERROR_KEY, "Método HTTP no soportado");
         errors.put(MESSAGE_KEY, "El método " + ex.getMethod() + " no está permitido para esta URL. Métodos permitidos: " + String.join(", ", ex.getSupportedMethods()));
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errors);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNoResourceFoundException(NoResourceFoundException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put(ERROR_KEY, "Recurso no encontrado");
+        errors.put(MESSAGE_KEY, "La URL solicitada no existe");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errors);
     }
 
     @ExceptionHandler(ParkingNotFoundException.class)

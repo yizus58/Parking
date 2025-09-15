@@ -1,5 +1,6 @@
 package com.nelumbo.park.controller;
 
+import com.nelumbo.park.dto.response.MonthParkingStatsResponse;
 import com.nelumbo.park.dto.response.WeeklyPartnerStatsResponse;
 import com.nelumbo.park.service.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,16 +27,29 @@ public class PartnersRankingController {
         this.vehicleService = vehicleService;
     }
 
-    @Operation(summary = "Obtiene los top 3 de partners con mayor ganancia")
+    @Operation(summary = "Obtiene los top 3 de partners con mayor ganancia en la semana")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ranking encontrado",
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = WeeklyPartnerStatsResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content)
     })
-    @GetMapping("/")
+    @GetMapping("/week")
     @PreAuthorize("hasAuthority('ADMIN')")
     public WeeklyPartnerStatsResponse getPartnersRanking() {
         return vehicleService.getPartnersRanking();
+    }
+
+    @Operation(summary = "Obtiene los top 3 de partners con mayor ganancia en el mes")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ranking encontrado",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MonthParkingStatsResponse.class))),
+            @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content)
+    })
+    @GetMapping("/month")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public MonthParkingStatsResponse getPartnersRankingMonth() {
+        return vehicleService.getPartnersRankingMonth();
     }
 }
