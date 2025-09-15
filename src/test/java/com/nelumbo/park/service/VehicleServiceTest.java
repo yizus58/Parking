@@ -133,7 +133,7 @@ class VehicleServiceTest {
         when(securityService.getCurrentUser()).thenReturn(socioUser);
         when(securityService.isSocio()).thenReturn(true);
         when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
-        when(vehicleMapper.toExitResponse(any(), any(), any(), anyFloat())).thenReturn(new VehicleExitResponse());
+        when(vehicleMapper.toExitResponse(any(), any(), any(), anyString())).thenReturn(new VehicleExitResponse());
 
         VehicleExitResponse response = vehicleService.exitVehicle(updateRequest);
 

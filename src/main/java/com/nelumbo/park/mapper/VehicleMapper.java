@@ -49,7 +49,7 @@ public abstract class VehicleMapper {
 
     public abstract VehicleCreateResponse toSimpleResponse(Vehicle vehicle);
 
-    public VehicleExitResponse toExitResponse(Vehicle vehicle, Date entryTime, Date exitTime, Float totalCost) {
+    public VehicleExitResponse toExitResponse(Vehicle vehicle, Date entryTime, Date exitTime, String totalCost) {
         VehicleExitResponse response = new VehicleExitResponse();
         response.setPlateNumber(vehicle.getPlateNumber());
         response.setModel(vehicle.getModel());

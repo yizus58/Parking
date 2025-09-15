@@ -26,8 +26,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class VehicleService {
@@ -156,11 +158,14 @@ public class VehicleService {
         long hoursParked = (long) Math.ceil((double) minutesParked / 60);
         Float totalCost = hoursParked * costParking;
 
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
+        String formattedCost = currencyFormatter.format(totalCost).replace("COP", "$").replace(",00", "");
+
         existingVehicle.setExitTime(exitTime);
         existingVehicle.setStatus(VehicleStatus.OUT);
         Vehicle savedVehicle = vehicleRepository.save(existingVehicle);
 
-        return vehicleMapper.toExitResponse(savedVehicle, entryTime, exitTime, totalCost);
+        return vehicleMapper.toExitResponse(savedVehicle, entryTime, exitTime, formattedCost);
     }
 
     public void deleteVehicle(String id) {
