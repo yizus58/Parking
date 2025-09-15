@@ -46,14 +46,15 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
            "ORDER BY COUNT(v) DESC")
     List<Object[]> findTopVehicleById(String id, Pageable pageable);
 
-    @Query("SELECT p.owner.username, COUNT(v.id), p.id " +
-            "FROM Vehicle v JOIN v.parking p " +
-            "WHERE p.owner.role = 'SOCIO' AND v.entryTime >= :startOfWeek AND v.entryTime <= :endOfWeek " +
-            "GROUP BY p.owner.id, p.owner.username, p.id " +
+    @Query("SELECT new com.nelumbo.park.dto.response.TopPartnerResponse(o.username, COUNT(v.id), p.id) " +
+            "FROM Vehicle v JOIN v.parking p JOIN p.owner o " +
+            "WHERE o.role = 'SOCIO' AND v.entryTime >= :startOfWeek AND v.entryTime <= :endOfWeek " +
+            "GROUP BY o.id, o.username, p.id " +
             "ORDER BY COUNT(v.id) DESC")
     List<TopPartnerResponse> findTopPartnersByWeek(@Param("startOfWeek") Date startOfWeek,
                                                    @Param("endOfWeek") Date endOfWeek,
                                                    Pageable pageable);
+    
     @Query("SELECT v FROM Vehicle v WHERE v.exitTime IS NOT NULL AND v.exitTime >= :startDate AND v.exitTime <= :endDate")
     List<Vehicle> findVehiclesWithExitTimeBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 }

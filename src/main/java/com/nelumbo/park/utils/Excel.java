@@ -95,6 +95,8 @@ public class Excel {
 
     private int addVehicleRows(XSSFSheet sheet, List<VehicleDetailResponse> vehicles, int startRowIndex) {
         int rowIndex = startRowIndex;
+        CellStyle currencyStyle = sheet.getWorkbook().createCellStyle();
+        currencyStyle.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("$#,##0.00"));
         for (int i = 0; i < vehicles.size(); i++) {
             VehicleDetailResponse v = vehicles.get(i);
             Row row = sheet.createRow(rowIndex++);
@@ -102,23 +104,31 @@ public class Excel {
             row.createCell(1).setCellValue(Optional.ofNullable(v.getPlateNumber()).orElse(""));
             row.createCell(2).setCellValue(Optional.ofNullable(v.getModelVehicle()).orElse(""));
             row.createCell(3).setCellValue(Optional.ofNullable(v.getDay()).orElse(""));
-            row.createCell(4).setCellValue(v.getTotalCost());
+            Cell costCell = row.createCell(4);
+            costCell.setCellValue(v.getTotalCost());
+            costCell.setCellStyle(currencyStyle);
         }
         return rowIndex;
     }
 
     private void addSubtotalRow(XSSFSheet sheet, VehicleOutDetailResponse item, int rowIndex, CellStyle boldStyle) {
         Row subtotalRow = sheet.createRow(rowIndex);
-        subtotalRow.createCell(3).setCellValue("Subtotal:");
+        Cell labelCell = subtotalRow.createCell(3);
+        labelCell.setCellValue("Subtotal:");
+        labelCell.setCellStyle(boldStyle);
         Cell subtotalCell = subtotalRow.createCell(4);
+
+        CellStyle boldCurrencyStyle = sheet.getWorkbook().createCellStyle();
+        boldCurrencyStyle.cloneStyleFrom(boldStyle);
+        boldCurrencyStyle.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("$#,##0.00"));
 
         if (item.getTotalEarnings() != null) {
             subtotalCell.setCellValue(item.getTotalEarnings());
         } else {
-            String formula = String.format("SUM(E4:E%d)", (int) ((double) rowIndex - 1));
+            String formula = String.format("SUM(E4:E%d)", rowIndex);
             subtotalCell.setCellFormula(formula);
         }
-        subtotalCell.setCellStyle(boldStyle);
+        subtotalCell.setCellStyle(boldCurrencyStyle);
     }
 
     private void addNoDataMessage(XSSFSheet sheet, int rowIndex) {

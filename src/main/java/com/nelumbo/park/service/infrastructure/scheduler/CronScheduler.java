@@ -17,7 +17,7 @@ public class CronScheduler {
         this.cronService = cronService;
     }
 
-    @Scheduled(cron = "${cron.determination}", zone = "America/Bogota")
+    @Scheduled(cron = "${cron.thirty.seconds}", zone = "America/Bogota")
     public void executeDailyTask() {
         if (!cronService.runDailyTask()) {
             logger.error("Error en la ejecucion de la tarea");

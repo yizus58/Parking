@@ -78,7 +78,8 @@ public class VehicleController {
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = VehicleCreateResponse.class))),
             @ApiResponse(responseCode = "401", description = "No tienes permisos para realizar esta accion", content = @Content),
-            @ApiResponse(responseCode = "409", description = "El vehiculo ya esta registrado", content = @Content)
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta accion", content = @Content),
+            @ApiResponse(responseCode = "409", description = "El vehiculo ya esta registrado / limite de vehiculos ha sido alcanzado", content = @Content)
     })
     @PostMapping("/")
     @PreAuthorize("hasAuthority('SOCIO')")

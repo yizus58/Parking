@@ -79,6 +79,14 @@ public class VehicleService {
     public VehicleCreateResponse createVehicle(VehicleCreateRequest vehicleCreateRequest) {
         Vehicle vehicle = vehicleMapper.toEntity(vehicleCreateRequest);
 
+        User currentUser = securityService.getCurrentUser();
+        String userId = currentUser.getId();
+
+        Boolean validateUserParking = vehicle.getParking().getOwner().getId().equals(userId);
+        if (Boolean.FALSE.equals(validateUserParking)) {
+            throw new InsufficientPermissionsException();
+        }
+
         vehicleRepository.findByPlateNumberAndStatus(vehicle.getPlateNumber(), VehicleStatus.IN)
                 .ifPresent(existingVehicle -> {
                     throw new VehicleAlreadyInParkingException(
@@ -96,9 +104,6 @@ public class VehicleService {
             );
         }
 
-        User currentUser = securityService.getCurrentUser();
-        String userId = currentUser.getId();
-
         vehicle.setCostPerHour(vehicle.getParking().getCostPerHour());
 
         User admin = userRepository.findById(userId).orElse(null);
@@ -112,10 +117,10 @@ public class VehicleService {
 
     public Boolean validateLimitParking(String idParking) {
         List<Object[]> limitParking = vehicleRepository.findLimitParking(idParking, VehicleStatus.IN);
-        if (limitParking.isEmpty() || limitParking.get(0).length < 2) {
+        if (limitParking.isEmpty() || limitParking.getFirst().length < 2) {
             return false;
         }
-        Object[] data = limitParking.get(0);
+        Object[] data = limitParking.getFirst();
         long vehicleCount = ((Number) data[0]).longValue();
         long vehicleLimit = ((Number) data[1]).longValue();
         return vehicleCount >= vehicleLimit;
