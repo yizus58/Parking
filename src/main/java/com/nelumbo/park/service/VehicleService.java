@@ -158,7 +158,7 @@ public class VehicleService {
         long hoursParked = (long) Math.ceil((double) minutesParked / 60);
         Float totalCost = hoursParked * costParking;
 
-        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.of("es", "CO"));
         String formattedCost = currencyFormatter.format(totalCost).replace("COP", "$").replace(",00", "");
 
         existingVehicle.setExitTime(exitTime);

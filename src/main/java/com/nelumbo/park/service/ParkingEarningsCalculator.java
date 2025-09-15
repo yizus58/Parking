@@ -52,7 +52,7 @@ public class ParkingEarningsCalculator {
     }
 
     private TopParkingResponse toTopParkingResponse(ParkingEarningsResponse earnings) {
-        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.of("es", "CO"));
         String formattedCost = currencyFormatter.format(earnings.getTotalEarnings()).replace("COP", "$").replace(",00", "");
 
         return new TopParkingResponse(
