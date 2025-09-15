@@ -119,7 +119,7 @@ class VehicleReportServiceTest {
         assertNotNull(report1);
         assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", "p1", "Parking One", 1, 1, 20.0f);
         VehicleDetailResponse detail1 = report1.getVehicles().get(0);
-        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", 20.0f);
+        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", "15-01-2023-14:00", 20.0f);
 
         VehicleOutDetailResponse report2 = result.stream()
                 .filter(r -> r.getUserId().equals("u2"))
@@ -127,7 +127,7 @@ class VehicleReportServiceTest {
         assertNotNull(report2);
         assertVehicleOutDetailResponse(report2, "u2", "adminUser2", "admin2@example.com", "p2", "Parking Two", 1, 1, 10.0f);
         VehicleDetailResponse detail2 = report2.getVehicles().get(0);
-        assertVehicleDetailResponse(detail2, "v2", "DEF-456", "Model B", "15-01-2023-11:00", 10.0f);
+        assertVehicleDetailResponse(detail2, "v2", "DEF-456", "Model B", "15-01-2023-11:00", "15-01-2023-13:00", 10.0f);
     }
 
     @Test
@@ -222,7 +222,7 @@ class VehicleReportServiceTest {
         VehicleOutDetailResponse report1 = result.get(0);
         assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", "p1", "Parking One", 1, 1, 0.0f);
         VehicleDetailResponse detail1 = report1.getVehicles().get(0);
-        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", 0.0f);
+        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", "15-01-2023-14:00", 0.0f);
     }
 
     @Test
@@ -304,7 +304,7 @@ class VehicleReportServiceTest {
         VehicleOutDetailResponse report1 = result.get(0);
         assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", null, "Unknown Parking", 1, 1, 20.0f);
         VehicleDetailResponse detail1 = report1.getVehicles().get(0);
-        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", 20.0f);
+        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", "15-01-2023-14:00", 20.0f);
     }
 
     private void assertVehicleOutDetailResponse(VehicleOutDetailResponse report, String userId, String username, String email, String parkingId, String parkingName, int vehiclesSize, int totalVehicles, float totalEarnings) {
@@ -318,11 +318,13 @@ class VehicleReportServiceTest {
         assertEquals(totalEarnings, report.getTotalEarnings());
     }
 
-    private void assertVehicleDetailResponse(VehicleDetailResponse detail, String vehicleId, String plateNumber, String modelVehicle, String day, float totalCost) {
+    private void assertVehicleDetailResponse(VehicleDetailResponse detail, String vehicleId, String plateNumber, String modelVehicle,
+                                             String dayEntry, String dayExit, float totalCost) {
         assertEquals(vehicleId, detail.getVehicleId());
         assertEquals(plateNumber, detail.getPlateNumber());
         assertEquals(modelVehicle, detail.getModelVehicle());
-        assertEquals(day, detail.getDay());
+        assertEquals(dayEntry, detail.getDayEntry());
+        assertEquals(dayExit, detail.getDayExit());
         assertEquals(totalCost, detail.getTotalCost());
     }
 }

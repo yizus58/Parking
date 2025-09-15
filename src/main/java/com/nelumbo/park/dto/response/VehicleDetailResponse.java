@@ -11,6 +11,7 @@ public class VehicleDetailResponse {
     private String vehicleId;
     private String plateNumber;
     private String modelVehicle;
-    private String day;
+    private String dayEntry;
+    private String dayExit;
     private Float totalCost;
 }

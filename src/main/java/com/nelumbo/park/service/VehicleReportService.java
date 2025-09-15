@@ -74,7 +74,8 @@ public class VehicleReportService {
             long hoursParked = (minutesParked + 59) / 60;
 
             Float totalCost = hoursParked * costPerHour;
-            String day = formatDate(exitTime, false);
+            String dayEntry = formatDate(entryTime, false);
+            String dayExit = formatDate(exitTime, false);
 
             parkingEarnings.computeIfAbsent(userId, k -> new HashMap<>());
 
@@ -86,7 +87,8 @@ public class VehicleReportService {
                     vehicleId,
                     plateNumber,
                     modelVehicle,
-                    day,
+                    dayEntry,
+                    dayExit,
                     totalCost
             );
 

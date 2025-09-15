@@ -66,12 +66,12 @@ public class Excel {
         Cell titleCell = titleRow.createCell(0);
         titleCell.setCellValue("Usuario: " + item.getUsername() + "  |  Parqueadero a cargo: " + nameParking);
         titleCell.setCellStyle(boldStyle);
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
 
         // Encabezados
         sheet.createRow(1);
         Row headerRow = sheet.createRow(2);
-        String[] headers = {"#", "Placa", "Modelo", "Fecha", "Costo"};
+        String[] headers = {"#", "Placa", "Modelo", "Fecha Entrada", "Fecha Salida", "Dinero Generado"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
@@ -103,8 +103,9 @@ public class Excel {
             row.createCell(0).setCellValue((double) i + 1);
             row.createCell(1).setCellValue(Optional.ofNullable(v.getPlateNumber()).orElse(""));
             row.createCell(2).setCellValue(Optional.ofNullable(v.getModelVehicle()).orElse(""));
-            row.createCell(3).setCellValue(Optional.ofNullable(v.getDay()).orElse(""));
-            Cell costCell = row.createCell(4);
+            row.createCell(3).setCellValue(Optional.ofNullable(v.getDayEntry()).orElse(""));
+            row.createCell(4).setCellValue(Optional.ofNullable(v.getDayExit()).orElse(""));
+            Cell costCell = row.createCell(5);
             costCell.setCellValue(v.getTotalCost());
             costCell.setCellStyle(currencyStyle);
         }
@@ -113,10 +114,10 @@ public class Excel {
 
     private void addSubtotalRow(XSSFSheet sheet, VehicleOutDetailResponse item, int rowIndex, CellStyle boldStyle) {
         Row subtotalRow = sheet.createRow(rowIndex);
-        Cell labelCell = subtotalRow.createCell(3);
+        Cell labelCell = subtotalRow.createCell(4);
         labelCell.setCellValue("Subtotal:");
         labelCell.setCellStyle(boldStyle);
-        Cell subtotalCell = subtotalRow.createCell(4);
+        Cell subtotalCell = subtotalRow.createCell(5);
 
         CellStyle boldCurrencyStyle = sheet.getWorkbook().createCellStyle();
         boldCurrencyStyle.cloneStyleFrom(boldStyle);
@@ -125,7 +126,7 @@ public class Excel {
         if (item.getTotalEarnings() != null) {
             subtotalCell.setCellValue(item.getTotalEarnings());
         } else {
-            String formula = String.format("SUM(E4:E%d)", rowIndex);
+            String formula = String.format("SUM(F4:F%d)", rowIndex);
             subtotalCell.setCellFormula(formula);
         }
         subtotalCell.setCellStyle(boldCurrencyStyle);
@@ -137,7 +138,7 @@ public class Excel {
     }
 
     private void configureColumnWidths(XSSFSheet sheet) {
-        int[] colWidths = {5, 15, 25, 15, 15};
+        int[] colWidths = {5, 15, 25, 15, 15, 17};
         for (int i = 0; i < colWidths.length; i++) {
             sheet.setColumnWidth(i, (int) (colWidths[i] * 256.0));
         }
