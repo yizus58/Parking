@@ -12,5 +12,5 @@ public class TopParkingResponse {
     private String parkingId;
     private String parkingName;
     private Long totalVehicles;
-    private Float totalCost;
+    private String totalCost;
 }

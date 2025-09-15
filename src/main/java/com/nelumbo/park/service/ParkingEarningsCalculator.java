@@ -5,9 +5,11 @@ import com.nelumbo.park.dto.response.TopParkingResponse;
 import com.nelumbo.park.entity.Vehicle;
 import org.springframework.stereotype.Component;
 
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Component
@@ -50,11 +52,14 @@ public class ParkingEarningsCalculator {
     }
 
     private TopParkingResponse toTopParkingResponse(ParkingEarningsResponse earnings) {
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
+        String formattedCost = currencyFormatter.format(earnings.getTotalEarnings()).replace("COP", "$").replace(",00", "");
+
         return new TopParkingResponse(
                 earnings.getId(),
                 earnings.getName(),
                 earnings.getVehicleCount(),
-                earnings.getTotalEarnings()
+                formattedCost
         );
     }
 
