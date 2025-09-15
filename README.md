@@ -154,7 +154,7 @@ Aquí hay algunos ejemplos de cómo interactuar con la API una vez que la aplica
 
 ### Autenticación de Usuario
 
-**Endpoint:** `POST /api/auth/login`
+**Endpoint:** `POST http://localhost:8080/auth/login`
 **Body:**
 ```json
 {
@@ -172,7 +172,7 @@ Aquí hay algunos ejemplos de cómo interactuar con la API una vez que la aplica
 
 ### Registrar un Vehículo (requiere autenticación)
 
-**Endpoint:** `POST /api/vehicles`
+**Endpoint:** `POST http://localhost:8080/vehicles`
 **Headers:** `Authorization: Bearer <your_jwt_token>`
 **Body:**
 ```json
@@ -185,7 +185,7 @@ Aquí hay algunos ejemplos de cómo interactuar con la API una vez que la aplica
 
 ### Obtener Lista de Parqueaderos
 
-**Endpoint:** `GET /api/parkings`
+**Endpoint:** `GET http://localhost:8080/parkings`
 **Headers:** `Authorization: Bearer <your_jwt_token>`
 
 ### Documentación de la API

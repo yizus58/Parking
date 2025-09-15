@@ -201,7 +201,7 @@ class VehicleControllerTest {
         VehicleUpdateRequest updateRequest = new VehicleUpdateRequest(
                 "ABC-123", "Model Y", new Date(), new Date(), "park1", "admin1", 10.0f, VehicleStatus.OUT
         );
-        VehicleExitResponse exitResponse = new VehicleExitResponse("ABC-123", "Model Y", new Date(), new Date(), 10.0f, VehicleStatus.OUT, 25.0f);
+        VehicleExitResponse exitResponse = new VehicleExitResponse("ABC-123", "Model Y", new Date(), new Date(), 10.0f, VehicleStatus.OUT, "25.0");
 
         when(vehicleService.exitVehicle(any(VehicleUpdateRequest.class))).thenReturn(exitResponse);
 

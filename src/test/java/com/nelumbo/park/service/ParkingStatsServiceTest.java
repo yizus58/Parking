@@ -52,7 +52,7 @@ class ParkingStatsServiceTest {
     void getParkingRanking_ShouldReturnWeeklyParkingStatsResponse() {
         List<Vehicle> mockVehicles = Collections.singletonList(new Vehicle());
 
-        List<TopParkingResponse> mockTopParkings = Collections.singletonList(new TopParkingResponse("1", "Parking Name 1", 10L, 200.0f));
+        List<TopParkingResponse> mockTopParkings = Collections.singletonList(new TopParkingResponse("1", "Parking Name 1", 10L, "200.0"));
 
         when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
                 .thenReturn(mockVehicles);

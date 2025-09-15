@@ -91,9 +91,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
         assertEquals(2, result.size());
         assertEquals("p1", result.get(0).getParkingId());
-        assertEquals(40.0f, result.get(0).getTotalCost());
+        assertEquals("40.0f", result.get(0).getTotalCost());
         assertEquals("p2", result.get(1).getParkingId());
-        assertEquals(15.0f, result.get(1).getTotalCost());
+        assertEquals("15.0f", result.get(1).getTotalCost());
     }
 
     @Test
@@ -119,11 +119,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
         assertEquals(3, result.size());
         assertEquals("p4", result.get(0).getParkingId());
-        assertEquals(40.0f, result.get(0).getTotalCost());
+        assertEquals("40.0f", result.get(0).getTotalCost());
         assertEquals("p3", result.get(1).getParkingId());
-        assertEquals(30.0f, result.get(1).getTotalCost());
+        assertEquals("30.0f", result.get(1).getTotalCost());
         assertEquals("p2", result.get(2).getParkingId());
-        assertEquals(20.0f, result.get(2).getTotalCost());
+        assertEquals("20.0f", result.get(2).getTotalCost());
     }
 
     @Test

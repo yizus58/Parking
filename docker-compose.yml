@@ -13,7 +13,22 @@ services:
     networks:
       - db
     restart: unless-stopped
-
+  spring-boot:
+    container_name: spring-boot-app
+    build: .
+    env_file:
+      - ./.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 networks:
   db:
     driver: bridge
