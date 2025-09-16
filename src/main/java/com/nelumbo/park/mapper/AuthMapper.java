@@ -41,6 +41,6 @@ public abstract class AuthMapper {
     }
 
     protected String getExpirationTime() {
-        return LocalDateTime.now().plusHours(jwtService.getExpirationHours()).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        return LocalDateTime.now().plusHours(jwtService.expirationHours()).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 }

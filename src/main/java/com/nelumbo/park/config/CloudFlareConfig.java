@@ -12,9 +12,6 @@ import java.net.URI;
 @Configuration
 public class CloudFlareConfig {
 
-    @Value("${r2.bucket.path}")
-    private String bucketPath;
-
     @Value("${r2.bucket.access.key}")
     private String bucketAccessKey;
 

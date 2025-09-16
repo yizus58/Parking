@@ -10,6 +10,7 @@ import com.nelumbo.park.service.VehicleReportService;
 import com.nelumbo.park.utils.Excel;
 import com.nelumbo.park.utils.ExcelComponent;
 import com.nelumbo.park.utils.HtmlGenerator;
+import com.nelumbo.park.utils.Pdf;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class CronService {
     private final VehicleReportService vehicleReportService;
     private final Excel excel;
     private final ExcelComponent excelGenerator;
+    private final Pdf pdf;
     private final S3Service s3Service;
     private final RabbitMQService rabbitMQService;
 
@@ -41,16 +43,21 @@ public class CronService {
     @Value("${type.message}")
     private String typeMessage;
 
+    @Value("${spring.mvc.contentnegotiation.media-types.pdf}")
+    private String pdfContentType;
+
     public CronService(
             VehicleReportService vehicleReportService,
             Excel excel,
             ExcelComponent excelGenerator,
+            Pdf pdf,
             S3Service s3Service,
             RabbitMQService rabbitMQService
     ) {
         this.vehicleReportService = vehicleReportService;
         this.excel = excel;
         this.excelGenerator = excelGenerator;
+        this.pdf = pdf;
         this.s3Service = s3Service;
         this.rabbitMQService = rabbitMQService;
     }
@@ -73,20 +80,39 @@ public class CronService {
 
     private void processVehicleReport(VehicleOutDetailResponse vehicleOutDetailResponse) {
         try {
-            FileInfoResponse fileNameInfo = generateFileNames(vehicleOutDetailResponse);
-            String contentType = getContentType();
-            byte[] buffer = this.excel.generarExcelPorUsuario(List.of(vehicleOutDetailResponse));
+            // Excel generation
+            FileInfoResponse excelFileInfo = generateFileNames(vehicleOutDetailResponse);
+            String excelContentType = getContentType();
+            byte[] excelBuffer = this.excel.generarExcelPorUsuario(List.of(vehicleOutDetailResponse));
 
-            if (uploadFileAndSendEmail(vehicleOutDetailResponse, fileNameInfo, buffer, contentType)) {
-                addToUploadedFiles(vehicleOutDetailResponse, fileNameInfo);
+            // PDF generation
+            String pdfFileName = excelFileInfo.getNameFile().replace(".xlsx", ".pdf");
+            String pdfS3Name = UUID.randomUUID().toString().replace("-", "");
+            FileInfoResponse pdfFileInfo = new FileInfoResponse(pdfFileName, pdfS3Name);
+            byte[] pdfBuffer = this.pdf.generarPdfPorUsuario(List.of(vehicleOutDetailResponse));
+
+            List<EmailAttachmentResponse> attachments = new ArrayList<>();
+
+            // Upload Excel
+            Map<String, String> uploadResult = this.s3Service.uploadFile(excelBuffer, excelContentType, excelFileInfo.getS3Name());
+            if (uploadResult != null && uploadResult.containsKey("Key")) {
+                attachments.add(new EmailAttachmentResponse(excelFileInfo.getNameFile(), excelFileInfo.getS3Name()));
+                addToUploadedFiles(vehicleOutDetailResponse, excelFileInfo);
             }
 
-        } catch (IOException e) {
-            log.error("Error procesando archivo para usuario {}: {}", 
-                    vehicleOutDetailResponse.getUserId(), e.getMessage());
-            e.printStackTrace();
+            // Upload PDF
+            Map<String, String> uploadResultPdf = this.s3Service.uploadFile(pdfBuffer, this.pdfContentType, pdfFileInfo.getS3Name());
+            if (uploadResultPdf != null && uploadResultPdf.containsKey("Key")) {
+                attachments.add(new EmailAttachmentResponse(pdfFileInfo.getNameFile(), pdfFileInfo.getS3Name()));
+                addToUploadedFiles(vehicleOutDetailResponse, pdfFileInfo);
+            }
+
+            if (!attachments.isEmpty()) {
+                sendEmailWithAttachments(vehicleOutDetailResponse, attachments);
+            }
+
         } catch (Exception e) {
-            log.error("Error inesperado procesando archivo para usuario {}: {}", 
+            log.error("Error inesperado procesando archivo para usuario {}: {}",
                     vehicleOutDetailResponse.getUserId(), e.getMessage());
             e.printStackTrace();
         }
@@ -114,43 +140,35 @@ public class CronService {
         return contentType;
     }
 
-    private boolean uploadFileAndSendEmail(VehicleOutDetailResponse vehicleOutDetailResponse,
-                                           FileInfoResponse fileNameInfo, byte[] buffer, String contentType) {
-        Map<String, String> uploadResult = null;
-        try {
-            uploadResult = this.s3Service.uploadFile(buffer, contentType, fileNameInfo.getS3Name());
-        } catch (Exception e) {
-            log.warn("Error en subida normal para archivo {}, intentando subida directa: {}", 
-                    fileNameInfo.getS3Name(), e.getMessage());
-        }
-
-        if (uploadResult != null && uploadResult.containsKey("Key")) {
-            sendEmailNotification(vehicleOutDetailResponse, fileNameInfo);
-            return true;
-        }
-        return false;
-    }
-
-    private void sendEmailNotification(VehicleOutDetailResponse vehicleOutDetailResponse, FileInfoResponse fileNameInfo) {
+    private void sendEmailWithAttachments(VehicleOutDetailResponse vehicleOutDetailResponse, List<EmailAttachmentResponse> attachments) {
         try {
             String email = Optional.ofNullable(vehicleOutDetailResponse.getEmail()).orElse("");
             String htmlContent = HtmlGenerator.generateHtmlContent(vehicleOutDetailResponse);
 
-            EmailAttachmentResponse attachment = new EmailAttachmentResponse(fileNameInfo.getNameFile(), fileNameInfo.getS3Name());
-            EmailDataResponse data = new EmailDataResponse(email, htmlContent, subject, List.of(attachment));
+            EmailDataResponse data = new EmailDataResponse(email, htmlContent, subject, attachments);
             RabbitMQResponse response = new RabbitMQResponse(typeMessage, data);
             this.rabbitMQService.publishMessageBackoff(response);
         } catch (Exception e) {
-            log.error("Error enviando notificación por email para usuario {}: {}", 
+            log.error("Error enviando notificación por email para usuario {}: {}",
                     vehicleOutDetailResponse.getUserId(), e.getMessage());
         }
     }
 
-    private void addToUploadedFiles(VehicleOutDetailResponse vehicleOutDetailResponse, FileInfoResponse fileNameInfo) {
+    private void addToUploadedFiles(VehicleOutDetailResponse vehicleOutDetailResponse, FileInfoResponse fileInfo) {
         String userId = vehicleOutDetailResponse.getUserId();
-        String email = Optional.ofNullable(vehicleOutDetailResponse.getEmail()).orElse("");
-        FileInfoResponse fileInfo = new FileInfoResponse(fileNameInfo.getNameFile(), fileNameInfo.getS3Name());
-        FileUploadResultResponse uploadInfo = new FileUploadResultResponse(userId, email, fileInfo);
-        uploadedFiles.add(uploadInfo);
+
+        Optional<FileUploadResultResponse> existingUploadInfo = uploadedFiles.stream()
+                .filter(r -> r.getIdUser().equals(userId))
+                .findFirst();
+
+        if (existingUploadInfo.isPresent()) {
+            existingUploadInfo.get().getFiles().add(fileInfo);
+        } else {
+            String email = Optional.ofNullable(vehicleOutDetailResponse.getEmail()).orElse("");
+            List<FileInfoResponse> files = new ArrayList<>();
+            files.add(fileInfo);
+            FileUploadResultResponse newUploadInfo = new FileUploadResultResponse(userId, email, files);
+            uploadedFiles.add(newUploadInfo);
+        }
     }
 }

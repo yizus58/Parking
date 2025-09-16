@@ -93,7 +93,7 @@ public class JwtService {
         return (tokenUsername.equals(username) && !isTokenExpired(token));
     }
 
-    public long getExpirationHours() {
+    public long expirationHours() {
         return expirationHours;
     }
 }
