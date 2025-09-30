@@ -5,11 +5,9 @@ import com.nelumbo.park.config.TestSecurityConfig;
 import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.request.LoginRequest;
 import com.nelumbo.park.dto.response.UserLoginResponse;
-import com.nelumbo.park.interfaces.ILoginLogService;
-import com.nelumbo.park.interfaces.LoginAttemptService;
+import com.nelumbo.park.interfaces.LoginService;
 import com.nelumbo.park.repository.UserRepository;
-import com.nelumbo.park.service.UserService;
-import com.nelumbo.park.service.implementations.LoginServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,38 +16,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(AuthController.class)
-@Import({TestSecurityConfig.class, LoginServiceImpl.class})
+@Import(TestSecurityConfig.class)
 class AuthControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
+    private LoginService loginService;
 
     @MockBean
     private JwtService jwtService;
 
     @MockBean
     private UserRepository userRepository;
-
-    @MockBean
-    private LoginAttemptService loginAttemptService;
-
-    @MockBean
-    private ILoginLogService loginLogService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -74,8 +66,8 @@ class AuthControllerTest {
 
     @Test
     void login_WithValidCredentials_ShouldReturnTokenResponse() throws Exception {
-        when(userService.login(any(LoginRequest.class))).thenReturn(userLoginResponse);
-        when(loginAttemptService.isBlocked(anyString())).thenReturn(false);
+        when(loginService.authenticate(any(LoginRequest.class), any(HttpServletRequest.class)))
+                .thenReturn(ResponseEntity.ok(userLoginResponse));
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,9 +81,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.accessToken").value("jwt-token-example"));
 
-        verify(userService, times(1)).login(any(LoginRequest.class));
-        verify(loginAttemptService, times(1)).loginSucceeded(anyString());
-        verify(loginLogService, times(1)).save(anyString(), anyString(), anyString(), any());
+        verify(loginService, times(1)).authenticate(any(LoginRequest.class), any(HttpServletRequest.class));
     }
 
     @Test
@@ -103,7 +93,7 @@ class AuthControllerTest {
                         .content(invalidJson))
                 .andExpect(status().isBadRequest());
 
-        verify(userService, never()).login(any(LoginRequest.class));
+        verify(loginService, never()).authenticate(any(), any());
     }
 
     @Test
@@ -115,7 +105,7 @@ class AuthControllerTest {
                         .content(emptyJson))
                 .andExpect(status().isBadRequest());
 
-        verify(userService, never()).login(any(LoginRequest.class));
+        verify(loginService, never()).authenticate(any(), any());
     }
 
     @Test
@@ -124,7 +114,7 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(userService, never()).login(any(LoginRequest.class));
+        verify(loginService, never()).authenticate(any(), any());
     }
 
     @Test
@@ -136,7 +126,7 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(userService, never()).login(any(LoginRequest.class));
+        verify(loginService, never()).authenticate(any(), any());
     }
 
     @Test
@@ -148,7 +138,7 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(userService, never()).login(any(LoginRequest.class));
+        verify(loginService, never()).authenticate(any(), any());
     }
 
     @Test
@@ -161,13 +151,13 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(userService, never()).login(any(LoginRequest.class));
+        verify(loginService, never()).authenticate(any(), any());
     }
 
     @Test
     void login_WhenIpIsBlocked_ShouldReturnTooManyRequests() throws Exception {
-        when(loginAttemptService.isBlocked(anyString())).thenReturn(true);
-        when(loginAttemptService.getBlockedUntil(anyString())).thenReturn(LocalDateTime.now().plusMinutes(5));
+        when(loginService.authenticate(any(LoginRequest.class), any(HttpServletRequest.class)))
+                .thenReturn(ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Lo sentimos no puedes hacer login"));
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -175,11 +165,6 @@ class AuthControllerTest {
                 .andExpect(status().isTooManyRequests())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Lo sentimos no puedes hacer login")));
 
-        verify(userService, never()).login(any(LoginRequest.class));
-        verify(loginAttemptService, times(1)).isBlocked(anyString());
-        verify(loginAttemptService, times(1)).getBlockedUntil(anyString());
-        verify(loginAttemptService, never()).loginSucceeded(anyString());
-        verify(loginAttemptService, never()).loginFailed(anyString(), anyString());
-        verify(loginLogService, never()).save(anyString(), anyString(), anyString(), any());
+        verify(loginService, times(1)).authenticate(any(LoginRequest.class), any(HttpServletRequest.class));
     }
 }
