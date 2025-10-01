@@ -25,6 +25,11 @@ public class DatabaseCreationInitializer implements ApplicationContextInitialize
         String databasePassword = env.getProperty("SPRING_DATASOURCE_PASSWORD", "root");
         String driverClassName = env.getProperty("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
 
+        if (databaseUrl == null || !databaseUrl.contains("/")) {
+            logger.warn("Database URL is not valid for database creation. URL: {}", databaseUrl);
+            return;
+        }
+        
         String[] urlParts = databaseUrl.split("/");
         String databaseName = urlParts[urlParts.length - 1];
         String baseUrl = databaseUrl.substring(0, databaseUrl.lastIndexOf("/")) + "/postgres";
