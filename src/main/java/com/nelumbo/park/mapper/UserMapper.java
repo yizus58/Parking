@@ -12,6 +12,7 @@ public abstract class UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "role", constant = "SOCIO")
+    @Mapping(target = "ownedParkings", ignore = true)
     public abstract User toEntity(UserCreateRequest dto);
     
     public abstract UserResponse toResponse(User user);

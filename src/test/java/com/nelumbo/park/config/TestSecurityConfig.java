@@ -19,17 +19,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class TestSecurityConfig {
 
-    @Autowired(required = false)
-    private JwtService jwtService;
-
-    @Autowired(required = false)
-    private UserRepository userRepository;
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
+        return new JwtAuthenticationFilter(jwtService, userRepository, "", "");
+    }
 
     @Bean
     @Primary
-    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(jwtService, userRepository, "", "");
-
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -43,7 +40,7 @@ public class TestSecurityConfig {
                         .requestMatchers("/vehicles/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

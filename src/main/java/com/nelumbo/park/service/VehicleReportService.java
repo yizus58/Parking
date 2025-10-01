@@ -15,16 +15,16 @@ import java.util.concurrent.TimeUnit;
 public class VehicleReportService {
 
     private final VehicleRepository vehicleRepository;
+    private static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
     public VehicleReportService(VehicleRepository vehicleRepository) {
         this.vehicleRepository = vehicleRepository;
     }
 
-    public static String formatDate(Date date, boolean onlyTime) {
-        SimpleDateFormat formatter = onlyTime
-                ? new SimpleDateFormat("dd-MM-yyyy")
-                : new SimpleDateFormat("dd-MM-yyyy-HH:mm");
-
+    public static String formatDate(Date date, boolean dateOnly) {
+        String pattern = dateOnly ? "dd-MM-yyyy" : "dd-MM-yyyy-HH:mm";
+        SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+        formatter.setTimeZone(UTC_TIME_ZONE);
         return formatter.format(date);
     }
 

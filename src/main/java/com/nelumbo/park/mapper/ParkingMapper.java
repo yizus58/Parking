@@ -21,11 +21,13 @@ public abstract class ParkingMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", source = "idOwner", qualifiedByName = "mapOwner")
     @Mapping(target = "costPerHour", source = "costPerHour")
+    @Mapping(target = "vehicles", ignore = true)
     public abstract Parking toEntity(ParkingRequest dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", source = "idOwner", qualifiedByName = "mapOwner")
     @Mapping(target = "costPerHour", source = "costPerHour")
+    @Mapping(target = "vehicles", ignore = true)
     public abstract Parking toEntity(ParkingUpdateRequest dto);
 
     @Named("mapOwner")
