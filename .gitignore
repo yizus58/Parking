@@ -27,6 +27,7 @@ logs/
 *.txt
 
 # Variables de entorno y secretos
+.env
 .env.development
 .env.test
 .env.production
