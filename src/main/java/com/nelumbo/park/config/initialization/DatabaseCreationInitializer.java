@@ -4,13 +4,16 @@ import com.nelumbo.park.exception.exceptions.DatabaseInitializationException;
 import org.slf4j.Logger;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.Environment;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertiesPropertySource;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 public class DatabaseCreationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -18,43 +21,63 @@ public class DatabaseCreationInitializer implements ApplicationContextInitialize
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
-        Environment env = applicationContext.getEnvironment();
-
-        String databaseUrl = env.getProperty("SPRING_DATASOURCE_URL", "jdbc:postgresql://localhost:5332/park");
-        String databaseUsername = env.getProperty("SPRING_DATASOURCE_USERNAME", "postgres");
-        String databasePassword = env.getProperty("SPRING_DATASOURCE_PASSWORD", "root");
+        ConfigurableEnvironment env = applicationContext.getEnvironment();
+        
+        String originalUrl = env.getProperty("SPRING_DATASOURCE_URL");
+        String dbUsername = env.getProperty("SPRING_DATASOURCE_USERNAME", "postgres");
+        String dbPassword = env.getProperty("SPRING_DATASOURCE_PASSWORD", "root");
         String driverClassName = env.getProperty("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
 
-        if (databaseUrl == null || !databaseUrl.contains("/")) {
-            logger.warn("Database URL is not valid for database creation. URL: {}", databaseUrl);
+        if (originalUrl == null) {
+            logger.warn("SPRING_DATASOURCE_URL is not set. Skipping database initialization check.");
             return;
         }
-        
-        String[] urlParts = databaseUrl.split("/");
-        String databaseName = urlParts[urlParts.length - 1];
-        String baseUrl = databaseUrl.substring(0, databaseUrl.lastIndexOf("/")) + "/postgres";
 
-        if (baseUrl.startsWith("postgresql://")) {
-            baseUrl = "jdbc:" + baseUrl;
+        String hostPart;
+        String dbNamePart;
+        
+        String urlToParse = originalUrl;
+        if (urlToParse.startsWith("postgresql://")) {
+            urlToParse = urlToParse.substring("postgresql://".length());
         }
+
+        int atIndex = urlToParse.indexOf('@');
+        if (atIndex != -1) {
+            urlToParse = urlToParse.substring(atIndex + 1);
+        }
+
+        int slashIndex = urlToParse.lastIndexOf('/');
+        if (slashIndex != -1) {
+            hostPart = urlToParse.substring(0, slashIndex);
+            dbNamePart = urlToParse.substring(slashIndex + 1);
+        } else {
+            logger.error("Could not parse host and database name from SPRING_DATASOURCE_URL: {}", originalUrl);
+            return;
+        }
+
+        String correctedAppUrl = "jdbc:postgresql://" + hostPart + "/" + dbNamePart;
+        MutablePropertySources propertySources = env.getPropertySources();
+        Properties props = new Properties();
+        props.put("spring.datasource.url", correctedAppUrl);
+        propertySources.addFirst(new PropertiesPropertySource("corrected-db-url", props));
+        logger.info("Overriding spring.datasource.url with: {}", correctedAppUrl);
+
+        String baseUrlForCheck = "jdbc:postgresql://" + hostPart + "/postgres";
 
         try {
             Class.forName(driverClassName);
-
-            try (Connection connection = DriverManager.getConnection(baseUrl, databaseUsername, databasePassword)) {
-
-                boolean databaseExists = checkDatabaseExists(connection, databaseName);
-
+            try (Connection connection = DriverManager.getConnection(baseUrlForCheck, dbUsername, dbPassword)) {
+                boolean databaseExists = checkDatabaseExists(connection, dbNamePart);
                 if (!databaseExists) {
-                    createDatabase(connection, databaseName);
+                    createDatabase(connection, dbNamePart);
                 }
             }
         } catch (ClassNotFoundException e) {
-            logger.error("Error al cargar el driver de la base de datos: {}", e.getMessage());
+            logger.error("Error loading database driver: {}", e.getMessage());
         } catch (SQLException e) {
-            logger.error("Error de SQL al verificar/crear la base de datos: {}", e.getMessage());
+            logger.error("SQL error during database check/creation: {}", e.getMessage());
         } catch (DatabaseInitializationException e) {
-            logger.error("Error al verificar/crear la base de datos: {}", e.getMessage());
+            logger.error("Error during database check/creation: {}", e.getMessage());
         }
     }
 
