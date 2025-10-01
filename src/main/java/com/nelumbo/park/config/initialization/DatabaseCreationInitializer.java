@@ -34,6 +34,10 @@ public class DatabaseCreationInitializer implements ApplicationContextInitialize
         String databaseName = urlParts[urlParts.length - 1];
         String baseUrl = databaseUrl.substring(0, databaseUrl.lastIndexOf("/")) + "/postgres";
 
+        if (baseUrl.startsWith("postgresql://")) {
+            baseUrl = "jdbc:" + baseUrl;
+        }
+
         try {
             Class.forName(driverClassName);
 
