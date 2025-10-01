@@ -6,6 +6,7 @@ import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
 import com.nelumbo.park.service.VehicleReportService;
 import com.nelumbo.park.utils.Excel;
 import com.nelumbo.park.utils.ExcelComponent;
+import com.nelumbo.park.utils.Pdf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,8 @@ class CronServiceTest {
     private Excel excel;
     @Mock
     private ExcelComponent excelGenerator;
+    @Mock
+    private Pdf pdf;
     @Mock
     private S3Service s3Service;
     @Mock
@@ -96,6 +99,7 @@ class CronServiceTest {
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
+        when(pdf.generarPdfPorUsuario(anyList())).thenReturn("test_pdf_bytes".getBytes());
         when(excelGenerator.getContentType()).thenReturn("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         when(s3Service.uploadFile(any(byte[].class), anyString(), anyString())).thenReturn(Collections.singletonMap("Key", "someKey"));
         doNothing().when(rabbitMQService).publishMessageBackoff(any());
@@ -105,8 +109,9 @@ class CronServiceTest {
         assertTrue(result);
         verify(vehicleReportService, times(1)).getVehiclesOutDetails();
         verify(excel, times(2)).generarExcelPorUsuario(anyList());
+        verify(pdf, times(2)).generarPdfPorUsuario(anyList());
         verify(excelGenerator, times(2)).getContentType();
-        verify(s3Service, times(2)).uploadFile(any(byte[].class), anyString(), anyString());
+        verify(s3Service, times(4)).uploadFile(any(byte[].class), anyString(), anyString());
         verify(rabbitMQService, times(2)).publishMessageBackoff(any());
     }
 
@@ -124,6 +129,7 @@ class CronServiceTest {
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
+        when(pdf.generarPdfPorUsuario(anyList())).thenReturn("test_pdf_bytes".getBytes());
         when(excelGenerator.getContentType()).thenReturn("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         when(s3Service.uploadFile(any(byte[].class), anyString(), anyString())).thenReturn(Collections.singletonMap("Key", "someKey"));
         doNothing().when(rabbitMQService).publishMessageBackoff(any());
@@ -133,9 +139,10 @@ class CronServiceTest {
         assertTrue(result);
         verify(vehicleReportService, times(1)).getVehiclesOutDetails();
         verify(excel, times(1)).generarExcelPorUsuario(anyList());
+        verify(pdf, times(1)).generarPdfPorUsuario(anyList());
         verify(excelGenerator, times(1)).getContentType();
 
-        verify(s3Service, times(1)).uploadFile(any(byte[].class), anyString(), anyString());
+        verify(s3Service, times(2)).uploadFile(any(byte[].class), anyString(), anyString());
 
         ArgumentCaptor<Object> rabbitMQMessageCaptor = ArgumentCaptor.forClass(Object.class);
         verify(rabbitMQService, times(1)).publishMessageBackoff(rabbitMQMessageCaptor.capture());
@@ -167,6 +174,7 @@ class CronServiceTest {
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
+        when(pdf.generarPdfPorUsuario(anyList())).thenReturn("test_pdf_bytes".getBytes());
 
         when(excelGenerator.getContentType())
                 .thenReturn(null)
@@ -180,14 +188,17 @@ class CronServiceTest {
 
         verify(vehicleReportService, times(2)).getVehiclesOutDetails();
         verify(excel, times(2)).generarExcelPorUsuario(anyList());
+        verify(pdf, times(2)).generarPdfPorUsuario(anyList());
         verify(excelGenerator, times(2)).getContentType();
 
         ArgumentCaptor<String> contentTypeCaptor = ArgumentCaptor.forClass(String.class);
-        verify(s3Service, times(2)).uploadFile(any(byte[].class), contentTypeCaptor.capture(), anyString());
+        verify(s3Service, times(4)).uploadFile(any(byte[].class), contentTypeCaptor.capture(), anyString());
 
         List<String> capturedContentTypes = contentTypeCaptor.getAllValues();
         assertEquals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", capturedContentTypes.get(0));
-        assertEquals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", capturedContentTypes.get(1));
+        assertEquals("application/pdf", capturedContentTypes.get(1));
+        assertEquals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", capturedContentTypes.get(2));
+        assertEquals("application/pdf", capturedContentTypes.get(3));
 
         verify(rabbitMQService, times(2)).publishMessageBackoff(any());
     }
@@ -233,6 +244,7 @@ class CronServiceTest {
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
+        when(pdf.generarPdfPorUsuario(anyList())).thenReturn("test_pdf_bytes".getBytes());
         when(excelGenerator.getContentType()).thenReturn("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         when(s3Service.uploadFile(any(byte[].class), anyString(), anyString())).thenThrow(new RuntimeException("Test S3 Exception"));
 
@@ -241,8 +253,9 @@ class CronServiceTest {
         assertTrue(result);
         verify(vehicleReportService, times(1)).getVehiclesOutDetails();
         verify(excel, times(1)).generarExcelPorUsuario(anyList());
+        verify(pdf, times(1)).generarPdfPorUsuario(anyList());
         verify(excelGenerator, times(1)).getContentType();
-        verify(s3Service, times(1)).uploadFile(any(byte[].class), anyString(), anyString());
+        verify(s3Service, times(2)).uploadFile(any(byte[].class), anyString(), anyString());
         verify(rabbitMQService, never()).publishMessageBackoff(any());
     }
 
@@ -260,6 +273,7 @@ class CronServiceTest {
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
+        when(pdf.generarPdfPorUsuario(anyList())).thenReturn("test_pdf_bytes".getBytes());
         when(excelGenerator.getContentType()).thenReturn("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         when(s3Service.uploadFile(any(byte[].class), anyString(), anyString())).thenReturn(null);
 
@@ -268,8 +282,9 @@ class CronServiceTest {
         assertTrue(result);
         verify(vehicleReportService, times(1)).getVehiclesOutDetails();
         verify(excel, times(1)).generarExcelPorUsuario(anyList());
+        verify(pdf, times(1)).generarPdfPorUsuario(anyList());
         verify(excelGenerator, times(1)).getContentType();
-        verify(s3Service, times(1)).uploadFile(any(byte[].class), anyString(), anyString());
+        verify(s3Service, times(2)).uploadFile(any(byte[].class), anyString(), anyString());
         verifyNoInteractions(rabbitMQService);
     }
 
@@ -287,6 +302,7 @@ class CronServiceTest {
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
+        when(pdf.generarPdfPorUsuario(anyList())).thenReturn("test_pdf_bytes".getBytes());
         when(excelGenerator.getContentType()).thenReturn("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         when(s3Service.uploadFile(any(byte[].class), anyString(), anyString())).thenReturn(Collections.singletonMap("OtherKey", "someKey"));
 
@@ -295,8 +311,9 @@ class CronServiceTest {
         assertTrue(result);
         verify(vehicleReportService, times(1)).getVehiclesOutDetails();
         verify(excel, times(1)).generarExcelPorUsuario(anyList());
+        verify(pdf, times(1)).generarPdfPorUsuario(anyList());
         verify(excelGenerator, times(1)).getContentType();
-        verify(s3Service, times(1)).uploadFile(any(byte[].class), anyString(), anyString());
+        verify(s3Service, times(2)).uploadFile(any(byte[].class), anyString(), anyString());
         verifyNoInteractions(rabbitMQService);
     }
 
@@ -314,6 +331,7 @@ class CronServiceTest {
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
+        when(pdf.generarPdfPorUsuario(anyList())).thenReturn("test_pdf_bytes".getBytes());
         when(excelGenerator.getContentType()).thenReturn("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         when(s3Service.uploadFile(any(byte[].class), anyString(), anyString())).thenReturn(Collections.singletonMap("Key", "someKey"));
         doThrow(new RuntimeException("Test RabbitMQ Exception")).when(rabbitMQService).publishMessageBackoff(any());
@@ -323,8 +341,9 @@ class CronServiceTest {
         assertTrue(result);
         verify(vehicleReportService, times(1)).getVehiclesOutDetails();
         verify(excel, times(1)).generarExcelPorUsuario(anyList());
+        verify(pdf, times(1)).generarPdfPorUsuario(anyList());
         verify(excelGenerator, times(1)).getContentType();
-        verify(s3Service, times(1)).uploadFile(any(byte[].class), anyString(), anyString());
+        verify(s3Service, times(2)).uploadFile(any(byte[].class), anyString(), anyString());
         verify(rabbitMQService, times(1)).publishMessageBackoff(any());
     }
 
@@ -342,6 +361,7 @@ class CronServiceTest {
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
+        when(pdf.generarPdfPorUsuario(anyList())).thenReturn("test_pdf_bytes".getBytes());
         when(excelGenerator.getContentType()).thenReturn("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         when(s3Service.uploadFile(any(byte[].class), anyString(), anyString())).thenReturn(Collections.singletonMap("Key", "someKey"));
         doNothing().when(rabbitMQService).publishMessageBackoff(any());
@@ -351,8 +371,9 @@ class CronServiceTest {
         assertTrue(result);
         verify(vehicleReportService, times(1)).getVehiclesOutDetails();
         verify(excel, times(1)).generarExcelPorUsuario(anyList());
+        verify(pdf, times(1)).generarPdfPorUsuario(anyList());
         verify(excelGenerator, times(1)).getContentType();
-        verify(s3Service, times(1)).uploadFile(any(byte[].class), anyString(), anyString());
+        verify(s3Service, times(2)).uploadFile(any(byte[].class), anyString(), anyString());
 
         ArgumentCaptor<Object> rabbitMQMessageCaptor = ArgumentCaptor.forClass(Object.class);
         verify(rabbitMQService, times(1)).publishMessageBackoff(rabbitMQMessageCaptor.capture());

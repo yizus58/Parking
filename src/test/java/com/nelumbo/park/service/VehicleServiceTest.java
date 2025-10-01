@@ -77,6 +77,7 @@ class VehicleServiceTest {
         parking.setId("parking-id");
         parking.setName("Central Park");
         parking.setCostPerHour(10.0f);
+        parking.setOwner(socioUser);
 
         vehicle = new Vehicle();
         vehicle.setId("vehicle-id");
@@ -122,6 +123,7 @@ class VehicleServiceTest {
 
         when(vehicleMapper.toEntity(createRequest)).thenReturn(vehicleFromMapper);
         when(vehicleRepository.findByPlateNumberAndStatus(createRequest.getPlateNumber(), VehicleStatus.IN)).thenReturn(Optional.of(vehicle));
+        when(securityService.getCurrentUser()).thenReturn(socioUser);
 
         assertThrows(VehicleAlreadyInParkingException.class, () -> vehicleService.createVehicle(createRequest));
         verify(vehicleRepository, never()).save(any());
@@ -305,6 +307,7 @@ class VehicleServiceTest {
         when(vehicleRepository.findByPlateNumberAndStatus(createRequest.getPlateNumber(), VehicleStatus.IN)).thenReturn(Optional.empty());
         when(vehicleMapper.toEntity(createRequest)).thenReturn(vehicleFromMapper);
         when(vehicleRepository.findLimitParking(anyString(), eq(VehicleStatus.IN))).thenReturn(Arrays.<Object[]>asList(new Object[]{10L, 10L}));
+        when(securityService.getCurrentUser()).thenReturn(socioUser);
 
         assertThrows(LimitParkingFullException.class, () -> vehicleService.createVehicle(createRequest));
         verify(vehicleRepository, never()).save(any());

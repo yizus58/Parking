@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,7 +38,7 @@ class VehicleReportServiceTest {
 
     @Test
     void formatDate_ShouldReturnFormattedDate() {
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.set(2023, Calendar.JANUARY, 15, 10, 30, 0);
         Date date = cal.getTime();
 
@@ -57,11 +58,11 @@ class VehicleReportServiceTest {
         vehicle1.setCostPerHour(10.0f);
         vehicle1.setStatus(VehicleStatus.OUT);
 
-        Calendar entryCal1 = Calendar.getInstance();
+        Calendar entryCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         entryCal1.set(2023, Calendar.JANUARY, 15, 8, 0, 0);
         vehicle1.setEntryTime(entryCal1.getTime());
 
-        Calendar exitCal1 = Calendar.getInstance();
+        Calendar exitCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         exitCal1.set(2023, Calendar.JANUARY, 15, 10, 0, 0);
         vehicle1.setExitTime(exitCal1.getTime());
 
@@ -83,11 +84,11 @@ class VehicleReportServiceTest {
         vehicle2.setCostPerHour(5.0f);
         vehicle2.setStatus(VehicleStatus.OUT);
 
-        Calendar entryCal2 = Calendar.getInstance();
+        Calendar entryCal2 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         entryCal2.set(2023, Calendar.JANUARY, 15, 9, 0, 0);
         vehicle2.setEntryTime(entryCal2.getTime());
 
-        Calendar exitCal2 = Calendar.getInstance();
+        Calendar exitCal2 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         exitCal2.set(2023, Calendar.JANUARY, 15, 11, 0, 0);
         vehicle2.setExitTime(exitCal2.getTime());
 
@@ -119,7 +120,7 @@ class VehicleReportServiceTest {
         assertNotNull(report1);
         assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", "p1", "Parking One", 1, 1, 20.0f);
         VehicleDetailResponse detail1 = report1.getVehicles().get(0);
-        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", "15-01-2023-14:00", 20.0f);
+        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-08:00", "15-01-2023-10:00", 20.0f);
 
         VehicleOutDetailResponse report2 = result.stream()
                 .filter(r -> r.getUserId().equals("u2"))
@@ -127,7 +128,7 @@ class VehicleReportServiceTest {
         assertNotNull(report2);
         assertVehicleOutDetailResponse(report2, "u2", "adminUser2", "admin2@example.com", "p2", "Parking Two", 1, 1, 10.0f);
         VehicleDetailResponse detail2 = report2.getVehicles().get(0);
-        assertVehicleDetailResponse(detail2, "v2", "DEF-456", "Model B", "15-01-2023-11:00", "15-01-2023-13:00", 10.0f);
+        assertVehicleDetailResponse(detail2, "v2", "DEF-456", "Model B", "15-01-2023-09:00", "15-01-2023-11:00", 10.0f);
     }
 
     @Test
@@ -150,11 +151,11 @@ class VehicleReportServiceTest {
         vehicle1.setCostPerHour(10.0f);
         vehicle1.setStatus(VehicleStatus.IN);
 
-        Calendar entryCal1 = Calendar.getInstance();
+        Calendar entryCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         entryCal1.set(2023, Calendar.JANUARY, 15, 8, 0, 0);
         vehicle1.setEntryTime(entryCal1.getTime());
 
-        Calendar exitCal1 = Calendar.getInstance();
+        Calendar exitCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         exitCal1.set(2023, Calendar.JANUARY, 15, 10, 0, 0);
         vehicle1.setExitTime(exitCal1.getTime());
 
@@ -189,11 +190,11 @@ class VehicleReportServiceTest {
         vehicle1.setCostPerHour(null);
         vehicle1.setStatus(VehicleStatus.OUT);
 
-        Calendar entryCal1 = Calendar.getInstance();
+        Calendar entryCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         entryCal1.set(2023, Calendar.JANUARY, 15, 8, 0, 0);
         vehicle1.setEntryTime(entryCal1.getTime());
 
-        Calendar exitCal1 = Calendar.getInstance();
+        Calendar exitCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         exitCal1.set(2023, Calendar.JANUARY, 15, 10, 0, 0);
         vehicle1.setExitTime(exitCal1.getTime());
 
@@ -222,7 +223,7 @@ class VehicleReportServiceTest {
         VehicleOutDetailResponse report1 = result.get(0);
         assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", "p1", "Parking One", 1, 1, 0.0f);
         VehicleDetailResponse detail1 = report1.getVehicles().get(0);
-        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", "15-01-2023-14:00", 0.0f);
+        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-08:00", "15-01-2023-10:00", 0.0f);
     }
 
     @Test
@@ -234,11 +235,11 @@ class VehicleReportServiceTest {
         vehicle1.setCostPerHour(10.0f);
         vehicle1.setStatus(VehicleStatus.OUT);
 
-        Calendar entryCal1 = Calendar.getInstance();
+        Calendar entryCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         entryCal1.set(2023, Calendar.JANUARY, 15, 8, 0, 0);
         vehicle1.setEntryTime(entryCal1.getTime());
 
-        Calendar exitCal1 = Calendar.getInstance();
+        Calendar exitCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         exitCal1.set(2023, Calendar.JANUARY, 15, 10, 0, 0);
         vehicle1.setExitTime(exitCal1.getTime());
 
@@ -271,11 +272,11 @@ class VehicleReportServiceTest {
         vehicle1.setCostPerHour(10.0f);
         vehicle1.setStatus(VehicleStatus.OUT);
 
-        Calendar entryCal1 = Calendar.getInstance();
+        Calendar entryCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         entryCal1.set(2023, Calendar.JANUARY, 15, 8, 0, 0);
         vehicle1.setEntryTime(entryCal1.getTime());
 
-        Calendar exitCal1 = Calendar.getInstance();
+        Calendar exitCal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         exitCal1.set(2023, Calendar.JANUARY, 15, 10, 0, 0);
         vehicle1.setExitTime(exitCal1.getTime());
 
@@ -304,7 +305,7 @@ class VehicleReportServiceTest {
         VehicleOutDetailResponse report1 = result.get(0);
         assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", null, "Unknown Parking", 1, 1, 20.0f);
         VehicleDetailResponse detail1 = report1.getVehicles().get(0);
-        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-10:00", "15-01-2023-14:00", 20.0f);
+        assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-08:00", "15-01-2023-10:00", 20.0f);
     }
 
     private void assertVehicleOutDetailResponse(VehicleOutDetailResponse report, String userId, String username, String email, String parkingId, String parkingName, int vehiclesSize, int totalVehicles, float totalEarnings) {
