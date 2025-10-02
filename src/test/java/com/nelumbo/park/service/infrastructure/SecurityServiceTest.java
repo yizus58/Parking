@@ -7,13 +7,9 @@ import com.nelumbo.park.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 
@@ -23,14 +19,6 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = SecurityService.class)
 @TestPropertySource(properties = {"admin.password"})
 class SecurityServiceTest {
-
-    @TestConfiguration
-    static class TestSecurityConfig {
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-            return NoOpPasswordEncoder.getInstance();
-        }
-    }
 
     @MockBean
     private UserRepository userRepository;
