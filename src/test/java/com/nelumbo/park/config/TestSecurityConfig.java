@@ -26,6 +26,7 @@ public class TestSecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/partners-rankings/week").hasAuthority("ADMIN")
                         .requestMatchers("/parking-rankings/week").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/users/**").hasAuthority("ADMIN")
