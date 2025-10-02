@@ -29,6 +29,7 @@ public class TestSecurityConfig {
                         .requestMatchers("/parking-rankings/week").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/users/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
+                        .requestMatchers("/indicators/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .anyRequest().authenticated()
                 )
                 .build();
