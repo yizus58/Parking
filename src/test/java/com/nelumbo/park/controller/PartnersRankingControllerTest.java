@@ -1,11 +1,11 @@
 package com.nelumbo.park.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nelumbo.park.config.TestSecurityConfig;
 import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.response.WeeklyPartnerStatsResponse;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.service.VehicleService;
-import com.nelumbo.park.service.infrastructure.SecurityService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = PartnersRankingController.class,
-        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityService.TestSecurityConfig.class))
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = TestSecurityConfig.class))
 class PartnersRankingControllerTest {
 
     @Autowired
