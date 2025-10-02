@@ -17,7 +17,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -47,8 +46,7 @@ public class TestSecurityConfig {
                         .requestMatchers("/users/**").hasAuthority("ADMIN")
                         .requestMatchers("/parkings/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .requestMatchers("/parking-rankings/**").hasAuthority("ADMIN")
-                        .requestMatchers("/partners-rankings/**
-").hasAuthority("ADMIN")
+                        .requestMatchers("/partners-rankings/**").hasAuthority("ADMIN")
                         .requestMatchers("/rankings/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .requestMatchers("/vehicles/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .anyRequest().authenticated()
