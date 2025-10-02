@@ -12,6 +12,9 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
+
+import java.util.Arrays;
 
 @Configuration
 public class TestSecurityConfig {
@@ -23,6 +26,9 @@ public class TestSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/partners-rankings/week").hasAuthority("ADMIN")
+                        .requestMatchers("/parking-rankings/week").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .build();
@@ -36,7 +42,7 @@ public class TestSecurityConfig {
                 .password(passwordEncoder.encode("password"))
                 .roles("USER")
                 .build();
-        return new InMemoryUserDetailsManager(user);
+        return new InMemoryUserDetailsManager(Arrays.asList(user));
     }
 
     @Bean
