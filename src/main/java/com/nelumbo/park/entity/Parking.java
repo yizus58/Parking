@@ -22,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "parking_lot")
+@Table(name = "\"parking_lot\"")
 public class Parking {
 
     @Id

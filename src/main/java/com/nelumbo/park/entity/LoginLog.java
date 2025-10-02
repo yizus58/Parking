@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "login_log")
+@Table(name = "\"login_log\"")
 public class LoginLog {
 
     @Id

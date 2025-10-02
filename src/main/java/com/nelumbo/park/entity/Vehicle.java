@@ -22,7 +22,7 @@ import java.util.Date;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "vehicles")
+@Table(name = "\"vehicles\"")
 public class Vehicle {
 
     @Id
