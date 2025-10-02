@@ -21,6 +21,7 @@ public class LoginLogServiceImpl implements ILoginLogService {
         loginLog.setEmail(email);
         loginLog.setDescription(description);
         loginLog.setDate(date);
+        System.out.println("LOGIN LOG SAVE: " + loginLog);
         loginLogRepository.save(loginLog);
     }
 }

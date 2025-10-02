@@ -50,6 +50,7 @@ class CronServiceTest {
     void setUp() {
         ReflectionTestUtils.setField(cronService, "subject", "Test Subject");
         ReflectionTestUtils.setField(cronService, "typeMessage", "Test Type Message");
+        ReflectionTestUtils.setField(cronService, "pdfContentType", "application/pdf");
     }
 
     @Test

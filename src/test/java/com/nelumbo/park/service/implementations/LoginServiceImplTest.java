@@ -42,7 +42,7 @@ class LoginServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        loginRequest = new LoginRequest("test@example.com", "password");
+        loginRequest = new LoginRequest("test@example.com", "password123");
         ipAddress = "127.0.0.1";
         when(httpServletRequest.getRemoteAddr()).thenReturn(ipAddress);
     }

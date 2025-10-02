@@ -94,23 +94,34 @@ public class CronService {
             List<EmailAttachmentResponse> attachments = new ArrayList<>();
 
             // Upload Excel
-            Map<String, String> uploadResult = this.s3Service.uploadFile(excelBuffer, excelContentType, excelFileInfo.getS3Name());
-            if (uploadResult != null && uploadResult.containsKey("Key")) {
-                attachments.add(new EmailAttachmentResponse(excelFileInfo.getNameFile(), excelFileInfo.getS3Name()));
-                addToUploadedFiles(vehicleOutDetailResponse, excelFileInfo);
+            try {
+                Map<String, String> uploadResult = this.s3Service.uploadFile(excelBuffer, excelContentType, excelFileInfo.getS3Name());
+                if (uploadResult != null && uploadResult.containsKey("Key")) {
+                    attachments.add(new EmailAttachmentResponse(excelFileInfo.getNameFile(), excelFileInfo.getS3Name()));
+                    addToUploadedFiles(vehicleOutDetailResponse, excelFileInfo);
+                }
+            } catch (Exception e) {
+                log.error("Error subiendo el archivo Excel para el usuario {}: {}", vehicleOutDetailResponse.getUserId(), e.getMessage());
             }
 
             // Upload PDF
-            Map<String, String> uploadResultPdf = this.s3Service.uploadFile(pdfBuffer, this.pdfContentType, pdfFileInfo.getS3Name());
-            if (uploadResultPdf != null && uploadResultPdf.containsKey("Key")) {
-                attachments.add(new EmailAttachmentResponse(pdfFileInfo.getNameFile(), pdfFileInfo.getS3Name()));
-                addToUploadedFiles(vehicleOutDetailResponse, pdfFileInfo);
+            try {
+                Map<String, String> uploadResultPdf = this.s3Service.uploadFile(pdfBuffer, this.pdfContentType, pdfFileInfo.getS3Name());
+                if (uploadResultPdf != null && uploadResultPdf.containsKey("Key")) {
+                    attachments.add(new EmailAttachmentResponse(pdfFileInfo.getNameFile(), pdfFileInfo.getS3Name()));
+                    addToUploadedFiles(vehicleOutDetailResponse, pdfFileInfo);
+                }
+            } catch (Exception e) {
+                log.error("Error subiendo el archivo PDF para el usuario {}: {}", vehicleOutDetailResponse.getUserId(), e.getMessage());
             }
 
             if (!attachments.isEmpty()) {
                 sendEmailWithAttachments(vehicleOutDetailResponse, attachments);
             }
 
+        } catch (IOException e) {
+            log.error("Error generando archivo para usuario {}: {}",
+                    vehicleOutDetailResponse.getUserId(), e.getMessage());
         } catch (Exception e) {
             log.error("Error inesperado procesando archivo para usuario {}: {}",
                     vehicleOutDetailResponse.getUserId(), e.getMessage());
