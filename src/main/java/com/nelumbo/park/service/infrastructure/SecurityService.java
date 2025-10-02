@@ -3,8 +3,11 @@ package com.nelumbo.park.service.infrastructure;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.exception.exceptions.JwtUserNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,5 +44,15 @@ public class SecurityService {
     public boolean isSocio() {
         User currentUser = getCurrentUser();
         return currentUser != null && "SOCIO".equals(currentUser.getRole());
+    }
+
+    @TestConfiguration
+    public static class TestSecurityConfig {
+        @Bean
+        public SecurityFilterChain securityFilterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http) throws Exception {
+            http.csrf().disable()
+                    .authorizeRequests().anyRequest().permitAll();
+            return http.build();
+        }
     }
 }
