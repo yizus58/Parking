@@ -21,7 +21,10 @@ public class TestSecurityConfig {
     public SecurityFilterChain testSecurityFilterChain( HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authz -> authz.anyRequest().authenticated())
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/partners-rankings/week").hasAuthority("ADMIN")
+                        .anyRequest().authenticated()
+                )
                 .build();
     }
 
