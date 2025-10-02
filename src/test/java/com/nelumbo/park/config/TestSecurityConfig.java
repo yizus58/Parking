@@ -2,6 +2,7 @@ package com.nelumbo.park.config;
 
 import com.nelumbo.park.config.security.JwtAuthenticationFilter;
 import com.nelumbo.park.config.security.JwtService;
+import com.nelumbo.park.config.security.PasswordConfig;
 import com.nelumbo.park.config.security.SecurityConfig;
 import com.nelumbo.park.repository.UserRepository;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +18,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -25,7 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 @ComponentScan(basePackages = "com.nelumbo.park",
         excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class),
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {SecurityConfig.class, PasswordConfig.class}),
                 @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = SpringBootTest.class)
         })
 public class TestSecurityConfig {
@@ -56,13 +58,18 @@ public class TestSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         UserDetails user = User.builder()
                 .username("user")
-                .password("password")
-                .passwordEncoder(password -> NoOpPasswordEncoder.getInstance().encode(password))
+                .password(passwordEncoder.encode("password"))
                 .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
+    }
+
+    @Bean
+    @Primary
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
 }
