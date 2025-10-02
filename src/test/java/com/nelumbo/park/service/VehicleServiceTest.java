@@ -118,14 +118,10 @@ class VehicleServiceTest {
 
     @Test
     void createVehicle_WhenAlreadyParked_ShouldThrowVehicleAlreadyInParkingException() {
-        Vehicle vehicleFromMapper = new Vehicle();
-        vehicleFromMapper.setPlateNumber(createRequest.getPlateNumber());
-
-        when(vehicleMapper.toEntity(createRequest)).thenReturn(vehicleFromMapper);
         when(vehicleRepository.findByPlateNumberAndStatus(createRequest.getPlateNumber(), VehicleStatus.IN)).thenReturn(Optional.of(vehicle));
-        when(securityService.getCurrentUser()).thenReturn(socioUser);
 
         assertThrows(VehicleAlreadyInParkingException.class, () -> vehicleService.createVehicle(createRequest));
+
         verify(vehicleRepository, never()).save(any());
     }
 
