@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
+@EnableWebSecurity
 public class TestSecurityConfig {
 
     @Bean
@@ -30,7 +32,11 @@ public class TestSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/users/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
                         .requestMatchers("/indicators/**").hasAnyAuthority("ADMIN", "SOCIO")
-                        .anyRequest().authenticated()
+                        .anyRequest().denyAll()
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) -> response.sendError(403))
+                        .accessDeniedHandler((request, response, accessDeniedException) -> response.sendError(403))
                 )
                 .build();
     }

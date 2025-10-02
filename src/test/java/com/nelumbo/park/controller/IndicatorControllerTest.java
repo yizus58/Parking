@@ -16,6 +16,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.context.annotation.Import;
+import com.nelumbo.park.config.TestSecurityConfig;
+import org.springframework.web.context.WebApplicationContext;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -28,11 +33,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-@WebMvcTest(value = IndicatorController.class, excludeAutoConfiguration = UserDetailsServiceAutoConfiguration.class)
+@WebMvcTest(value = IndicatorController.class, excludeAutoConfiguration = {
+        UserDetailsServiceAutoConfiguration.class
+})
+@Import(TestSecurityConfig.class)
 class IndicatorControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext context;
 
     @MockBean
     private VehicleService vehicleService;
@@ -50,6 +60,10 @@ class IndicatorControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
+                .apply(springSecurity())
+                .build();
+
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         sdf.setTimeZone(TimeZone.getTimeZone("America/Bogota"));
         Date entryDate = sdf.parse("04-09-2025 10:47");
