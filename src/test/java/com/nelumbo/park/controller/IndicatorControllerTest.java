@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -27,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-@WebMvcTest(IndicatorController.class)
+@WebMvcTest(value = IndicatorController.class, excludeAutoConfiguration = UserDetailsServiceAutoConfiguration.class)
 class IndicatorControllerTest {
 
     @Autowired

@@ -35,6 +35,7 @@ public class TestSecurityConfig {
     }
 
     @Bean
+    @Primary
     public UserDetailsService userDetailsService() {
         UserDetails user = User.builder()
                 .username("user")
