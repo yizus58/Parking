@@ -32,6 +32,7 @@ public class TestSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/users/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
                         .requestMatchers("/indicators/**").hasAnyAuthority("ADMIN", "SOCIO")
+                        .requestMatchers("/vehicles/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .anyRequest().denyAll()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
