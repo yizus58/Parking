@@ -35,20 +35,20 @@ public class TestSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+    public UserDetailsService userDetailsService() {
         UserDetails user = User.builder()
                 .username("user")
-                .password(passwordEncoder.encode("password"))
+                .password("password")
                 .roles("USER")
                 .build();
         UserDetails admin = User.builder()
                 .username("admin")
-                .password(passwordEncoder.encode("admin"))
+                .password("admin")
                 .roles("ADMIN")
                 .build();
         UserDetails socio = User.builder()
                 .username("socio")
-                .password(passwordEncoder.encode("socio"))
+                .password("socio")
                 .roles("SOCIO")
                 .build();
         return new InMemoryUserDetailsManager(Arrays.asList(user, admin, socio));
