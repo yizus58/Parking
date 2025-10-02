@@ -1,6 +1,5 @@
 package com.nelumbo.park.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -15,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class TestSecurityConfig {
@@ -35,18 +35,26 @@ public class TestSecurityConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         UserDetails user = User.builder()
                 .username("user")
                 .password(passwordEncoder.encode("password"))
                 .roles("USER")
                 .build();
-        return new InMemoryUserDetailsManager(Arrays.asList(user));
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("admin"))
+                .roles("ADMIN")
+                .build();
+        UserDetails socio = User.builder()
+                .username("socio")
+                .password(passwordEncoder.encode("socio"))
+                .roles("SOCIO")
+                .build();
+        return new InMemoryUserDetailsManager(Arrays.asList(user, admin, socio));
     }
 
     @Bean
-    @ConditionalOnMissingBean
     public PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();
     }
