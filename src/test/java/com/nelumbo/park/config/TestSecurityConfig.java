@@ -21,7 +21,7 @@ public class TestSecurityConfig {
     public SecurityFilterChain testSecurityFilterChain( HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
+                .authorizeHttpRequests(authz -> authz.anyRequest().authenticated())
                 .build();
     }
 
