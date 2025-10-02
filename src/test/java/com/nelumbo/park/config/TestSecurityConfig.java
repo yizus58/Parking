@@ -1,5 +1,7 @@
 package com.nelumbo.park.config;
 
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -15,9 +17,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@ImportAutoConfiguration(exclude = UserDetailsServiceAutoConfiguration.class)
 public class TestSecurityConfig {
 
     @Bean
@@ -45,22 +49,24 @@ public class TestSecurityConfig {
     @Bean
     @Primary
     public UserDetailsService userDetailsService() {
-        UserDetails user = User.builder()
-                .username("user")
-                .password("password")
-                .roles("USER")
-                .build();
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password("admin")
-                .roles("ADMIN")
-                .build();
-        UserDetails socio = User.builder()
-                .username("socio")
-                .password("socio")
-                .roles("SOCIO")
-                .build();
-        return new InMemoryUserDetailsManager(Arrays.asList(user, admin, socio));
+        List<UserDetails> users = Arrays.asList(
+                User.builder()
+                        .username("user")
+                        .password("password")
+                        .authorities("USER")
+                        .build(),
+                User.builder()
+                        .username("admin")
+                        .password("admin")
+                        .authorities("ADMIN")
+                        .build(),
+                User.builder()
+                        .username("socio")
+                        .password("socio")
+                        .authorities("SOCIO")
+                        .build()
+        );
+        return new InMemoryUserDetailsManager(users);
     }
 
     @Bean
