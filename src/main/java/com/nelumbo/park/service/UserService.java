@@ -66,22 +66,17 @@ public class UserService {
     }
 
     public UserLoginResponse login(LoginRequest loginRequest) {
-        System.out.println("ENTRO EN LA LOGICA LOGIN");
         User user = userRepository.findByEmail(loginRequest.getEmail());
-        System.out.println("USER LOGIN: "+user);
         if (user == null) {
-            System.out.println("USER NO FOUND LOGIN");
             throw new EmailNotFoundException();
         }
 
         boolean passwordMatches = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
 
         if (!passwordMatches) {
-            System.out.println("ERROR PASSWORD LOGIN");
             logger.warn("Contraseña incorrecta para el usuario: {}", loginRequest.getEmail());
             throw new InvalidPasswordException();
         }
-        System.out.println("LOGIN SUCCESS RETURN VALUES");
         return authMapper.toUserLoginResponse(user);
     }
 }

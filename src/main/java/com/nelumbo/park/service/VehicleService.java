@@ -32,6 +32,7 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Service
 public class VehicleService {
@@ -81,23 +82,27 @@ public class VehicleService {
     }
 
     public VehicleCreateResponse createVehicle(VehicleCreateRequest vehicleCreateRequest) {
+        Optional<Vehicle> existingVehicleOpt = vehicleRepository.findByPlateNumberAndStatus(vehicleCreateRequest.getPlateNumber(), VehicleStatus.IN);
+        if (existingVehicleOpt.isPresent()) {
+            throw new VehicleAlreadyInParkingException(
+                    "El vehiculo con placa " + vehicleCreateRequest.getPlateNumber() +
+                            " ya está registrado y actualmente en un parking"
+            );
+        }
+
         Vehicle vehicle = vehicleMapper.toEntity(vehicleCreateRequest);
 
         User currentUser = securityService.getCurrentUser();
         String userId = currentUser.getId();
 
+        if (vehicle.getParking() == null) {
+            throw new ParkingNotFoundException();
+        }
+
         Boolean validateUserParking = vehicle.getParking().getOwner().getId().equals(userId);
         if (Boolean.FALSE.equals(validateUserParking)) {
             throw new InsufficientPermissionsException();
         }
-
-        vehicleRepository.findByPlateNumberAndStatus(vehicle.getPlateNumber(), VehicleStatus.IN)
-                .ifPresent(existingVehicle -> {
-                    throw new VehicleAlreadyInParkingException(
-                            "El vehiculo con placa " + vehicle.getPlateNumber() + 
-                            " ya está registrado y actualmente en un parking"
-                    );
-                });
 
         Boolean validateLimitParking = validateLimitParking(vehicle.getParking().getId());
         if (Boolean.TRUE.equals(validateLimitParking)) {
@@ -217,7 +222,7 @@ public class VehicleService {
                 ))
                 .toList();
     }
-    
+
     public WeeklyPartnerStatsResponse getPartnersRanking() {
         return parkingStatsService.getPartnersRanking();
     }

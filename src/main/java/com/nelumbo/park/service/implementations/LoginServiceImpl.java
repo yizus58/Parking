@@ -38,10 +38,8 @@ public class LoginServiceImpl implements LoginService {
 
         try {
             UserLoginResponse tokenResponse = userService.login(request);
-            System.out.println("LOGIN SUCCESS");
             loginLogService.save(request.getEmail(), request.getEmail(), "Loggin Success: " + ip, date);
             loginAttemptService.loginSucceeded(ip);
-            System.out.println("LOGIN SUCCESS RETURN AND IP IS: "+ip);
             return ResponseEntity.ok(tokenResponse);
         } catch (Exception e) {
             loginAttemptService.loginFailed(ip, request.getEmail());
