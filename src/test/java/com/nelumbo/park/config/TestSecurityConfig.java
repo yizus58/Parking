@@ -2,9 +2,12 @@ package com.nelumbo.park.config;
 
 import com.nelumbo.park.config.security.JwtAuthenticationFilter;
 import com.nelumbo.park.config.security.JwtService;
+import com.nelumbo.park.config.security.SecurityConfig;
 import com.nelumbo.park.repository.UserRepository;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @TestConfiguration
 @EnableWebSecurity
 @EnableMethodSecurity
+@ComponentScan(basePackages = "com.nelumbo.park",
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class))
 public class TestSecurityConfig {
 
     @Bean
