@@ -10,6 +10,7 @@ import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.mapper.ParkingResponseMapper;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.service.ParkingService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
@@ -21,6 +22,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import com.nelumbo.park.config.TestSecurityConfig;
 
 import java.util.Collections;
@@ -32,6 +35,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @WebMvcTest(
     value = ParkingController.class,
@@ -44,8 +48,10 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @Import(TestSecurityConfig.class)
 class ParkingControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext context;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -61,6 +67,14 @@ class ParkingControllerTest {
 
     @MockBean
     private UserRepository userRepository;
+
+    @BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+    }
 
     @Test
     @WithMockUser(roles = {"ADMIN", "SOCIO"})
