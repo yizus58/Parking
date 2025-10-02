@@ -1,16 +1,17 @@
 package com.nelumbo.park.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nelumbo.park.config.TestSecurityConfig;
 import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.response.WeeklyPartnerStatsResponse;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.service.VehicleService;
+import com.nelumbo.park.service.infrastructure.SecurityServiceTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,8 +25,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(PartnersRankingController.class)
-@Import(TestSecurityConfig.class)
+@WebMvcTest(controllers = PartnersRankingController.class,
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityServiceTest.TestSecurityConfig.class))
 class PartnersRankingControllerTest {
 
     @Autowired

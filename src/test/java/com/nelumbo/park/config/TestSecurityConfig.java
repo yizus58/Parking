@@ -4,7 +4,7 @@ import com.nelumbo.park.config.security.JwtAuthenticationFilter;
 import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.config.security.SecurityConfig;
 import com.nelumbo.park.repository.UserRepository;
-import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
@@ -16,15 +16,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@TestConfiguration
 @EnableWebSecurity
 @EnableMethodSecurity
 @ComponentScan(basePackages = "com.nelumbo.park",
-        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class))
+        excludeFilters = {
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class),
+                @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = SpringBootTest.class)
+        })
 public class TestSecurityConfig {
 
     @Bean
@@ -43,7 +47,8 @@ public class TestSecurityConfig {
                         .requestMatchers("/users/**").hasAuthority("ADMIN")
                         .requestMatchers("/parkings/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .requestMatchers("/parking-rankings/**").hasAuthority("ADMIN")
-                        .requestMatchers("/partners-rankings/**").hasAuthority("ADMIN")
+                        .requestMatchers("/partners-rankings/**
+").hasAuthority("ADMIN")
                         .requestMatchers("/rankings/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .requestMatchers("/vehicles/**").hasAnyAuthority("ADMIN", "SOCIO")
                         .anyRequest().authenticated()
@@ -54,11 +59,12 @@ public class TestSecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user = User.withDefaultPasswordEncoder()
-            .username("user")
-            .password("password")
-            .roles("USER")
-            .build();
+        UserDetails user = User.builder()
+                .username("user")
+                .password("password")
+                .passwordEncoder(password -> NoOpPasswordEncoder.getInstance().encode(password))
+                .roles("USER")
+                .build();
         return new InMemoryUserDetailsManager(user);
     }
 }

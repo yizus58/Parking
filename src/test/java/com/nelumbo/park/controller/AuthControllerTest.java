@@ -1,7 +1,6 @@
 package com.nelumbo.park.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nelumbo.park.config.TestSecurityConfig;
 import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.request.LoginRequest;
 import com.nelumbo.park.dto.response.UserLoginResponse;
@@ -15,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(AuthController.class)
-@Import(TestSecurityConfig.class)
 class AuthControllerTest {
 
     @Autowired
