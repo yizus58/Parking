@@ -50,7 +50,7 @@ class PartnersRankingControllerTest {
 
         when(vehicleService.getPartnersRanking()).thenReturn(statsResponse);
 
-        mockMvc.perform(get("/partners-rankings/"))
+        mockMvc.perform(get("/partners-rankings/week"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.topPartners").isArray());
@@ -61,7 +61,7 @@ class PartnersRankingControllerTest {
     @Test
     @WithMockUser(authorities = "SOCIO")
     void getPartnersRanking_WithNonAdminRole_ShouldReturnForbidden() throws Exception {
-        mockMvc.perform(get("/partners-rankings/"))
+        mockMvc.perform(get("/partners-rankings/week"))
                 .andExpect(status().isForbidden());
 
         verify(vehicleService, never()).getPartnersRanking();
@@ -69,7 +69,7 @@ class PartnersRankingControllerTest {
 
     @Test
     void getPartnersRanking_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
-        mockMvc.perform(get("/partners-rankings/"))
+        mockMvc.perform(get("/partners-rankings/week"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(""));
 

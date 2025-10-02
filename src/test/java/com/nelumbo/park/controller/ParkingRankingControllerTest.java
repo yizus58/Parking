@@ -50,7 +50,7 @@ class ParkingRankingControllerTest {
 
         when(vehicleService.getParkingRanking()).thenReturn(statsResponse);
 
-        mockMvc.perform(get("/parking-rankings/"))
+        mockMvc.perform(get("/parking-rankings/week"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.topParking").isArray());
@@ -61,7 +61,7 @@ class ParkingRankingControllerTest {
     @Test
     @WithMockUser(authorities = "SOCIO")
     void getParkingRanking_WithNonAdminRole_ShouldReturnForbidden() throws Exception {
-        mockMvc.perform(get("/parking-rankings/"))
+        mockMvc.perform(get("/parking-rankings/week"))
                 .andExpect(status().isForbidden());
 
         verify(vehicleService, never()).getParkingRanking();
@@ -69,7 +69,7 @@ class ParkingRankingControllerTest {
 
     @Test
     void getParkingRanking_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
-        mockMvc.perform(get("/parking-rankings/"))
+        mockMvc.perform(get("/parking-rankings/week"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(""));
 
