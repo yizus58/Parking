@@ -35,8 +35,6 @@ public class SecurityConfig {
                     .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/v3/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()
-                    .requestMatchers("/api/sonarqube-webhook").permitAll()
-                    .requestMatchers("/api/sonarqube-logs").permitAll()
                     .anyRequest().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions
