@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SpringBootWebSecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -41,8 +40,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
         value = ParkingController.class,
         excludeAutoConfiguration = {
                 UserDetailsServiceAutoConfiguration.class,
-                SecurityAutoConfiguration.class,
-                SpringBootWebSecurityAutoConfiguration.class
+                SecurityAutoConfiguration.class
         }
 )
 @Import(TestSecurityConfig.class)
