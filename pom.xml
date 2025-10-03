@@ -38,7 +38,7 @@
         <junit-platform.version>1.10.5</junit-platform.version>
         <mockito.version>5.14.2</mockito.version>
         <jacoco.version>0.8.12</jacoco.version>
-        <sonar.host.url>http://YOUR_SERVER_IP:9000</sonar.host.url>
+        <sonar.host.url>${sonar.host.url}:9000</sonar.host.url>
     </properties>
 
     <dependencyManagement>
