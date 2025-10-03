@@ -26,6 +26,25 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
+      - name: Verify Secrets
+        run: |
+          if [ -z "${{ secrets.SONAR_HOST_URL }}" ]; then
+            echo "::error::SONAR_HOST_URL secret is NOT set or is empty."
+          else
+            echo "SONAR_HOST_URL is set."
+          fi
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "::error::SONAR_TOKEN secret is NOT set or is empty."
+          else
+            echo "SONAR_TOKEN is set."
+          fi
+          if [ -z "${{ secrets.SONAR_PROJECT_KEY }}" ]; then
+            echo "::error::SONAR_PROJECT_KEY secret is NOT set or is empty."
+          else
+            echo "SONAR_PROJECT_KEY is set."
+          fi
+
       - name: Build, Test and Analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,7 +101,11 @@ jobs:
           SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_JSON: ${{ secrets.SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_JSON }}
           SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_XML: ${{ secrets.SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_XML }}
           LOGGING_LEVEL_ROOT: ${{ secrets.LOGGING_LEVEL_ROOT }}
-        run: mvn -B verify sonar:sonar -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+        run: >
+          mvn -B verify sonar:sonar
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
 
   deploy:
     name: Deploy to Render
