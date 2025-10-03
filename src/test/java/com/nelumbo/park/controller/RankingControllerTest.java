@@ -38,7 +38,7 @@ class RankingControllerTest {
     private UserRepository userRepository;
 
     @Test
-    @WithMockUser(authorities = {"ADMIN", "SOCIO"})
+    @WithMockUser(authorities = {"ROLE_ADMIN", "ROLE_SOCIO"})
     void getTopVehicles_WithAuthorizedUser_ShouldReturnTopVehicles() throws Exception {
         TopVehicleResponse topVehicle = new TopVehicleResponse("ABC-123", 10L);
         List<TopVehicleResponse> topVehicles = Collections.singletonList(topVehicle);
@@ -63,7 +63,7 @@ class RankingControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"ADMIN", "SOCIO"})
+    @WithMockUser(authorities = {"ROLE_ADMIN", "ROLE_SOCIO"})
     void getTopVehicleById_WithAuthorizedUser_ShouldReturnTopVehiclesForParking() throws Exception {
         String parkingId = "park-1";
         TopVehicleResponse topVehicle = new TopVehicleResponse("XYZ-789", 5L);
