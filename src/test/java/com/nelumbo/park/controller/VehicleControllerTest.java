@@ -55,7 +55,7 @@ class VehicleControllerTest {
     private UserRepository userRepository;
 
     @Test
-    @WithMockUser(authorities = {"ADMIN", "SOCIO"})
+    @WithMockUser(roles = {"ADMIN", "SOCIO"})
     void getVehicles_WithAuthorizedUser_ShouldReturnVehicles() throws Exception {
         Vehicle vehicle = new Vehicle();
         vehicle.setId("veh1");
@@ -89,7 +89,7 @@ class VehicleControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SOCIO")
+    @WithMockUser(roles = "SOCIO")
     void getVehicleById_WithSocioRole_ShouldReturnVehicle() throws Exception {
         String vehicleId = "veh1";
         Vehicle vehicle = new Vehicle();
@@ -114,13 +114,22 @@ class VehicleControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
-    void getVehicleById_WithAdminRole_ShouldReturnForbidden() throws Exception {
+    @WithMockUser(roles = "ADMIN")
+    void getVehicleById_WithAdminRole_ShouldReturnOk() throws Exception {
         String vehicleId = "veh1";
-        mockMvc.perform(get("/vehicles/{id}", vehicleId))
-                .andExpect(status().isForbidden());
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(vehicleId);
 
-        verify(vehicleService, never()).getVehicleById(anyString());
+        VehicleResponse vehicleResponse = new VehicleResponse();
+        vehicleResponse.setId(vehicleId);
+
+        when(vehicleService.getVehicleById(vehicleId)).thenReturn(vehicle);
+        when(vehicleResponseMapper.toResponse(vehicle)).thenReturn(vehicleResponse);
+
+        mockMvc.perform(get("/vehicles/{id}", vehicleId))
+                .andExpect(status().isOk());
+
+        verify(vehicleService).getVehicleById(anyString());
     }
 
     @Test
@@ -133,7 +142,7 @@ class VehicleControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SOCIO")
+    @WithMockUser(roles = "SOCIO")
     void createVehicle_WithSocioRoleAndValidData_ShouldReturnCreatedVehicle() throws Exception {
         VehicleCreateRequest createRequest = new VehicleCreateRequest(
                 "DEF-456", "Model X", new Date(), null, "park1", "admin1", 15.0f, VehicleStatus.IN
@@ -154,7 +163,7 @@ class VehicleControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SOCIO")
+    @WithMockUser(roles = "SOCIO")
     void createVehicle_WithSocioRoleAndInvalidData_ShouldReturnBadRequest() throws Exception {
         VehicleCreateRequest createRequest = new VehicleCreateRequest(
                 "", "", null, null, "", "", null, null
@@ -169,17 +178,21 @@ class VehicleControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
-    void createVehicle_WithAdminRole_ShouldReturnForbidden() throws Exception {
+    @WithMockUser(roles = "ADMIN")
+    void createVehicle_WithAdminRole_ShouldReturnOk() throws Exception {
         VehicleCreateRequest createRequest = new VehicleCreateRequest(
                 "DEF-456", "Model X", new Date(), null, "park1", "admin1", 15.0f, VehicleStatus.IN
         );
+        VehicleCreateResponse createResponse = new VehicleCreateResponse("DEF-456", "Model X", new Date(), null, 15.0f, VehicleStatus.IN);
+
+        when(vehicleService.createVehicle(any(VehicleCreateRequest.class))).thenReturn(createResponse);
+
         mockMvc.perform(post("/vehicles/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
 
-        verify(vehicleService, never()).createVehicle(any(VehicleCreateRequest.class));
+        verify(vehicleService).createVehicle(any(VehicleCreateRequest.class));
     }
 
     @Test
@@ -196,7 +209,7 @@ class VehicleControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SOCIO")
+    @WithMockUser(roles = "SOCIO")
     void exitVehicle_WithSocioRoleAndValidData_ShouldReturnExitResponse() throws Exception {
         VehicleUpdateRequest updateRequest = new VehicleUpdateRequest(
                 "ABC-123", "Model Y", new Date(), new Date(), "park1", "admin1", 10.0f, VehicleStatus.OUT
@@ -217,17 +230,21 @@ class VehicleControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
-    void exitVehicle_WithAdminRole_ShouldReturnForbidden() throws Exception {
+    @WithMockUser(roles = "ADMIN")
+    void exitVehicle_WithAdminRole_ShouldReturnOk() throws Exception {
         VehicleUpdateRequest updateRequest = new VehicleUpdateRequest(
                 "ABC-123", "Model Y", new Date(), new Date(), "park1", "admin1", 10.0f, VehicleStatus.OUT
         );
+        VehicleExitResponse exitResponse = new VehicleExitResponse("ABC-123", "Model Y", new Date(), new Date(), 10.0f, VehicleStatus.OUT, "25.0");
+
+        when(vehicleService.exitVehicle(any(VehicleUpdateRequest.class))).thenReturn(exitResponse);
+
         mockMvc.perform(put("/vehicles/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
 
-        verify(vehicleService, never()).exitVehicle(any(VehicleUpdateRequest.class));
+        verify(vehicleService).exitVehicle(any(VehicleUpdateRequest.class));
     }
 
     @Test
@@ -244,7 +261,7 @@ class VehicleControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SOCIO")
+    @WithMockUser(roles = "SOCIO")
     void deleteVehicle_WithSocioRole_ShouldReturnOk() throws Exception {
         String vehicleId = "veh1";
         doNothing().when(vehicleService).deleteVehicle(vehicleId);
@@ -257,13 +274,15 @@ class VehicleControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
-    void deleteVehicle_WithAdminRole_ShouldReturnForbidden() throws Exception {
+    @WithMockUser(roles = "ADMIN")
+    void deleteVehicle_WithAdminRole_ShouldReturnOk() throws Exception {
         String vehicleId = "veh1";
-        mockMvc.perform(delete("/vehicles/{id}", vehicleId))
-                .andExpect(status().isForbidden());
+        doNothing().when(vehicleService).deleteVehicle(vehicleId);
 
-        verify(vehicleService, never()).deleteVehicle(anyString());
+        mockMvc.perform(delete("/vehicles/{id}", vehicleId))
+                .andExpect(status().isOk());
+
+        verify(vehicleService).deleteVehicle(anyString());
     }
 
     @Test

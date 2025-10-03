@@ -36,10 +36,11 @@ public class TestSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
                         .requestMatchers("/indicators/**").hasAnyRole("ADMIN", "SOCIO")
-                        .requestMatchers("/vehicles/**").hasRole("SOCIO")
+                        .requestMatchers("/vehicles/**").hasAnyRole("ADMIN", "SOCIO")
                         .requestMatchers(HttpMethod.POST, "/parkings/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/parkings/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/parkings/**").hasRole("ADMIN")
+
                         .anyRequest().denyAll()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
