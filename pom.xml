@@ -38,6 +38,7 @@
         <junit-platform.version>1.10.5</junit-platform.version>
         <mockito.version>5.14.2</mockito.version>
         <jacoco.version>0.8.12</jacoco.version>
+        <sonar.host.url>http://YOUR_SERVER_IP:9000</sonar.host.url>
     </properties>
 
     <dependencyManagement>
@@ -235,6 +236,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.11.0.3922</version>
             </plugin>
         </plugins>
     </build>
