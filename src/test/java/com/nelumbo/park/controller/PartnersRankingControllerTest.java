@@ -44,7 +44,7 @@ class PartnersRankingControllerTest {
     private UserRepository userRepository;
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void getPartnersRanking_WithAdminRole_ShouldReturnRanking() throws Exception {
         WeeklyPartnerStatsResponse statsResponse = new WeeklyPartnerStatsResponse(LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList());
 
@@ -59,7 +59,7 @@ class PartnersRankingControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SOCIO")
+    @WithMockUser(authorities = "ROLE_SOCIO")
     void getPartnersRanking_WithNonAdminRole_ShouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/partners-rankings/week"))
                 .andExpect(status().isForbidden());
