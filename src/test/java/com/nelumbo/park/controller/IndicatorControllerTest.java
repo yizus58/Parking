@@ -74,7 +74,7 @@ class IndicatorControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     void getFirstTimeParkedVehicles_WithAdminRole_ShouldReturnVehiclesList() throws Exception {
 
         when(vehicleService.getFirstTimeParkedVehicles()).thenReturn(indicatorResponseList);
@@ -93,7 +93,7 @@ class IndicatorControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SOCIO")
+    @WithMockUser(roles = "SOCIO")
     void getFirstTimeParkedVehicles_WithSocioRole_ShouldReturnVehiclesList() throws Exception {
 
         when(vehicleService.getFirstTimeParkedVehicles()).thenReturn(indicatorResponseList);
@@ -118,8 +118,8 @@ class IndicatorControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = {})
-    void getFirstTimeParkedVehicles_WithNoAuthorities_ShouldReturnForbidden() throws Exception {
+    @WithMockUser(roles = {})
+    void getFirstTimeParkedVehicles_WithNoRoles_ShouldReturnForbidden() throws Exception {
 
         mockMvc.perform(get("/indicators/")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -129,7 +129,7 @@ class IndicatorControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     void getFirstTimeParkedVehicles_WhenNoVehicles_ShouldReturnEmptyList() throws Exception {
 
         when(vehicleService.getFirstTimeParkedVehicles()).thenReturn(Collections.emptyList());

@@ -40,7 +40,6 @@ public class TestSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/parkings/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/parkings/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/parkings/**").hasRole("ADMIN")
-
                         .anyRequest().denyAll()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
