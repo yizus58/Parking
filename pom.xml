@@ -38,7 +38,6 @@
         <junit-platform.version>1.10.5</junit-platform.version>
         <mockito.version>5.14.2</mockito.version>
         <jacoco.version>0.8.12</jacoco.version>
-        <sonar.host.url>${env.SONAR_HOST_URL}</sonar.host.url>
     </properties>
 
     <dependencyManagement>
