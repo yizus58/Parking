@@ -37,6 +37,7 @@ public class TestSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
                         .requestMatchers("/indicators/**").hasAnyRole("ADMIN", "SOCIO")
                         .requestMatchers("/vehicles/**").hasAnyRole("ADMIN", "SOCIO")
+                        .requestMatchers(HttpMethod.GET, "/parkings/**").hasAnyRole("ADMIN", "SOCIO")
                         .requestMatchers(HttpMethod.POST, "/parkings/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/parkings/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/parkings/**").hasRole("ADMIN")
