@@ -74,7 +74,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void getAllUsers_WithAdminRole_ShouldReturnUsersList() throws Exception {
         when(userService.getAllUsers()).thenReturn(usersList);
 
@@ -97,7 +97,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SOCIO")
+    @WithMockUser(authorities = "ROLE_SOCIO")
     void getAllUsers_WithNonAdminRole_ShouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/users/")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -117,7 +117,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void createUser_WithValidData_ShouldReturnCreatedUser() throws Exception {
         when(userService.createUser(any(UserCreateRequest.class))).thenReturn(userResponse);
 
@@ -135,7 +135,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SOCIO")
+    @WithMockUser(authorities = "ROLE_SOCIO")
     void createUser_WithNonAdminRole_ShouldReturnForbidden() throws Exception {
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -157,7 +157,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void createUser_WithInvalidEmail_ShouldReturnBadRequest() throws Exception {
         userCreateRequest.setEmail("invalid-email");
 
@@ -170,7 +170,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void createUser_WithBlankUsername_ShouldReturnBadRequest() throws Exception {
         userCreateRequest.setUsername("");
 
@@ -183,7 +183,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void createUser_WithPasswordTooShort_ShouldReturnBadRequest() throws Exception {
         userCreateRequest.setPassword("123");
 
@@ -196,7 +196,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void createUser_WithInvalidUsernameCharacters_ShouldReturnBadRequest() throws Exception {
         userCreateRequest.setUsername("invalid@username");
 
@@ -209,7 +209,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void createUser_WithUsernameTooLong_ShouldReturnBadRequest() throws Exception {
         userCreateRequest.setUsername("a".repeat(51));
 
@@ -222,7 +222,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void createUser_WithEmptyRequestBody_ShouldReturnBadRequest() throws Exception {
         String emptyJson = "{}";
 
