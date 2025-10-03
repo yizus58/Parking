@@ -1,4 +1,4 @@
-name: Spring Boot CI
+name: Spring Boot CI/CD
 
 on:
   push:
@@ -30,7 +30,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SPRING_APPLICATION_NAME: ${{ secrets.SPRING_APPLICATION_NAME }}
           PASSWORD_ADMIN: ${{ secrets.PASSWORD_ADMIN }}
           API_HOST: ${{ secrets.API_HOST }}
@@ -83,4 +82,13 @@ jobs:
           SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_JSON: ${{ secrets.SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_JSON }}
           SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_XML: ${{ secrets.SPRING_MVC_CONTENTNEGOTIATION_MEDIA_TYPES_XML }}
           LOGGING_LEVEL_ROOT: ${{ secrets.LOGGING_LEVEL_ROOT }}
-        run: mvn -B verify sonar:sonar -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+        run: mvn -B verify sonar:sonar -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+
+  deploy:
+    name: Deploy to Render
+    needs: build-test-and-analyze
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deployment
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
