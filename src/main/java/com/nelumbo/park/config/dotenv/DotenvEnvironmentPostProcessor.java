@@ -35,7 +35,6 @@ public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor 
 
         } catch (Exception e) {
             logger.error("Error cargando .env: {} ", e.getMessage());
-            e.printStackTrace();
         }
     }
 }

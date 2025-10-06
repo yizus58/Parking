@@ -35,7 +35,6 @@ public class DotenvConfig implements ApplicationContextInitializer<ConfigurableA
 
         } catch (Exception e) {
             logger.error("ERROR al cargar el archivo .env: {}", e.getMessage());
-            e.printStackTrace();
         }
     }
 }

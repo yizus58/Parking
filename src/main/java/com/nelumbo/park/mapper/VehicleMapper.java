@@ -22,10 +22,14 @@ import java.util.Date;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class VehicleMapper {
 
+    private final UserRepository userRepository;
+    private final ParkingRepository parkingRepository;
+
     @Autowired
-    protected UserRepository userRepository;
-    @Autowired
-    protected ParkingRepository parkingRepository;
+    protected VehicleMapper( UserRepository userRepository, ParkingRepository parkingRepository ) {
+        this.userRepository = userRepository;
+        this.parkingRepository = parkingRepository;
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "plateNumber", source = "plateNumber")

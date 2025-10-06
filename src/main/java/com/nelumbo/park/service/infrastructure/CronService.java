@@ -107,7 +107,6 @@ public class CronService {
         } catch (Exception e) {
             log.error("Error inesperado procesando archivo para usuario {}: {}",
                     vehicleOutDetailResponse.getUserId(), e.getMessage());
-            e.printStackTrace();
         }
     }
 

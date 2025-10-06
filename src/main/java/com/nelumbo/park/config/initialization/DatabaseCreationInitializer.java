@@ -94,9 +94,22 @@ public class DatabaseCreationInitializer implements ApplicationContextInitialize
     }
 
     private void createDatabase(Connection connection, String databaseName) throws DatabaseInitializationException {
-        String createDatabaseSQL = "CREATE DATABASE \"" + databaseName + "\"";
+        String quotedDbName;
+        try (var ps = connection.prepareStatement("SELECT pg_catalog.quote_ident(?)")) {
+            ps.setString(1, databaseName);
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    quotedDbName = rs.getString(1);
+                } else {
+                    throw new DatabaseInitializationException("No se pudo citar el nombre de la base de datos: " + databaseName);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseInitializationException("Error al citar el nombre de la base de datos: " + databaseName, e);
+        }
+
         try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate(createDatabaseSQL);
+            statement.executeUpdate("CREATE DATABASE " + quotedDbName);
             logger.info("Base de datos '{}' creada exitosamente", databaseName);
         } catch (SQLException e) {
             throw new DatabaseInitializationException("Error al crear la base de datos: " + databaseName, e);
