@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = { JwtService.class })
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class AuthMapper {
 
     private final JwtService jwtService;

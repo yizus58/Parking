@@ -1,6 +1,5 @@
 package com.nelumbo.park.mapper;
 
-import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.request.VehicleCreateRequest;
 import com.nelumbo.park.dto.request.VehicleUpdateRequest;
 import com.nelumbo.park.dto.response.VehicleCreateResponse;
@@ -20,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = { JwtService.class })
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class VehicleMapper {
 
     private final UserRepository userRepository;
