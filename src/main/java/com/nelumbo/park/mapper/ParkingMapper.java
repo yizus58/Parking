@@ -6,16 +6,21 @@ import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.exception.exceptions.UserNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper(componentModel = "spring")
-@RequiredArgsConstructor
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public abstract class ParkingMapper {
 
     protected final UserRepository userRepository;
+
+    @Autowired
+    protected ParkingMapper(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", source = "idOwner", qualifiedByName = "mapOwner")

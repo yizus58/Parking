@@ -11,19 +11,23 @@ import com.nelumbo.park.exception.exceptions.UserNotFoundException;
 import com.nelumbo.park.exception.exceptions.ParkingNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.repository.ParkingRepository;
-import lombok.RequiredArgsConstructor;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.Date;
 
-@Mapper(componentModel = "spring")
-@RequiredArgsConstructor
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public abstract class VehicleMapper {
 
     protected final UserRepository userRepository;
     protected final ParkingRepository parkingRepository;
+
+    protected VehicleMapper(UserRepository userRepository, ParkingRepository parkingRepository) {
+        this.userRepository = userRepository;
+        this.parkingRepository = parkingRepository;
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "plateNumber", source = "plateNumber")
