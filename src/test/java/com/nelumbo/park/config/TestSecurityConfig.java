@@ -1,5 +1,6 @@
 package com.nelumbo.park.config;
 
+import com.nelumbo.park.config.security.JwtAuthenticationFilter;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +25,12 @@ import java.util.List;
 @EnableWebSecurity
 @ImportAutoConfiguration(exclude = UserDetailsServiceAutoConfiguration.class)
 public class TestSecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public TestSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     @Primary
@@ -48,6 +56,7 @@ public class TestSecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> response.sendError(403))
                         .accessDeniedHandler((request, response, accessDeniedException) -> response.sendError(403))
                 )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

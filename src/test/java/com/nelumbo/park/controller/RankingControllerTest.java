@@ -56,9 +56,6 @@ class RankingControllerTest {
     @MockBean
     private UserRepository userRepository;
 
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
     @BeforeEach
     void setup() {
         mockMvc = MockMvcBuilders
