@@ -158,7 +158,8 @@ class ParkingServiceTest {
         when(parkingRepository.findByIdAndOwner(parking.getId(), anotherSocio)).thenReturn(null);
         when(parkingRepository.findById(parking.getId())).thenReturn(parking);
 
-        assertThrows(InsufficientPermissionsException.class, () -> parkingService.getParkingById(parking.getId()));
+        String parkingId = parking.getId();
+        assertThrows(InsufficientPermissionsException.class, () -> parkingService.getParkingById(parkingId));
     }
 
     @Test
