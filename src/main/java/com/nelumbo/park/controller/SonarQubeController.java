@@ -21,7 +21,6 @@ public class SonarQubeController {
     @PostMapping("/sonarqube-webhook")
     public ResponseEntity<Void> sonarqubeWebhook(@RequestBody Map<String, Object> payload) {
         webhookPayloads.add(payload);
-        System.out.println("Received SonarQube webhook payload: " + payload);
         return ResponseEntity.ok().build();
     }
 
