@@ -23,8 +23,8 @@ import java.util.Date;
 @RequiredArgsConstructor
 public abstract class VehicleMapper {
 
-    protected final UserRepository userRepository;
-    protected final ParkingRepository parkingRepository;
+    private final UserRepository userRepository;
+    private final ParkingRepository parkingRepository;
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "plateNumber", source = "plateNumber")

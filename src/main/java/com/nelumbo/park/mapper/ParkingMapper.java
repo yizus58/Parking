@@ -16,7 +16,7 @@ import org.mapstruct.Named;
 @RequiredArgsConstructor
 public abstract class ParkingMapper {
 
-    protected final UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", source = "idOwner", qualifiedByName = "mapOwner")

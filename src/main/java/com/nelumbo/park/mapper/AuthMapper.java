@@ -18,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public abstract class AuthMapper {
 
-    protected final JwtService jwtService;
+    private final JwtService jwtService;
 
     @Mapping(target = "tokenType", constant = "Bearer")
     @Mapping(target = "accessToken", expression = "java(generateJwtToken(user))")
