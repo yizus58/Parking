@@ -4,25 +4,20 @@ import com.nelumbo.park.dto.response.TokenResponse;
 import com.nelumbo.park.dto.response.UserLoginResponse;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.config.security.JwtService;
+import lombok.RequiredArgsConstructor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = "spring")
+@RequiredArgsConstructor
 public abstract class AuthMapper {
 
-    private final JwtService jwtService;
-
-    @Autowired
-    protected AuthMapper( JwtService jwtService ) {
-        this.jwtService = jwtService;
-    }
+    protected final JwtService jwtService;
 
     @Mapping(target = "tokenType", constant = "Bearer")
     @Mapping(target = "accessToken", expression = "java(generateJwtToken(user))")
