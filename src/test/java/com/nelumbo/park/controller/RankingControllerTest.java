@@ -1,7 +1,6 @@
 package com.nelumbo.park.controller;
 
 import com.nelumbo.park.config.TestSecurityConfig;
-import com.nelumbo.park.config.security.JwtAuthenticationFilter;
 import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.dto.response.TopVehicleResponse;
@@ -83,6 +82,9 @@ class RankingControllerTest {
 
     @Test
     void getTopVehicles_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
+        doThrow(new IllegalStateException("Service method should not be called when unauthenticated"))
+                .when(vehicleService).getTopVehicles();
+
         mockMvc.perform(get("/rankings/"))
                 .andExpect(status().isForbidden());
 
@@ -110,6 +112,9 @@ class RankingControllerTest {
     @Test
     void getTopVehicleById_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
         String parkingId = "park-1";
+        doThrow(new IllegalStateException("Service method should not be called when unauthenticated"))
+                .when(vehicleService).getTopVehicleById(anyString());
+
         mockMvc.perform(get("/rankings/{id}", parkingId))
                 .andExpect(status().isForbidden());
 
