@@ -1,24 +1,32 @@
 package com.nelumbo.park.controller;
 
 import com.nelumbo.park.config.TestSecurityConfig;
+import com.nelumbo.park.config.security.JwtAuthenticationFilter;
+import com.nelumbo.park.config.security.JwtService;
+import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.dto.response.TopVehicleResponse;
 import com.nelumbo.park.service.VehicleService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -34,13 +42,32 @@ class RankingControllerTest {
         }
     }
 
-    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private VehicleService vehicleService;
-    @Test
+    private WebApplicationContext context;
 
+    @Autowired
+    private VehicleService vehicleService;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+    }
+
+    @Test
     @WithMockUser(authorities = {"ROLE_ADMIN", "ROLE_SOCIO"})
     void getTopVehicles_WithAuthorizedUser_ShouldReturnTopVehicles() throws Exception {
         TopVehicleResponse topVehicle = new TopVehicleResponse("ABC-123", 10L);
