@@ -1,42 +1,46 @@
 package com.nelumbo.park.controller;
 
+import com.nelumbo.park.config.TestSecurityConfig;
 import com.nelumbo.park.dto.response.TopVehicleResponse;
 import com.nelumbo.park.service.VehicleService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(controllers = RankingController.class)
+@Import({RankingControllerTest.TestConfig.class, TestSecurityConfig.class})
 class RankingControllerTest {
 
-    private MockMvc mockMvc;
-
-    @Mock
-    private VehicleService vehicleService;
-
-    @InjectMocks
-    private RankingController rankingController;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(rankingController).build();
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public VehicleService vehicleService() {
+            return Mockito.mock(VehicleService.class);
+        }
     }
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private VehicleService vehicleService;
     @Test
+
     @WithMockUser(authorities = {"ROLE_ADMIN", "ROLE_SOCIO"})
     void getTopVehicles_WithAuthorizedUser_ShouldReturnTopVehicles() throws Exception {
         TopVehicleResponse topVehicle = new TopVehicleResponse("ABC-123", 10L);
