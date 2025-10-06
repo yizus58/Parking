@@ -1,5 +1,6 @@
 package com.nelumbo.park.mapper;
 
+import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.request.ParkingRequest;
 import com.nelumbo.park.dto.request.ParkingUpdateRequest;
 import com.nelumbo.park.entity.Parking;
@@ -12,7 +13,7 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = { JwtService.class })
 public abstract class ParkingMapper {
 
     private final UserRepository userRepository;

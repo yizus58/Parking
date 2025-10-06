@@ -1,5 +1,6 @@
 package com.nelumbo.park.mapper;
 
+import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.request.UserCreateRequest;
 import com.nelumbo.park.dto.response.UserResponse;
 import com.nelumbo.park.entity.User;
@@ -7,7 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = { JwtService.class })
 public abstract class UserMapper {
 
     @Mapping(target = "id", ignore = true)

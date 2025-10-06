@@ -1,5 +1,6 @@
 package com.nelumbo.park.mapper;
 
+import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.response.ParkingResponse;
 import com.nelumbo.park.dto.response.UserResponse;
 import com.nelumbo.park.entity.Parking;
@@ -12,7 +13,7 @@ import org.mapstruct.Named;
 
 import java.util.List;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = { JwtService.class })
 public interface ParkingResponseMapper {
 
     @Named("toResponseWithId")
