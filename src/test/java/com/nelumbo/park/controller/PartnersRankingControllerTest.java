@@ -2,14 +2,14 @@ package com.nelumbo.park.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nelumbo.park.config.TestSecurityConfig;
-import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.response.WeeklyPartnerStatsResponse;
-import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.service.VehicleService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -18,15 +18,21 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = PartnersRankingController.class)
-@Import(TestSecurityConfig.class)
+@Import({PartnersRankingControllerTest.TestConfig.class, TestSecurityConfig.class})
 class PartnersRankingControllerTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public VehicleService vehicleService() {
+            return Mockito.mock(VehicleService.class);
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -34,14 +40,8 @@ class PartnersRankingControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @Autowired
     private VehicleService vehicleService;
-
-    @MockBean
-    private JwtService jwtService;
-
-    @MockBean
-    private UserRepository userRepository;
 
     @Test
     @WithMockUser(authorities = "ROLE_ADMIN")

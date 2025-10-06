@@ -1,32 +1,29 @@
 package com.nelumbo.park.service.infrastructure;
 
-import com.nelumbo.park.config.initialization.DatabaseInitializer;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.exception.exceptions.JwtUserNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = SecurityService.class)
-@TestPropertySource(properties = {"admin.password"})
+@ExtendWith(MockitoExtension.class)
 class SecurityServiceTest {
 
-    @MockBean
+    @Mock
     private UserRepository userRepository;
 
-    @MockBean
-    private DatabaseInitializer databaseInitializer;
-
-    @SpyBean
+    @Spy
+    @InjectMocks
     private SecurityService securityService;
 
     // --- getCurrentUser tests ---

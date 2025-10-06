@@ -2,18 +2,16 @@ package com.nelumbo.park.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nelumbo.park.config.TestSecurityConfig;
-import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.request.UserCreateRequest;
 import com.nelumbo.park.dto.response.UserResponse;
-import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -27,22 +25,23 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
 @WebMvcTest(controllers = UserController.class)
-@Import(TestSecurityConfig.class)
+@Import({UserControllerTest.TestConfig.class, TestSecurityConfig.class})
 class UserControllerTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public UserService userService() {
+            return Mockito.mock(UserService.class);
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     private UserService userService;
-    
-    @MockBean
-    private JwtService jwtService;
-    
-    @MockBean
-    private UserRepository userRepository;
 
     @Autowired
     private ObjectMapper objectMapper;

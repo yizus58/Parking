@@ -2,7 +2,6 @@ package com.nelumbo.park.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nelumbo.park.config.TestSecurityConfig;
-import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.request.VehicleCreateRequest;
 import com.nelumbo.park.dto.response.VehicleCreateResponse;
 import com.nelumbo.park.dto.response.VehicleExitResponse;
@@ -11,12 +10,13 @@ import com.nelumbo.park.dto.request.VehicleUpdateRequest;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.enums.VehicleStatus;
 import com.nelumbo.park.mapper.VehicleResponseMapper;
-import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.service.VehicleService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -33,8 +33,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = VehicleController.class)
-@Import(TestSecurityConfig.class)
+@Import({VehicleControllerTest.TestConfig.class, TestSecurityConfig.class})
 class VehicleControllerTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public VehicleService vehicleService() {
+            return Mockito.mock(VehicleService.class);
+        }
+        @Bean
+        public VehicleResponseMapper vehicleResponseMapper() {
+            return Mockito.mock(VehicleResponseMapper.class);
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,17 +54,11 @@ class VehicleControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @Autowired
     private VehicleService vehicleService;
 
-    @MockBean
+    @Autowired
     private VehicleResponseMapper vehicleResponseMapper;
-
-    @MockBean
-    private JwtService jwtService;
-
-    @MockBean
-    private UserRepository userRepository;
 
     @Test
     @WithMockUser(roles = {"ADMIN", "SOCIO"})

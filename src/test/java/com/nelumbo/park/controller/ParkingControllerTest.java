@@ -1,29 +1,27 @@
 package com.nelumbo.park.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nelumbo.park.config.security.JwtService;
+import com.nelumbo.park.config.TestSecurityConfig;
 import com.nelumbo.park.dto.request.ParkingRequest;
 import com.nelumbo.park.dto.request.ParkingUpdateRequest;
 import com.nelumbo.park.dto.response.ParkingResponse;
 import com.nelumbo.park.dto.response.ParkingWithVehiclesResponse;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.mapper.ParkingResponseMapper;
-import com.nelumbo.park.repository.UserRepository;
 import com.nelumbo.park.service.ParkingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import com.nelumbo.park.config.TestSecurityConfig;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,20 +29,27 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(
-        value = ParkingController.class,
-        excludeAutoConfiguration = {
-                UserDetailsServiceAutoConfiguration.class,
-                SecurityAutoConfiguration.class
-        }
-)
-@Import(TestSecurityConfig.class)
+@WebMvcTest(controllers = ParkingController.class)
+@Import({ParkingControllerTest.TestConfig.class, TestSecurityConfig.class})
 class ParkingControllerTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public ParkingService parkingService() {
+            return Mockito.mock(ParkingService.class);
+        }
+
+        @Bean
+        public ParkingResponseMapper parkingResponseMapper() {
+            return Mockito.mock(ParkingResponseMapper.class);
+        }
+    }
 
     private MockMvc mockMvc;
 
@@ -54,17 +59,11 @@ class ParkingControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @Autowired
     private ParkingService parkingService;
 
-    @MockBean
+    @Autowired
     private ParkingResponseMapper parkingResponseMapper;
-
-    @MockBean
-    private JwtService jwtService;
-
-    @MockBean
-    private UserRepository userRepository;
 
     @BeforeEach
     void setup() {

@@ -6,14 +6,15 @@ import com.nelumbo.park.exception.exceptions.S3FileUploadException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -22,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {S3Service.class})
+@ExtendWith(MockitoExtension.class)
 class S3ServiceTest {
 
-    @MockBean
+    @Mock
     private S3Client s3Client;
 
-    @Autowired
+    @InjectMocks
     private S3Service s3Service;
 
     private final String bucketName = "test-bucket";
