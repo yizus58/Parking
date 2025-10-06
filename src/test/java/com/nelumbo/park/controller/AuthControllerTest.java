@@ -1,25 +1,21 @@
 package com.nelumbo.park.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nelumbo.park.config.TestSecurityConfig;
-import com.nelumbo.park.config.security.JwtService;
 import com.nelumbo.park.dto.request.LoginRequest;
 import com.nelumbo.park.dto.response.UserLoginResponse;
 import com.nelumbo.park.interfaces.LoginService;
-import com.nelumbo.park.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -27,23 +23,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-@WebMvcTest(AuthController.class)
-@Import(TestSecurityConfig.class)
 class AuthControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private LoginService loginService;
 
-    @MockBean
-    private JwtService jwtService;
+    @InjectMocks
+    private AuthController authController;
 
-    @MockBean
-    private UserRepository userRepository;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     private LoginRequest loginRequest;
@@ -51,6 +40,8 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
+        objectMapper = new ObjectMapper();
         loginRequest = new LoginRequest();
         loginRequest.setEmail("user@example.com");
         loginRequest.setPassword("1231443");
