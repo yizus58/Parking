@@ -103,7 +103,7 @@ class AuthControllerTest {
     void login_WithMissingContentType_ShouldReturnUnsupportedMediaType() throws Exception {
         mockMvc.perform(post("/auth/login")
                         .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnsupportedMediaType());
 
         verify(loginService, never()).authenticate(any(), any());
     }
