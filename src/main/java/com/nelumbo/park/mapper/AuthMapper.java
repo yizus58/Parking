@@ -17,8 +17,11 @@ import java.util.Map;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class AuthMapper {
 
-    @Autowired
-    protected JwtService jwtService;
+    protected final JwtService jwtService;
+
+    public AuthMapper( JwtService jwtService ) {
+        this.jwtService = jwtService;
+    }
 
     @Mapping(target = "tokenType", constant = "Bearer")
     @Mapping(target = "accessToken", expression = "java(generateJwtToken(user))")

@@ -15,8 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class ParkingMapper {
 
-    @Autowired
-    protected UserRepository userRepository;
+    protected final UserRepository userRepository;
+
+    public ParkingMapper( UserRepository userRepository ) {
+        this.userRepository = userRepository;
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", source = "idOwner", qualifiedByName = "mapOwner")
