@@ -1,11 +1,10 @@
 package com.nelumbo.park.config;
 
 import com.nelumbo.park.config.security.JwtAuthenticationFilter;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -15,15 +14,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Configuration
+@TestConfiguration
 @EnableWebSecurity
-@ImportAutoConfiguration(exclude = UserDetailsServiceAutoConfiguration.class)
 public class TestSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -34,7 +31,7 @@ public class TestSecurityConfig {
 
     @Bean
     @Primary
-    public SecurityFilterChain testSecurityFilterChain( HttpSecurity http) throws Exception {
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
@@ -62,22 +59,22 @@ public class TestSecurityConfig {
 
     @Bean
     @Primary
-    public UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         List<UserDetails> users = Arrays.asList(
                 User.builder()
                         .username("user")
-                        .password("password")
-                        .authorities("USER")
+                        .password(passwordEncoder.encode("password"))
+                        .roles("USER")
                         .build(),
                 User.builder()
                         .username("admin")
-                        .password("admin")
-                        .authorities("ROLE_ADMIN")
+                        .password(passwordEncoder.encode("admin"))
+                        .roles("ADMIN")
                         .build(),
                 User.builder()
                         .username("socio")
-                        .password("socio")
-                        .authorities("ROLE_SOCIO")
+                        .password(passwordEncoder.encode("socio"))
+                        .roles("SOCIO")
                         .build()
         );
         return new InMemoryUserDetailsManager(users);
