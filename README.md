@@ -27,6 +27,7 @@ Una aplicación completa de gestión de parqueaderos desarrollada con Spring Boo
 
 ### Base de Datos
 - **PostgreSQL** - Base de datos principal
+- **Flyway** - Migraciones versionadas del esquema (`src/main/resources/db/migration`)
 - **Docker** - Containerización de la base de datos
 
 ### Servicios Externos
@@ -35,7 +36,6 @@ Una aplicación completa de gestión de parqueaderos desarrollada con Spring Boo
 
 ### Utilidades
 - **Lombok** - Reducción de código boilerplate
-- **MapStruct** - Mapeo entre DTOs y entidades
 - **Apache POI** - Generación de archivos Excel
 - **Jackson** - Serialización/deserialización JSON
 - **Maven** - Gestión de dependencias
@@ -121,77 +121,104 @@ mvn spring-boot:run
 
 La aplicación estará disponible en `http://localhost:8080` (o el puerto configurado).
 
-## 📂 Estructura del Proyecto
-
-Una visión general de la estructura de directorios principal del proyecto:
+## 📂 Estructura del Proyecto (arquitectura hexagonal)
 
 ```
-.
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── nelumbo/
-│   │   │           └── park/
-│   │   │               ├── controller/       # Controladores REST
-│   │   │               ├── service/          # Lógica de negocio
-│   │   │               ├── repository/       # Acceso a datos
-│   │   │               ├── model/            # Entidades de base de datos
-│   │   │               ├── dto/              # Objetos de transferencia de datos
-│   │   │               ├── config/           # Configuraciones de la aplicación
-│   │   │               └── ...
-│   │   └── resources/      # Archivos de configuración, estáticos, etc.
-│   └── test/               # Pruebas unitarias e de integración
-├── .env.example          # Ejemplo de archivo de variables de entorno
-├── pom.xml                 # Archivo de configuración de Maven
-├── docker-compose.yml      # Configuración de Docker Compose
-└── README.md               # Este archivo
+src/main/java/com/nelumbo/park/
+├── domain/                     # Modelo y reglas de negocio, sin Spring
+│   ├── model/                  # User, Parking, Vehicle, stats, report
+│   ├── service/                # ParkingFeeCalculator, rankings, reportes
+│   └── exception/              # Errores de negocio
+├── application/
+│   ├── port/in/                # Casos de uso (LoginUseCase, RegisterVehicleEntryUseCase, ...)
+│   ├── port/out/               # Puertos hacia infraestructura (repositorios, hasher, JWT, correo, ...)
+│   └── service/                # Implementación de los casos de uso
+└── infrastructure/
+    ├── adapter/in/web/         # Controladores REST, DTOs, GlobalExceptionHandler
+    ├── adapter/in/scheduler/   # Cron del reporte diario
+    ├── adapter/out/            # JPA, seguridad, RabbitMQ, R2/S3, Excel/PDF
+    └── config/                 # Seguridad (JWT), Jackson, inicialización
+src/main/resources/db/migration # V1 esquema base, V2 placa única dentro, V3 índices
 ```
+
+## 🗄️ Base de datos y migraciones
+
+El esquema lo crea Flyway; Hibernate solo lo valida (`ddl-auto=validate`).
+
+- **Base nueva:** se aplican V1, V2 y V3.
+- **Base existente creada antes con `ddl-auto=update`:** en el primer arranque Flyway la marca como versión 1
+  (`baseline-on-migrate`) y aplica solo V2 y V3.
+- **V2** crea el índice único parcial `ux_vehicles_plate_inside` (una placa solo puede estar `IN` una vez, en
+  cualquier parqueadero). **Antes de desplegar** sobre una base existente, verifica que no haya duplicados; si
+  los hay, la migración falla sin cambiar nada:
+
+```sql
+SELECT upper(trim(plate_number)) AS plate, count(*)
+FROM "vehicles" WHERE status = 'IN'
+GROUP BY upper(trim(plate_number)) HAVING count(*) > 1;
+```
+
+`SPRING_DATASOURCE_URL` acepta `jdbc:postgresql://host:puerto/base` o `postgresql://usuario:clave@host:puerto/base`.
+Si la base no existe se crea al arrancar (desactívalo con `app.database.create-if-missing=false`).
+
+## 🔐 Permisos
+
+| Operación | ADMIN | SOCIO |
+|---|---|---|
+| Crear/listar usuarios, crear/editar/borrar parqueaderos, rankings de socios y parqueaderos | ✅ | ❌ |
+| Ver parqueaderos | todos | solo los suyos |
+| Listar vehículos | todos | los que registró |
+| Entrada / salida / ver un vehículo | ❌ | solo en sus parqueaderos |
+| Borrar un vehículo | ❌ | solo de sus parqueaderos |
+| Logs del webhook de SonarQube | ✅ | ❌ |
+
+El login responde siempre `401 {"error":"Credenciales incorrectas"}` ante email desconocido o contraseña
+incorrecta, y bloquea la IP 5 minutos tras 3 intentos fallidos. Un token vencido o inválido responde 401.
+
+## 🧪 Pruebas
+
+```bash
+./mvnw test
+```
+
+- Pruebas unitarias de dominio y servicios, slices web (MockMvc con la seguridad real) y de persistencia sobre H2.
+- Pruebas contra **PostgreSQL real** (migraciones, índice único parcial, concurrencia, API HTTP completa):
+  se ejecutan con Testcontainers si hay Docker, o contra una base desechable indicada con
+  `TEST_POSTGRES_URL=jdbc:postgresql://localhost:5432/park_test` (`TEST_POSTGRES_USERNAME`,
+  `TEST_POSTGRES_PASSWORD`). Las pruebas borran todas las filas de esa base. Sin Docker ni
+  `TEST_POSTGRES_URL` se reportan como *skipped*.
 
 ## 💡 Ejemplos de Uso
 
-Aquí hay algunos ejemplos de cómo interactuar con la API una vez que la aplicación esté en funcionamiento.
+### Autenticación
 
-### Autenticación de Usuario
-
-**Endpoint:** `POST http://localhost:8080/auth/login`
-**Body:**
+`POST /auth/login`
 ```json
-{
-  "username": "usuario@example.com",
-  "password": "password123"
-}
+{ "email": "socio@example.com", "password": "secret123" }
 ```
-**Respuesta (ejemplo):**
+Respuesta:
 ```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "type": "Bearer"
-}
+{ "id": "…", "username": "socio", "email": "socio@example.com", "role": "SOCIO", "tokenType": "Bearer", "accessToken": "eyJ…" }
 ```
 
-### Registrar un Vehículo (requiere autenticación)
+### Registrar la entrada de un vehículo (SOCIO dueño del parqueadero)
 
-**Endpoint:** `POST http://localhost:8080/vehicles`
-**Headers:** `Authorization: Bearer <your_jwt_token>`
-**Body:**
+`POST /vehicles/` con `Authorization: Bearer <token>`
 ```json
-{
-  "licensePlate": "ABC-123",
-  "type": "CAR",
-  "userId": 1
-}
+{ "plateNumber": "ABC123", "modelVehicle": "Mazda 3", "idParking": "<id del parqueadero>" }
 ```
 
-### Obtener Lista de Parqueaderos
+### Registrar la salida
 
-**Endpoint:** `GET http://localhost:8080/parkings`
-**Headers:** `Authorization: Bearer <your_jwt_token>`
+`PUT /vehicles/` con `Authorization: Bearer <token>`
+```json
+{ "plateNumber": "ABC123", "modelVehicle": "Mazda 3", "idParking": "<id del parqueadero>" }
+```
+Se cobra cada hora iniciada (`totalCost`, p. ej. `"$ 4.000"`).
 
 ### Documentación de la API
 
-Puedes acceder a la documentación interactiva de la API a través de Swagger UI en:
-`http://localhost:8080/swagger-ui.html`
+Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 ## 🤝 Cómo Contribuir
 
