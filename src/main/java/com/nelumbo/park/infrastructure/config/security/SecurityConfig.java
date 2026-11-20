@@ -1,5 +1,6 @@
 package com.nelumbo.park.infrastructure.config.security;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -47,6 +48,17 @@ public class SecurityConfig {
             .formLogin(AbstractHttpConfigurer::disable);
 
         return http.build();
+    }
+
+    /**
+     * The JWT filter is a bean only so it can be injected here; it must run inside the security
+     * chain, not a second time as a plain servlet filter.
+     */
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterServletRegistration(JwtAuthenticationFilter filter) {
+        FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Bean

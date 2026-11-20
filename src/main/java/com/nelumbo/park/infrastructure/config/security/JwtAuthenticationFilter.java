@@ -1,7 +1,8 @@
 package com.nelumbo.park.infrastructure.config.security;
 
-import com.nelumbo.park.infrastructure.exception.JwtProcessingException;
 import com.nelumbo.park.application.port.out.UserRepositoryPort;
+import com.nelumbo.park.domain.model.User;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,18 +17,34 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Authenticates requests that carry {@code Authorization: Bearer <jwt>}.
+ *
+ * <ul>
+ *   <li>Expired token: 401 {"error":"Token expirado"}.</li>
+ *   <li>Malformed token or wrong signature: 401 {"error":"Token JWT inválido o firma no válida"}.</li>
+ *   <li>Valid token of a user that no longer exists: 403 {"error":"Usuario no encontrado"}.</li>
+ * </ul>
+ * The authority is the user's current role in the database, not the role
+ * claim frozen in the token, so a changed role takes effect immediately.
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Logger loggers = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    static final String EXPIRED = "Token expirado";
+    static final String INVALID = "Token JWT inválido o firma no válida";
+    static final String USER_NOT_FOUND = "Usuario no encontrado";
+
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final String BEARER = "Bearer ";
+
     private final JwtService jwtService;
     private final UserRepositoryPort userRepository;
     private final String applicationJson;
     private final String applicationJsonCharset;
-
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
@@ -42,109 +59,55 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
-
-        String authHeader = request.getHeader("Authorization");
-        String jwt = null;
-        String username = null;
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);
-            try {
-                username = extractUsernameFromJwt(jwt, response);
-                if (username == null) {
-                    return;
-                }
-            } catch (JwtProcessingException e) {
-                loggers.error("Error processing JWT: {}", e.getMessage());
-                writeErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                        "Error al procesar token JWT, su token se debe encontrar vencido");
-                return;
-            }
-        }
-
-        if (username != null && !validateUserExists(username, response)) {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith(BEARER)) {
+            filterChain.doFilter(request, response);
             return;
         }
 
-        if (username != null) {
-            boolean isNotAuthenticated = SecurityContextHolder.getContext().getAuthentication() == null;
-            if (isNotAuthenticated) {
-                boolean authenticationFailed = !processAuthentication(jwt, username, response);
-                if (authenticationFailed) {
-                    return;
-                }
-            }
+        String userId;
+        try {
+            userId = jwtService.extractUid(header.substring(BEARER.length()).trim());
+        } catch (RuntimeException e) {
+            boolean expired = causedBy(e, ExpiredJwtException.class);
+            log.debug("Rejected JWT: {}", expired ? "expired" : "invalid");
+            writeError(response, HttpServletResponse.SC_UNAUTHORIZED, expired ? EXPIRED : INVALID);
+            return;
+        }
+        if (userId == null || userId.isBlank()) {
+            writeError(response, HttpServletResponse.SC_UNAUTHORIZED, INVALID);
+            return;
         }
 
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            writeError(response, HttpServletResponse.SC_FORBIDDEN, USER_NOT_FOUND);
+            return;
+        }
+
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userId, null, List.of(new SimpleGrantedAuthority(user.get().getRole())));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
         filterChain.doFilter(request, response);
     }
 
-    private void writeErrorResponse(HttpServletResponse response, int status, String errorMessage) throws IOException {
+    private static boolean causedBy(Throwable error, Class<? extends Throwable> type) {
+        for (Throwable t = error; t != null; t = t.getCause() == t ? null : t.getCause()) {
+            if (type.isInstance(t)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void writeError(HttpServletResponse response, int status, String message) throws IOException {
         response.setStatus(status);
         response.setContentType(applicationJson);
         response.setCharacterEncoding(applicationJsonCharset);
-        response.getWriter().write("{\"error\":\"" + errorMessage + "\"}");
-    }
-
-    private String extractUsernameFromJwt(String jwt, HttpServletResponse response) throws IOException {
-        try {
-            return jwtService.extractUid(jwt);
-        } catch (RuntimeException e) {
-            if (isSignatureError(e)) {
-                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                        "Token JWT inválido o firma no válida");
-                return null;
-            }
-            throw new JwtProcessingException("Error al procesar token JWT para extracción de username, su token se debe encontrar vencido", e);
-        }
-    }
-
-    private boolean isSignatureError(Exception e) {
-        String message = e.getMessage();
-        return message.contains("JWT signature does not match") || 
-               message.contains("signature") || 
-               message.contains("SignatureException");
-    }
-
-    private boolean validateUserExists(String username, HttpServletResponse response) throws IOException {
-        if (userRepository.findById(username).isEmpty()) {
-            writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Usuario no encontrado");
-            return false;
-        }
-        return true;
-    }
-
-
-    private boolean processAuthentication(String jwt, String username, HttpServletResponse response) throws IOException {
-        try {
-            boolean tokenNotExpired = !jwtService.isTokenExpired(jwt);
-            if (tokenNotExpired) {
-                setAuthentication(jwt, username);
-                return true;
-            } else {
-                loggers.warn("Token expirado para usuario: {}", username);
-                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Token expirado");
-                return false;
-            }
-        } catch (Exception e) {
-            loggers.error("Error al validar token: {}", e.getMessage());
-            writeErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al validar token");
-            return false;
-        }
-    }
-
-    private void setAuthentication(String jwt, String username) {
-        String role = jwtService.extractRole(jwt);
-        List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority(role)
-        );
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(username, null, authorities);
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+        response.getWriter().write("{\"error\":\"" + message + "\"}");
     }
 }
