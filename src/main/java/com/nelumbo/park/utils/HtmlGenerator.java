@@ -1,12 +1,12 @@
 package com.nelumbo.park.utils;
 
-import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
+import com.nelumbo.park.domain.model.report.VehicleOutDetail;
 
 public class HtmlGenerator {
 
     private HtmlGenerator() {}
 
-    public static String generateHtmlContent(VehicleOutDetailResponse vehicle) {
+    public static String generateHtmlContent(VehicleOutDetail vehicle) {
         return String.format("""
             <body style="margin: 0px; padding: 0px; background: rgb(245, 245, 247); font-family: Arial, sans-serif;">
             <table align="center" width="100%%" cellpadding="0" cellspacing="0" style="padding: 20px; width: 100%%;">

@@ -1,7 +1,7 @@
 package com.nelumbo.park.service;
 
-import com.nelumbo.park.dto.response.VehicleDetailResponse;
-import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
+import com.nelumbo.park.domain.model.report.VehicleDetail;
+import com.nelumbo.park.domain.model.report.VehicleOutDetail;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.domain.model.VehicleStatus;
 import com.nelumbo.park.repository.VehicleRepository;
@@ -28,7 +28,7 @@ public class VehicleReportService {
         return formatter.format(date);
     }
 
-    public List<VehicleOutDetailResponse> getVehiclesOutDetails() {
+    public List<VehicleOutDetail> getVehiclesOutDetails() {
         List<Vehicle> vehiclesOut = getVehiclesOutToday();
         return processVehiclesOutDetails(vehiclesOut);
     }
@@ -54,8 +54,8 @@ public class VehicleReportService {
                 .toList();
     }
 
-    private List<VehicleOutDetailResponse> processVehiclesOutDetails(List<Vehicle> vehiclesOut) {
-        Map<String, Map<String, Map<String, VehicleDetailResponse>>> parkingEarnings = new HashMap<>();
+    private List<VehicleOutDetail> processVehiclesOutDetails(List<Vehicle> vehiclesOut) {
+        Map<String, Map<String, Map<String, VehicleDetail>>> parkingEarnings = new HashMap<>();
 
         for (Vehicle vehicle : vehiclesOut) {
             String vehicleId = vehicle.getId();
@@ -83,7 +83,7 @@ public class VehicleReportService {
                 parkingEarnings.get(userId).put(parkingId, new HashMap<>());
             }
 
-            VehicleDetailResponse vehicleDetail = new VehicleDetailResponse(
+            VehicleDetail vehicleDetail = new VehicleDetail(
                     vehicleId,
                     plateNumber,
                     modelVehicle,
@@ -98,15 +98,15 @@ public class VehicleReportService {
         return flattenVehicleData(parkingEarnings, vehiclesOut);
     }
 
-    private List<VehicleOutDetailResponse> flattenVehicleData(
-            Map<String, Map<String, Map<String, VehicleDetailResponse>>> parkingEarnings,
+    private List<VehicleOutDetail> flattenVehicleData(
+            Map<String, Map<String, Map<String, VehicleDetail>>> parkingEarnings,
             List<Vehicle> vehiclesOut) {
 
-        List<VehicleOutDetailResponse> flattenedData = new ArrayList<>();
+        List<VehicleOutDetail> flattenedData = new ArrayList<>();
 
-        for (Map.Entry<String, Map<String, Map<String, VehicleDetailResponse>>> userEntry : parkingEarnings.entrySet()) {
+        for (Map.Entry<String, Map<String, Map<String, VehicleDetail>>> userEntry : parkingEarnings.entrySet()) {
             String userId = userEntry.getKey();
-            Map<String, Map<String, VehicleDetailResponse>> userParkings = userEntry.getValue();
+            Map<String, Map<String, VehicleDetail>> userParkings = userEntry.getValue();
 
             Vehicle sampleVehicle = vehiclesOut.stream()
                     .filter(v -> v.getAdmin() != null && v.getAdmin().getId() != null && v.getAdmin().getId().equals(userId))
@@ -118,9 +118,9 @@ public class VehicleReportService {
             String username = sampleVehicle.getAdmin().getUsername();
             String email = sampleVehicle.getAdmin().getEmail();
 
-            for (Map.Entry<String, Map<String, VehicleDetailResponse>> parkingEntry : userParkings.entrySet()) {
+            for (Map.Entry<String, Map<String, VehicleDetail>> parkingEntry : userParkings.entrySet()) {
                 String parkingId = parkingEntry.getKey();
-                Map<String, VehicleDetailResponse> parkingVehicles = parkingEntry.getValue();
+                Map<String, VehicleDetail> parkingVehicles = parkingEntry.getValue();
 
                 String parkingName = vehiclesOut.stream()
                         .filter(v -> v.getParking() != null && v.getParking().getId() != null && v.getParking().getId().equals(parkingId))
@@ -128,14 +128,14 @@ public class VehicleReportService {
                         .findFirst()
                         .orElse("Unknown Parking");
 
-                List<VehicleDetailResponse> vehicles = new ArrayList<>(parkingVehicles.values());
+                List<VehicleDetail> vehicles = new ArrayList<>(parkingVehicles.values());
                 vehicles.sort((a, b) -> Float.compare(b.getTotalCost(), a.getTotalCost()));
 
                 Float totalEarnings = vehicles.stream()
-                        .map(VehicleDetailResponse::getTotalCost)
+                        .map(VehicleDetail::getTotalCost)
                         .reduce(0.0f, Float::sum);
 
-                VehicleOutDetailResponse response = new VehicleOutDetailResponse(
+                VehicleOutDetail response = new VehicleOutDetail(
                         userId,
                         username,
                         email,

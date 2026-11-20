@@ -1,4 +1,4 @@
-package com.nelumbo.park.dto.response;
+package com.nelumbo.park.domain.model.report;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VehicleDetailResponse {
+public class VehicleDetail {
     private String vehicleId;
     private String plateNumber;
     private String modelVehicle;

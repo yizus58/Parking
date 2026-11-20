@@ -1,7 +1,7 @@
 package com.nelumbo.park.utils;
 
-import com.nelumbo.park.dto.response.VehicleDetailResponse;
-import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
+import com.nelumbo.park.domain.model.report.VehicleDetail;
+import com.nelumbo.park.domain.model.report.VehicleOutDetail;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @Component("report")
 public class Excel {
 
-    public byte[] generarExcelPorUsuario(List<VehicleOutDetailResponse> data) throws IOException {
+    public byte[] generarExcelPorUsuario(List<VehicleOutDetail> data) throws IOException {
         if (data == null || data.isEmpty()) {
             throw new IllegalArgumentException("generarExcelPorUsuario: 'data' vacío o inválido");
         }
@@ -27,7 +27,7 @@ public class Excel {
         try (XSSFWorkbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-            for (VehicleOutDetailResponse item : data) {
+            for (VehicleOutDetail item : data) {
                 createUserSheet(workbook, item);
             }
 
@@ -36,7 +36,7 @@ public class Excel {
         }
     }
 
-    private void createUserSheet(XSSFWorkbook workbook, VehicleOutDetailResponse item) {
+    private void createUserSheet(XSSFWorkbook workbook, VehicleOutDetail item) {
         String sheetName = Optional.ofNullable(item.getUsername()).orElse("usuario");
         sheetName = sheetName.length() > 31 ? sheetName.substring(0, 31) : sheetName;
 
@@ -58,7 +58,7 @@ public class Excel {
         return boldStyle;
     }
 
-    private void createSheetHeaders(XSSFSheet sheet, VehicleOutDetailResponse item, CellStyle boldStyle) {
+    private void createSheetHeaders(XSSFSheet sheet, VehicleOutDetail item, CellStyle boldStyle) {
         String nameParking = Optional.ofNullable(item.getParking()).orElse("").toLowerCase();
 
         // Fila título
@@ -79,9 +79,9 @@ public class Excel {
         }
     }
 
-    private int processVehicleData(XSSFSheet sheet, VehicleOutDetailResponse item, CellStyle boldStyle) {
+    private int processVehicleData(XSSFSheet sheet, VehicleOutDetail item, CellStyle boldStyle) {
         int rowIndex = 3;
-        List<VehicleDetailResponse> vehicles = item.getVehicles();
+        List<VehicleDetail> vehicles = item.getVehicles();
 
         if (vehicles != null && !vehicles.isEmpty()) {
             rowIndex = addVehicleRows(sheet, vehicles, rowIndex);
@@ -93,12 +93,12 @@ public class Excel {
         return rowIndex;
     }
 
-    private int addVehicleRows(XSSFSheet sheet, List<VehicleDetailResponse> vehicles, int startRowIndex) {
+    private int addVehicleRows(XSSFSheet sheet, List<VehicleDetail> vehicles, int startRowIndex) {
         int rowIndex = startRowIndex;
         CellStyle currencyStyle = sheet.getWorkbook().createCellStyle();
         currencyStyle.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("$#,##0.00"));
         for (int i = 0; i < vehicles.size(); i++) {
-            VehicleDetailResponse v = vehicles.get(i);
+            VehicleDetail v = vehicles.get(i);
             Row row = sheet.createRow(rowIndex++);
             row.createCell(0).setCellValue((double) i + 1);
             row.createCell(1).setCellValue(Optional.ofNullable(v.getPlateNumber()).orElse(""));
@@ -112,7 +112,7 @@ public class Excel {
         return rowIndex;
     }
 
-    private void addSubtotalRow(XSSFSheet sheet, VehicleOutDetailResponse item, int rowIndex, CellStyle boldStyle) {
+    private void addSubtotalRow(XSSFSheet sheet, VehicleOutDetail item, int rowIndex, CellStyle boldStyle) {
         Row subtotalRow = sheet.createRow(rowIndex);
         Cell labelCell = subtotalRow.createCell(4);
         labelCell.setCellValue("Subtotal:");

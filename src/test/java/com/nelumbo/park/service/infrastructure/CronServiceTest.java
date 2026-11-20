@@ -2,7 +2,7 @@ package com.nelumbo.park.service.infrastructure;
 
 import com.nelumbo.park.dto.response.EmailDataResponse;
 import com.nelumbo.park.dto.response.RabbitMQResponse;
-import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
+import com.nelumbo.park.domain.model.report.VehicleOutDetail;
 import com.nelumbo.park.service.VehicleReportService;
 import com.nelumbo.park.utils.Excel;
 import com.nelumbo.park.utils.ExcelComponent;
@@ -82,21 +82,21 @@ class CronServiceTest {
     @Test
     @DisplayName("Should return true and process vehicles when details are found")
     void runDailyTask_WithVehicleOutDetails_ReturnsTrueAndProcesses() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user1");
         detail1.setEmail("user1@example.com");
         detail1.setParking("parking1");
         detail1.setUsername("User One");
         detail1.setTotalVehicles(10);
 
-        VehicleOutDetailResponse detail2 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail2 = new VehicleOutDetail();
         detail2.setUserId("user2");
         detail2.setEmail("user2@example.com");
         detail2.setParking("parking2");
         detail2.setUsername("User Two");
         detail2.setTotalVehicles(5);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1, detail2);
+        List<VehicleOutDetail> details = List.of(detail1, detail2);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
@@ -119,14 +119,14 @@ class CronServiceTest {
     @Test
     @DisplayName("Should generate correct file names for various vehicle details")
     void runDailyTask_GenerateFileNames_Correctly() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user123456789");
         detail1.setEmail("user1@example.com");
         detail1.setParking("parking_with_a_very_long_name_that_should_be_truncated_to_fifty_characters_and_more");
         detail1.setUsername("Test User");
         detail1.setTotalVehicles(15);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1);
+        List<VehicleOutDetail> details = List.of(detail1);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
@@ -164,14 +164,14 @@ class CronServiceTest {
     @Test
     @DisplayName("Should use default content type when excelGenerator returns null or empty")
     void runDailyTask_ContentTypeNullOrEmpty_UsesDefault() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user1");
         detail1.setEmail("user1@example.com");
         detail1.setParking("parking1");
         detail1.setUsername("User One");
         detail1.setTotalVehicles(10);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1);
+        List<VehicleOutDetail> details = List.of(detail1);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
@@ -207,14 +207,14 @@ class CronServiceTest {
     @Test
     @DisplayName("Should handle IOException during excel generation gracefully")
     void runDailyTask_ExcelGenerationThrowsIOException_LogsErrorAndContinues() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user1");
         detail1.setEmail("user1@example.com");
         detail1.setParking("parking1");
         detail1.setUsername("User One");
         detail1.setTotalVehicles(10);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1);
+        List<VehicleOutDetail> details = List.of(detail1);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenThrow(new IOException("Test IO Exception"));
@@ -234,14 +234,14 @@ class CronServiceTest {
     @Test
     @DisplayName("Should handle Exception during S3 upload gracefully")
     void runDailyTask_S3UploadThrowsException_LogsErrorAndContinues() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user1");
         detail1.setEmail("user1@example.com");
         detail1.setParking("parking1");
         detail1.setUsername("User One");
         detail1.setTotalVehicles(10);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1);
+        List<VehicleOutDetail> details = List.of(detail1);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
@@ -263,14 +263,14 @@ class CronServiceTest {
     @Test
     @DisplayName("Should not send email if S3 upload returns null")
     void runDailyTask_S3UploadReturnsNull_NoEmailSent() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user1");
         detail1.setEmail("user1@example.com");
         detail1.setParking("parking1");
         detail1.setUsername("User One");
         detail1.setTotalVehicles(10);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1);
+        List<VehicleOutDetail> details = List.of(detail1);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
@@ -292,14 +292,14 @@ class CronServiceTest {
     @Test
     @DisplayName("Should not send email if S3 upload returns map without 'Key'")
     void runDailyTask_S3UploadReturnsMapWithoutKey_NoEmailSent() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user1");
         detail1.setEmail("user1@example.com");
         detail1.setParking("parking1");
         detail1.setUsername("User One");
         detail1.setTotalVehicles(10);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1);
+        List<VehicleOutDetail> details = List.of(detail1);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
@@ -321,14 +321,14 @@ class CronServiceTest {
     @Test
     @DisplayName("Should handle Exception during email notification gracefully")
     void runDailyTask_EmailNotificationThrowsException_LogsErrorAndContinues() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user1");
         detail1.setEmail("user1@example.com");
         detail1.setParking("parking1");
         detail1.setUsername("User One");
         detail1.setTotalVehicles(10);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1);
+        List<VehicleOutDetail> details = List.of(detail1);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
@@ -351,14 +351,14 @@ class CronServiceTest {
     @Test
     @DisplayName("Should send email notification with empty email if vehicle email is null")
     void runDailyTask_VehicleEmailIsNull_SendsEmailWithEmptyString() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user1");
         detail1.setEmail(null);
         detail1.setParking("parking1");
         detail1.setUsername("User One");
         detail1.setTotalVehicles(10);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1);
+        List<VehicleOutDetail> details = List.of(detail1);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
         when(excel.generarExcelPorUsuario(anyList())).thenReturn("test_excel_bytes".getBytes());
@@ -389,14 +389,14 @@ class CronServiceTest {
     @Test
     @DisplayName("Should handle general Exception during processVehicleReport gracefully")
     void runDailyTask_GeneralExceptionInProcessVehicleReport_LogsErrorAndContinues() throws IOException {
-        VehicleOutDetailResponse detail1 = new VehicleOutDetailResponse();
+        VehicleOutDetail detail1 = new VehicleOutDetail();
         detail1.setUserId("user1");
         detail1.setEmail("user1@example.com");
         detail1.setParking("parking1");
         detail1.setUsername("User One");
         detail1.setTotalVehicles(10);
 
-        List<VehicleOutDetailResponse> details = List.of(detail1);
+        List<VehicleOutDetail> details = List.of(detail1);
 
         when(vehicleReportService.getVehiclesOutDetails()).thenReturn(details);
 

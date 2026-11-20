@@ -1,7 +1,7 @@
 package com.nelumbo.park.utils;
 
-import com.nelumbo.park.dto.response.VehicleDetailResponse;
-import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
+import com.nelumbo.park.domain.model.report.VehicleDetail;
+import com.nelumbo.park.domain.model.report.VehicleOutDetail;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @Component("pdfReport")
 public class Pdf {
 
-    public byte[] generarPdfPorUsuario(List<VehicleOutDetailResponse> data) throws IOException {
+    public byte[] generarPdfPorUsuario(List<VehicleOutDetail> data) throws IOException {
         if (data == null || data.isEmpty()) {
             throw new IllegalArgumentException("generarPdfPorUsuario: 'data' vacío o inválido");
         }
@@ -27,7 +27,7 @@ public class Pdf {
         try (PDDocument document = new PDDocument();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-            for (VehicleOutDetailResponse item : data) {
+            for (VehicleOutDetail item : data) {
                 createUserPage(document, item);
             }
 
@@ -36,7 +36,7 @@ public class Pdf {
         }
     }
 
-    private void createUserPage(PDDocument document, VehicleOutDetailResponse item) throws IOException {
+    private void createUserPage(PDDocument document, VehicleOutDetail item) throws IOException {
         PDPage page = new PDPage();
         document.addPage(page);
 
@@ -87,7 +87,7 @@ public class Pdf {
         }
     }
 
-    private void drawTable(PDPageContentStream contentStream, VehicleOutDetailResponse item) throws IOException {
+    private void drawTable(PDPageContentStream contentStream, VehicleOutDetail item) throws IOException {
         final float margin = 50;
         final float yStart = 670; // Adjusted yStart to make space for the new text
         final float tableWidth = 500;
@@ -117,13 +117,13 @@ public class Pdf {
         contentStream.stroke();
 
         // Table data
-        List<VehicleDetailResponse> vehicles = item.getVehicles();
+        List<VehicleDetail> vehicles = item.getVehicles();
         contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);
         y = tableTopY;
 
         if (vehicles != null && !vehicles.isEmpty()) {
             int rowNum = 1;
-            for (VehicleDetailResponse v : vehicles) {
+            for (VehicleDetail v : vehicles) {
                 y -= rowHeight;
                 nextX = margin;
 

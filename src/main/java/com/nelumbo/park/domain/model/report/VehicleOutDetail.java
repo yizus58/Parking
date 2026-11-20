@@ -1,5 +1,5 @@
 
-package com.nelumbo.park.dto.response;
+package com.nelumbo.park.domain.model.report;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,13 +10,13 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VehicleOutDetailResponse {
+public class VehicleOutDetail {
     private String userId;
     private String username;
     private String email;
     private String parkingId;
     private String parking;
-    private List<VehicleDetailResponse> vehicles;
+    private List<VehicleDetail> vehicles;
     private Integer totalVehicles;
     private Float totalEarnings;
 }

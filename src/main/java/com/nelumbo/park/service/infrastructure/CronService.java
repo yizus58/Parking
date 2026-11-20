@@ -3,7 +3,7 @@ package com.nelumbo.park.service.infrastructure;
 import com.nelumbo.park.dto.response.FileInfoResponse;
 import com.nelumbo.park.dto.response.FileUploadResultResponse;
 import com.nelumbo.park.dto.response.RabbitMQResponse;
-import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
+import com.nelumbo.park.domain.model.report.VehicleOutDetail;
 import com.nelumbo.park.dto.response.EmailAttachmentResponse;
 import com.nelumbo.park.dto.response.EmailDataResponse;
 import com.nelumbo.park.service.VehicleReportService;
@@ -63,14 +63,14 @@ public class CronService {
     }
 
     public boolean runDailyTask() {
-        List<VehicleOutDetailResponse> dataVehicleOutParking = this.vehicleReportService.getVehiclesOutDetails();
+        List<VehicleOutDetail> dataVehicleOutParking = this.vehicleReportService.getVehiclesOutDetails();
         if (dataVehicleOutParking == null || dataVehicleOutParking.isEmpty()) {
             return false;
         }
 
         uploadedFiles.clear();
 
-        for (VehicleOutDetailResponse vehicleOutDetailResponse : dataVehicleOutParking) {
+        for (VehicleOutDetail vehicleOutDetailResponse : dataVehicleOutParking) {
             processVehicleReport(vehicleOutDetailResponse);
         }
 
@@ -78,7 +78,7 @@ public class CronService {
         return true;
     }
 
-    private void processVehicleReport(VehicleOutDetailResponse vehicleOutDetailResponse) {
+    private void processVehicleReport(VehicleOutDetail vehicleOutDetailResponse) {
         try {
             // Excel generation
             FileInfoResponse excelFileInfo = generateFileNames(vehicleOutDetailResponse);
@@ -110,7 +110,7 @@ public class CronService {
         }
     }
 
-    private void uploadFileAndTrack(byte[] buffer, String contentType, FileInfoResponse fileInfo, VehicleOutDetailResponse vehicleOutDetailResponse, List<EmailAttachmentResponse> attachments, String fileType) {
+    private void uploadFileAndTrack(byte[] buffer, String contentType, FileInfoResponse fileInfo, VehicleOutDetail vehicleOutDetailResponse, List<EmailAttachmentResponse> attachments, String fileType) {
         try {
             Map<String, String> uploadResult = this.s3Service.uploadFile(buffer, contentType, fileInfo.getS3Name());
             if (uploadResult != null && uploadResult.containsKey("Key")) {
@@ -122,7 +122,7 @@ public class CronService {
         }
     }
 
-    private FileInfoResponse generateFileNames(VehicleOutDetailResponse vehicleOutDetailResponse) {
+    private FileInfoResponse generateFileNames(VehicleOutDetail vehicleOutDetailResponse) {
         String rawName = Optional.ofNullable(vehicleOutDetailResponse.getParking()).orElse("diario");
         String safeName = rawName.replaceAll("[^\\w\\-]+", "_");
         String userId = vehicleOutDetailResponse.getUserId();
@@ -144,7 +144,7 @@ public class CronService {
         return contentType;
     }
 
-    private void sendEmailWithAttachments(VehicleOutDetailResponse vehicleOutDetailResponse, List<EmailAttachmentResponse> attachments) {
+    private void sendEmailWithAttachments(VehicleOutDetail vehicleOutDetailResponse, List<EmailAttachmentResponse> attachments) {
         try {
             String email = Optional.ofNullable(vehicleOutDetailResponse.getEmail()).orElse("");
             String htmlContent = HtmlGenerator.generateHtmlContent(vehicleOutDetailResponse);
@@ -158,7 +158,7 @@ public class CronService {
         }
     }
 
-    private void addToUploadedFiles(VehicleOutDetailResponse vehicleOutDetailResponse, FileInfoResponse fileInfo) {
+    private void addToUploadedFiles(VehicleOutDetail vehicleOutDetailResponse, FileInfoResponse fileInfo) {
         String userId = vehicleOutDetailResponse.getUserId();
 
         Optional<FileUploadResultResponse> existingUploadInfo = uploadedFiles.stream()

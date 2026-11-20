@@ -1,7 +1,7 @@
 package com.nelumbo.park.service;
 
-import com.nelumbo.park.dto.response.VehicleDetailResponse;
-import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
+import com.nelumbo.park.domain.model.report.VehicleDetail;
+import com.nelumbo.park.domain.model.report.VehicleOutDetail;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Vehicle;
@@ -108,26 +108,26 @@ class VehicleReportServiceTest {
         when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
                 .thenReturn(mockVehicles);
 
-        List<VehicleOutDetailResponse> result = vehicleReportService.getVehiclesOutDetails();
+        List<VehicleOutDetail> result = vehicleReportService.getVehiclesOutDetails();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(2, result.size());
 
-        VehicleOutDetailResponse report1 = result.stream()
+        VehicleOutDetail report1 = result.stream()
                 .filter(r -> r.getUserId().equals("u1"))
                 .findFirst().orElse(null);
         assertNotNull(report1);
         assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", "p1", "Parking One", 1, 1, 20.0f);
-        VehicleDetailResponse detail1 = report1.getVehicles().get(0);
+        VehicleDetail detail1 = report1.getVehicles().get(0);
         assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-08:00", "15-01-2023-10:00", 20.0f);
 
-        VehicleOutDetailResponse report2 = result.stream()
+        VehicleOutDetail report2 = result.stream()
                 .filter(r -> r.getUserId().equals("u2"))
                 .findFirst().orElse(null);
         assertNotNull(report2);
         assertVehicleOutDetailResponse(report2, "u2", "adminUser2", "admin2@example.com", "p2", "Parking Two", 1, 1, 10.0f);
-        VehicleDetailResponse detail2 = report2.getVehicles().get(0);
+        VehicleDetail detail2 = report2.getVehicles().get(0);
         assertVehicleDetailResponse(detail2, "v2", "DEF-456", "Model B", "15-01-2023-09:00", "15-01-2023-11:00", 10.0f);
     }
 
@@ -136,7 +136,7 @@ class VehicleReportServiceTest {
         when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
                 .thenReturn(Collections.emptyList());
 
-        List<VehicleOutDetailResponse> result = vehicleReportService.getVehiclesOutDetails();
+        List<VehicleOutDetail> result = vehicleReportService.getVehiclesOutDetails();
 
         assertNotNull(result);
         assertEquals(0, result.size());
@@ -175,7 +175,7 @@ class VehicleReportServiceTest {
         when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
                 .thenReturn(mockVehicles);
 
-        List<VehicleOutDetailResponse> result = vehicleReportService.getVehiclesOutDetails();
+        List<VehicleOutDetail> result = vehicleReportService.getVehiclesOutDetails();
 
         assertNotNull(result);
         assertEquals(0, result.size());
@@ -214,15 +214,15 @@ class VehicleReportServiceTest {
         when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
                 .thenReturn(mockVehicles);
 
-        List<VehicleOutDetailResponse> result = vehicleReportService.getVehiclesOutDetails();
+        List<VehicleOutDetail> result = vehicleReportService.getVehiclesOutDetails();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
 
-        VehicleOutDetailResponse report1 = result.get(0);
+        VehicleOutDetail report1 = result.get(0);
         assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", "p1", "Parking One", 1, 1, 0.0f);
-        VehicleDetailResponse detail1 = report1.getVehicles().get(0);
+        VehicleDetail detail1 = report1.getVehicles().get(0);
         assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-08:00", "15-01-2023-10:00", 0.0f);
     }
 
@@ -257,7 +257,7 @@ class VehicleReportServiceTest {
         when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
                 .thenReturn(mockVehicles);
 
-        List<VehicleOutDetailResponse> result = vehicleReportService.getVehiclesOutDetails();
+        List<VehicleOutDetail> result = vehicleReportService.getVehiclesOutDetails();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -296,19 +296,19 @@ class VehicleReportServiceTest {
         when(vehicleRepository.findVehiclesWithExitTimeBetween(any(Date.class), any(Date.class)))
                 .thenReturn(mockVehicles);
 
-        List<VehicleOutDetailResponse> result = vehicleReportService.getVehiclesOutDetails();
+        List<VehicleOutDetail> result = vehicleReportService.getVehiclesOutDetails();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
 
-        VehicleOutDetailResponse report1 = result.get(0);
+        VehicleOutDetail report1 = result.get(0);
         assertVehicleOutDetailResponse(report1, "u1", "adminUser", "admin@example.com", null, "Unknown Parking", 1, 1, 20.0f);
-        VehicleDetailResponse detail1 = report1.getVehicles().get(0);
+        VehicleDetail detail1 = report1.getVehicles().get(0);
         assertVehicleDetailResponse(detail1, "v1", "ABC-123", "Model A", "15-01-2023-08:00", "15-01-2023-10:00", 20.0f);
     }
 
-    private void assertVehicleOutDetailResponse(VehicleOutDetailResponse report, String userId, String username, String email, String parkingId, String parkingName, int vehiclesSize, int totalVehicles, float totalEarnings) {
+    private void assertVehicleOutDetailResponse(VehicleOutDetail report, String userId, String username, String email, String parkingId, String parkingName, int vehiclesSize, int totalVehicles, float totalEarnings) {
         assertEquals(userId, report.getUserId());
         assertEquals(username, report.getUsername());
         assertEquals(email, report.getEmail());
@@ -319,7 +319,7 @@ class VehicleReportServiceTest {
         assertEquals(totalEarnings, report.getTotalEarnings());
     }
 
-    private void assertVehicleDetailResponse(VehicleDetailResponse detail, String vehicleId, String plateNumber, String modelVehicle,
+    private void assertVehicleDetailResponse(VehicleDetail detail, String vehicleId, String plateNumber, String modelVehicle,
                                              String dayEntry, String dayExit, float totalCost) {
         assertEquals(vehicleId, detail.getVehicleId());
         assertEquals(plateNumber, detail.getPlateNumber());
