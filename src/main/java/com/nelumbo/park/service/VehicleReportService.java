@@ -3,7 +3,7 @@ package com.nelumbo.park.service;
 import com.nelumbo.park.dto.response.VehicleDetailResponse;
 import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
 import com.nelumbo.park.entity.Vehicle;
-import com.nelumbo.park.enums.VehicleStatus;
+import com.nelumbo.park.domain.model.VehicleStatus;
 import com.nelumbo.park.repository.VehicleRepository;
 import org.springframework.stereotype.Service;
 

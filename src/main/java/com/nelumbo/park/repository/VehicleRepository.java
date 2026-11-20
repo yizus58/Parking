@@ -3,7 +3,7 @@ package com.nelumbo.park.repository;
 import com.nelumbo.park.dto.response.TopPartnerResponse;
 import com.nelumbo.park.entity.Vehicle;
 import com.nelumbo.park.entity.User;
-import com.nelumbo.park.enums.VehicleStatus;
+import com.nelumbo.park.domain.model.VehicleStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

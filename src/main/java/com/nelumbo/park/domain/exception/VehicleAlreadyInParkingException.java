@@ -1,4 +1,4 @@
-package com.nelumbo.park.exception.exceptions;
+package com.nelumbo.park.domain.exception;
 
 public class VehicleAlreadyInParkingException extends RuntimeException {
     public VehicleAlreadyInParkingException() {

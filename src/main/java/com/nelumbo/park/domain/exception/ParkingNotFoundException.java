@@ -1,4 +1,4 @@
-package com.nelumbo.park.exception.exceptions;
+package com.nelumbo.park.domain.exception;
 
 public class ParkingNotFoundException extends RuntimeException {
     public ParkingNotFoundException() {

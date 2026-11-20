@@ -8,7 +8,7 @@ import com.nelumbo.park.dto.response.VehicleExitResponse;
 import com.nelumbo.park.dto.response.VehicleResponse;
 import com.nelumbo.park.dto.request.VehicleUpdateRequest;
 import com.nelumbo.park.entity.Vehicle;
-import com.nelumbo.park.enums.VehicleStatus;
+import com.nelumbo.park.domain.model.VehicleStatus;
 import com.nelumbo.park.mapper.VehicleResponseMapper;
 import com.nelumbo.park.service.VehicleService;
 import org.junit.jupiter.api.Test;

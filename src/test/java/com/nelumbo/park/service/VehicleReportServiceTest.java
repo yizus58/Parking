@@ -5,7 +5,7 @@ import com.nelumbo.park.dto.response.VehicleOutDetailResponse;
 import com.nelumbo.park.entity.Parking;
 import com.nelumbo.park.entity.User;
 import com.nelumbo.park.entity.Vehicle;
-import com.nelumbo.park.enums.VehicleStatus;
+import com.nelumbo.park.domain.model.VehicleStatus;
 import com.nelumbo.park.repository.VehicleRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

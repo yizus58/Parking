@@ -1,6 +1,6 @@
 package com.nelumbo.park.entity;
 
-import com.nelumbo.park.enums.VehicleStatus;
+import com.nelumbo.park.domain.model.VehicleStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
