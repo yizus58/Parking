@@ -5,8 +5,7 @@ import com.nelumbo.park.application.port.out.AccessTokenPort;
 import com.nelumbo.park.application.port.out.LoginLogRepositoryPort;
 import com.nelumbo.park.application.port.out.PasswordHasherPort;
 import com.nelumbo.park.application.port.out.UserRepositoryPort;
-import com.nelumbo.park.domain.exception.EmailNotFoundException;
-import com.nelumbo.park.domain.exception.InvalidPasswordException;
+import com.nelumbo.park.domain.exception.InvalidCredentialsException;
 import com.nelumbo.park.domain.exception.LoginBlockedException;
 import com.nelumbo.park.domain.model.LoginLog;
 import com.nelumbo.park.domain.model.User;
@@ -14,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
+import java.util.Optional;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -66,12 +66,18 @@ public class AuthenticationService implements LoginUseCase {
         }
     }
 
+    /**
+     * Unknown email and wrong password fail with the same exception, and both run one BCrypt check
+     * (against a dummy hash when there is no user), so neither the response nor its timing reveals
+     * whether the email is registered.
+     */
     private User checkCredentials(String email, String password) {
-        User user = userRepository.findByEmail(email).orElseThrow(EmailNotFoundException::new);
-        if (!passwordHasher.matches(password, user.getPassword())) {
-            log.warn("Contraseña incorrecta para el usuario: {}", email);
-            throw new InvalidPasswordException();
+        Optional<User> user = userRepository.findByEmail(email);
+        boolean matches = passwordHasher.matches(password, user.map(User::getPassword).orElse(null));
+        if (user.isEmpty() || !matches) {
+            log.warn("Login fallido para: {}", email);
+            throw new InvalidCredentialsException();
         }
-        return user;
+        return user.get();
     }
 }

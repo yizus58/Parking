@@ -5,8 +5,7 @@ import com.nelumbo.park.application.port.out.AccessTokenPort;
 import com.nelumbo.park.application.port.out.LoginLogRepositoryPort;
 import com.nelumbo.park.application.port.out.PasswordHasherPort;
 import com.nelumbo.park.application.port.out.UserRepositoryPort;
-import com.nelumbo.park.domain.exception.EmailNotFoundException;
-import com.nelumbo.park.domain.exception.InvalidPasswordException;
+import com.nelumbo.park.domain.exception.InvalidCredentialsException;
 import com.nelumbo.park.domain.exception.LoginBlockedException;
 import com.nelumbo.park.domain.model.LoginLog;
 import com.nelumbo.park.domain.model.User;
@@ -61,7 +60,11 @@ class AuthenticationServiceTest {
     @Test
     void login_unknownEmail() {
         when(users.findByEmail(any())).thenReturn(Optional.empty());
-        assertThrows(EmailNotFoundException.class, () -> service.login("x@example.com", "secret1", IP));
+        InvalidCredentialsException e = assertThrows(InvalidCredentialsException.class,
+                () -> service.login("x@example.com", "secret1", IP));
+        assertEquals("Credenciales incorrectas", e.getMessage());
+        // A password check still runs (against the adapter's dummy hash), so timing does not reveal the account.
+        verify(hasher).matches("secret1", null);
         verify(loginLogs, never()).save(any());
     }
 
@@ -69,15 +72,17 @@ class AuthenticationServiceTest {
     void login_wrongPassword() {
         when(users.findByEmail(any())).thenReturn(Optional.of(user));
         when(hasher.matches(any(), any())).thenReturn(false);
-        assertThrows(InvalidPasswordException.class, () -> service.login("p1@example.com", "bad", IP));
+        InvalidCredentialsException e = assertThrows(InvalidCredentialsException.class,
+                () -> service.login("p1@example.com", "bad", IP));
+        assertEquals("Credenciales incorrectas", e.getMessage());
     }
 
     @Test
     void login_thirdFailureBlocksIp_thenRejectsWithMinutesLeft() {
         when(users.findByEmail(any())).thenReturn(Optional.empty());
 
-        assertThrows(EmailNotFoundException.class, () -> service.login("x@example.com", "p", IP));
-        assertThrows(EmailNotFoundException.class, () -> service.login("x@example.com", "p", IP));
+        assertThrows(InvalidCredentialsException.class, () -> service.login("x@example.com", "p", IP));
+        assertThrows(InvalidCredentialsException.class, () -> service.login("x@example.com", "p", IP));
         LoginBlockedException third = assertThrows(LoginBlockedException.class,
                 () -> service.login("x@example.com", "p", IP));
         assertEquals("Lo sentimos no puedes hacer login, durante 5 min", third.getMessage());
@@ -86,5 +91,12 @@ class AuthenticationServiceTest {
                 () -> service.login("x@example.com", "p", IP));
         assertEquals("Lo sentimos no puedes hacer login, puedes intentarlo de nuevo en 6 min", next.getMessage());
         verify(users, times(3)).findByEmail(any());
+    }
+
+    @Test
+    void login_unknownUser_neverSucceeds_evenIfTheHasherSaysTrue() {
+        when(users.findByEmail(any())).thenReturn(Optional.empty());
+        when(hasher.matches(any(), any())).thenReturn(true);
+        assertThrows(InvalidCredentialsException.class, () -> service.login("x@example.com", "secret1", IP));
     }
 }

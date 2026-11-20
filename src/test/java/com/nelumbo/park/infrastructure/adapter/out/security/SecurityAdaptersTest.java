@@ -70,4 +70,15 @@ class SecurityAdaptersTest {
         assertTrue(hasher.matches("secret1", hash));
         assertFalse(hasher.matches("other", hash));
     }
+
+    @Test
+    void passwordHasher_withoutStoredHash_checksADummyHashAndReturnsFalse() {
+        org.springframework.security.crypto.password.PasswordEncoder encoder =
+                mock(org.springframework.security.crypto.password.PasswordEncoder.class);
+        when(encoder.encode(org.mockito.ArgumentMatchers.anyString())).thenReturn("dummy-hash");
+        BCryptPasswordHasherAdapter hasher = new BCryptPasswordHasherAdapter(encoder);
+
+        assertFalse(hasher.matches("secret1", null));
+        verify(encoder).matches("secret1", "dummy-hash");
+    }
 }

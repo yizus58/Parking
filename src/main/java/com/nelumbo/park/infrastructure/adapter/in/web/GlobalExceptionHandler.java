@@ -1,8 +1,7 @@
 package com.nelumbo.park.infrastructure.adapter.in.web;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.nelumbo.park.domain.exception.EmailNotFoundException;
-import com.nelumbo.park.domain.exception.InvalidPasswordException;
+import com.nelumbo.park.domain.exception.InvalidCredentialsException;
 import com.nelumbo.park.domain.exception.InsufficientPermissionsException;
 import com.nelumbo.park.domain.exception.LimitParkingFullException;
 import com.nelumbo.park.domain.exception.NoAssociatedParkingException;
@@ -165,14 +164,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errors);
     }
 
-    @ExceptionHandler(EmailNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleEmailNotFoundException(EmailNotFoundException ex) {
-        return createErrorResponse(HttpStatus.UNAUTHORIZED, "Email no encontrado");
-    }
-
-    @ExceptionHandler(InvalidPasswordException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidPasswordException(InvalidPasswordException ex) {
-        return createErrorResponse(HttpStatus.UNAUTHORIZED, "Password incorrecta");
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCredentialsException(InvalidCredentialsException ex) {
+        return createErrorResponse(HttpStatus.UNAUTHORIZED, InvalidCredentialsException.MESSAGE);
     }
 
     @ExceptionHandler(InsufficientPermissionsException.class)

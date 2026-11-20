@@ -2,8 +2,7 @@ package com.nelumbo.park.infrastructure.adapter.in.web;
 
 import com.nelumbo.park.application.port.in.LoginUseCase;
 import com.nelumbo.park.application.port.in.LoginUseCase.AuthenticatedUser;
-import com.nelumbo.park.domain.exception.EmailNotFoundException;
-import com.nelumbo.park.domain.exception.InvalidPasswordException;
+import com.nelumbo.park.domain.exception.InvalidCredentialsException;
 import com.nelumbo.park.domain.exception.LoginBlockedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -54,27 +53,18 @@ class AuthControllerTest extends WebLayerTestSupport {
     }
 
     @Test
-    void login_unknownEmail_returns401() throws Exception {
-        when(loginUseCase.login(any(), any(), any())).thenThrow(new EmailNotFoundException());
+    void login_badCredentials_returns401WithGenericMessage() throws Exception {
+        when(loginUseCase.login(any(), any(), any())).thenThrow(new InvalidCredentialsException());
 
         mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Email no encontrado"));
-    }
-
-    @Test
-    void login_wrongPassword_returns401() throws Exception {
-        when(loginUseCase.login(any(), any(), any())).thenThrow(new InvalidPasswordException());
-
-        mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(BODY))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Password incorrecta"));
+                .andExpect(jsonPath("$.error").value("Credenciales incorrectas"));
     }
 
     @Test
     void login_withoutCsrfToken_isAccepted() throws Exception {
         // CSRF is disabled for this stateless JWT API: a plain JSON POST, as any client sends it, reaches the use case.
-        when(loginUseCase.login(any(), any(), any())).thenThrow(new InvalidPasswordException());
+        when(loginUseCase.login(any(), any(), any())).thenThrow(new InvalidCredentialsException());
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON).content(BODY))

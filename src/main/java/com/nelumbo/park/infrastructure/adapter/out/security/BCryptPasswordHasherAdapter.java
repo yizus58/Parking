@@ -9,8 +9,12 @@ public class BCryptPasswordHasherAdapter implements PasswordHasherPort {
 
     private final PasswordEncoder passwordEncoder;
 
+    /** Hash of a random value, checked when there is no stored hash so both paths cost the same. */
+    private final String dummyHash;
+
     public BCryptPasswordHasherAdapter(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
+        this.dummyHash = passwordEncoder.encode(java.util.UUID.randomUUID().toString());
     }
 
     @Override
@@ -20,6 +24,10 @@ public class BCryptPasswordHasherAdapter implements PasswordHasherPort {
 
     @Override
     public boolean matches(String rawPassword, String hash) {
+        if (hash == null) {
+            passwordEncoder.matches(rawPassword, dummyHash);
+            return false;
+        }
         return passwordEncoder.matches(rawPassword, hash);
     }
 }

@@ -2,9 +2,8 @@ package com.nelumbo.park.infrastructure.adapter.in.web;
 
 import com.nelumbo.park.domain.exception.DuplicateEmailException;
 import com.nelumbo.park.domain.exception.DuplicateUsernameException;
-import com.nelumbo.park.domain.exception.EmailNotFoundException;
 import com.nelumbo.park.domain.exception.InsufficientPermissionsException;
-import com.nelumbo.park.domain.exception.InvalidPasswordException;
+import com.nelumbo.park.domain.exception.InvalidCredentialsException;
 import com.nelumbo.park.infrastructure.exception.JwtUserNotFoundException;
 import com.nelumbo.park.domain.exception.NoAssociatedParkingException;
 import com.nelumbo.park.domain.exception.ParkingNotFoundException;
@@ -77,25 +76,13 @@ import static org.mockito.Mockito.*;
     }
 
     @Test
-    void handleEmailNotFoundException_shouldReturnUnauthorized() {
-        EmailNotFoundException ex = new EmailNotFoundException("Email not found");
-
-        ResponseEntity<Map<String, String>> response = globalExceptionHandler.handleEmailNotFoundException(ex);
-
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Email no encontrado", response.getBody().get("error"));
-    }
-
-    @Test
-    void handleInvalidPasswordException_shouldReturnUnauthorized() {
-        InvalidPasswordException ex = new InvalidPasswordException("Invalid password");
-
-        ResponseEntity<Map<String, String>> response = globalExceptionHandler.handleInvalidPasswordException(ex);
+    void handleInvalidCredentialsException_shouldReturnUnauthorizedWithGenericMessage() {
+        ResponseEntity<Map<String, String>> response =
+                globalExceptionHandler.handleInvalidCredentialsException(new InvalidCredentialsException());
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Password incorrecta", response.getBody().get("error"));
+        assertEquals("Credenciales incorrectas", response.getBody().get("error"));
     }
 
     @Test
