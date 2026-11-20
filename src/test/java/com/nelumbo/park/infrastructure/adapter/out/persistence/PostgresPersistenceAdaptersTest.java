@@ -37,6 +37,11 @@ class PostgresPersistenceAdaptersTest extends PersistenceAdaptersTest {
         TestPostgres.registerProperties(registry);
     }
 
+    @org.junit.jupiter.api.BeforeAll
+    static void startFromEmptyTables() {
+        TestPostgres.deleteAllRows();
+    }
+
     @Autowired
     private JdbcTemplate jdbc;
     @Autowired

@@ -36,6 +36,11 @@ class VehicleEntryPostgresConcurrencyTest extends VehicleEntryConcurrencyTest {
         TestPostgres.registerProperties(registry);
     }
 
+    @org.junit.jupiter.api.BeforeAll
+    static void startFromEmptyTables() {
+        TestPostgres.deleteAllRows();
+    }
+
     @Test
     void samePlateIntoTwoParkingsAtOnce_entersOnlyOnce() throws Exception {
         User owner = users.save(User.newPartner("socio-two", "two@example.com", "hash"));

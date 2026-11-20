@@ -53,6 +53,26 @@ public final class TestPostgres {
         });
     }
 
+    /**
+     * Empties the application tables (if they exist), so a test class does not depend on what
+     * other classes left in the shared database.
+     */
+    public static void deleteAllRows() {
+        connection().ifPresent(c -> {
+            try (java.sql.Connection jdbc = java.sql.DriverManager.getConnection(c.jdbcUrl(), c.username(), c.password());
+                 java.sql.Statement st = jdbc.createStatement()) {
+                st.execute("""
+                        DO $$ BEGIN
+                          IF to_regclass('public.vehicles') IS NOT NULL THEN
+                            DELETE FROM vehicles; DELETE FROM parking_lot; DELETE FROM login_log; DELETE FROM users_table;
+                          END IF;
+                        END $$""");
+            } catch (java.sql.SQLException e) {
+                throw new IllegalStateException("Could not clean the test database", e);
+            }
+        });
+    }
+
     private static Optional<Connection> resolve() {
         String url = setting("TEST_POSTGRES_URL");
         if (url != null && !url.isBlank()) {
