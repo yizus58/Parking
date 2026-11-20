@@ -29,6 +29,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            // Stateless JWT API: no session or cookie carries credentials, so CSRF protection does not
+            // apply and only blocked legitimate POST/PUT/DELETE requests that had a valid Bearer token.
+            .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                     .requestMatchers("/auth/**").permitAll()

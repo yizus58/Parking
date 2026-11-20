@@ -72,14 +72,14 @@ class AuthControllerTest extends WebLayerTestSupport {
     }
 
     @Test
-    void login_withoutCsrfToken_isRejected() throws Exception {
-        // Current behaviour: SecurityConfig does not disable CSRF, so any POST/PUT/DELETE
-        // without a CSRF token is rejected. MockMvc shows the raw 403; a real server
-        // answers 401 because the error dispatch to /error requires authentication.
+    void login_withoutCsrfToken_isAccepted() throws Exception {
+        // CSRF is disabled for this stateless JWT API: a plain JSON POST, as any client sends it, reaches the use case.
+        when(loginUseCase.login(any(), any(), any())).thenThrow(new InvalidPasswordException());
+
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON).content(BODY))
-                .andExpect(status().isForbidden());
-        verify(loginUseCase, never()).login(any(), any(), any());
+                .andExpect(status().isUnauthorized());
+        verify(loginUseCase).login(any(), any(), any());
     }
 
     @Test
