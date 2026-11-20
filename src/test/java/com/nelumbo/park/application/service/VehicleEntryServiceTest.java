@@ -40,7 +40,6 @@ class VehicleEntryServiceTest {
         service = new VehicleEntryService(vehicles, parkings, new CurrentUserResolver(currentUser), Fixtures.CLOCK);
         when(vehicles.findByPlateNumberAndStatus(any(), any())).thenReturn(Optional.empty());
         when(parkings.findByIdForUpdate("park-1")).thenReturn(Optional.of(parking));
-        when(parkings.findById("park-1")).thenReturn(Optional.of(parking));
         when(currentUser.currentUser()).thenReturn(Optional.of(owner));
         when(vehicles.save(any())).thenAnswer(inv -> inv.getArgument(0));
     }
@@ -75,10 +74,16 @@ class VehicleEntryServiceTest {
     @Test
     void unknownParking() {
         when(parkings.findByIdForUpdate("park-1")).thenReturn(Optional.empty());
-        when(parkings.findById("park-1")).thenReturn(Optional.empty());
 
         ParkingNotFoundException ex = assertThrows(ParkingNotFoundException.class, () -> service.registerEntry(command));
         assertEquals("Parking no encontrado con ID: park-1", ex.getMessage());
+    }
+
+    @Test
+    void locksTheParkingRow() {
+        service.registerEntry(command);
+        verify(parkings).findByIdForUpdate("park-1");
+        verify(parkings, never()).findById(any());
     }
 
     @Test
