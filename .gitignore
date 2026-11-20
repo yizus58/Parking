@@ -28,10 +28,8 @@ logs/
 
 # Variables de entorno y secretos
 .env
-.env.development
-.env.test
-.env.production
-.env.local
+.env.*
+!.env.example
 # application-dev.properties
 # application-prod.properties
 # application-*.yml
