@@ -44,10 +44,17 @@ public class VehicleManagementService implements ManageVehiclesUseCase {
         return vehicle;
     }
 
+    /**
+     * A partner may only delete vehicles of parkings it owns; an admin may delete any vehicle.
+     */
     @Override
     @Transactional
     public void deleteVehicle(String id) {
-        vehicleRepository.findById(id).orElseThrow(VehicleNotFoundException::new);
+        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(VehicleNotFoundException::new);
+        User user = currentUser.require();
+        if (!user.isAdmin() && (vehicle.getParking() == null || !vehicle.getParking().isOwnedBy(user))) {
+            throw new InsufficientPermissionsException();
+        }
         vehicleRepository.deleteById(id);
     }
 }

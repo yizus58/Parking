@@ -174,6 +174,17 @@ class VehicleControllerTest extends WebLayerTestSupport {
     }
 
     @Test
+    @WithMockUser(authorities = "SOCIO")
+    void delete_vehicleOfAnotherPartnersParking_returns403() throws Exception {
+        org.mockito.Mockito.doThrow(new com.nelumbo.park.domain.exception.InsufficientPermissionsException())
+                .when(manageVehicles).deleteVehicle("veh-2");
+
+        mockMvc.perform(delete("/vehicles/veh-2"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("No tienes permisos para realizar esta acción"));
+    }
+
+    @Test
     void anonymous_unauthorized() throws Exception {
         mockMvc.perform(post("/vehicles/").contentType(MediaType.APPLICATION_JSON).content(CREATE))
                 .andExpect(status().isUnauthorized());

@@ -78,13 +78,51 @@ class VehicleManagementServiceTest {
     }
 
     @Test
-    void delete_existingAndMissing() {
+    void delete_byParkingOwner() {
+        when(currentUser.currentUser()).thenReturn(Optional.of(owner));
         when(vehicles.findById("v1")).thenReturn(Optional.of(vehicle));
         service.deleteVehicle("v1");
         verify(vehicles).deleteById("v1");
+    }
 
+    @Test
+    void delete_byAdmin() {
+        when(currentUser.currentUser()).thenReturn(Optional.of(Fixtures.admin()));
+        when(vehicles.findById("v1")).thenReturn(Optional.of(vehicle));
+        service.deleteVehicle("v1");
+        verify(vehicles).deleteById("v1");
+    }
+
+    @Test
+    void delete_missing_isNotFound() {
+        when(currentUser.currentUser()).thenReturn(Optional.of(owner));
         when(vehicles.findById("nope")).thenReturn(Optional.empty());
         assertThrows(VehicleNotFoundException.class, () -> service.deleteVehicle("nope"));
+        verify(vehicles, org.mockito.Mockito.never()).deleteById(org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void delete_byAnotherPartner_isForbidden() {
+        when(currentUser.currentUser()).thenReturn(Optional.of(Fixtures.partner("p2")));
+        when(vehicles.findById("v1")).thenReturn(Optional.of(vehicle));
+        assertThrows(InsufficientPermissionsException.class, () -> service.deleteVehicle("v1"));
+        verify(vehicles, org.mockito.Mockito.never()).deleteById(org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void delete_vehicleWithoutParking_isForbiddenForPartners() {
+        Vehicle orphan = new Vehicle("v2", "XYZ987", "Mazda", Fixtures.NOW, null, 1000f,
+                com.nelumbo.park.domain.model.VehicleStatus.IN, null, owner);
+        when(currentUser.currentUser()).thenReturn(Optional.of(owner));
+        when(vehicles.findById("v2")).thenReturn(Optional.of(orphan));
+        assertThrows(InsufficientPermissionsException.class, () -> service.deleteVehicle("v2"));
+    }
+
+    @Test
+    void delete_withoutAuthenticatedUser_isForbidden() {
+        when(currentUser.currentUser()).thenReturn(Optional.empty());
+        when(vehicles.findById("v1")).thenReturn(Optional.of(vehicle));
+        assertThrows(InsufficientPermissionsException.class, () -> service.deleteVehicle("v1"));
     }
 
     private static String any() {
