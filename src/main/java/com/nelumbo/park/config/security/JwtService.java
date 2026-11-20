@@ -1,6 +1,6 @@
 package com.nelumbo.park.config.security;
 
-import com.nelumbo.park.exception.exceptions.JwtExtractException;
+import com.nelumbo.park.infrastructure.exception.JwtExtractException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

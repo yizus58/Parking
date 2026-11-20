@@ -1,7 +1,7 @@
 package com.nelumbo.park.config.security;
 
 import com.nelumbo.park.entity.User;
-import com.nelumbo.park.exception.exceptions.JwtProcessingException;
+import com.nelumbo.park.infrastructure.exception.JwtProcessingException;
 import com.nelumbo.park.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

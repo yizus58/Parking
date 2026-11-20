@@ -12,7 +12,7 @@ import com.nelumbo.park.domain.exception.DuplicateUsernameException;
 import com.nelumbo.park.domain.exception.ParkingNotFoundException;
 import com.nelumbo.park.domain.exception.VehicleNotFoundException;
 import com.nelumbo.park.domain.exception.VehicleAlreadyInParkingException;
-import com.nelumbo.park.exception.exceptions.JwtUserNotFoundException;
+import com.nelumbo.park.infrastructure.exception.JwtUserNotFoundException;
 import com.nelumbo.park.domain.exception.VehicleOutParkingException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;

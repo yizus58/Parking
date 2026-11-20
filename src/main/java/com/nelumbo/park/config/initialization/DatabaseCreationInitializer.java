@@ -1,6 +1,6 @@
 package com.nelumbo.park.config.initialization;
 
-import com.nelumbo.park.exception.exceptions.DatabaseInitializationException;
+import com.nelumbo.park.infrastructure.exception.DatabaseInitializationException;
 import org.slf4j.Logger;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;

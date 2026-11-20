@@ -1,7 +1,7 @@
 package com.nelumbo.park.service.infrastructure;
 
 import com.nelumbo.park.entity.User;
-import com.nelumbo.park.exception.exceptions.JwtUserNotFoundException;
+import com.nelumbo.park.infrastructure.exception.JwtUserNotFoundException;
 import com.nelumbo.park.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

@@ -5,7 +5,7 @@ import com.nelumbo.park.domain.exception.DuplicateUsernameException;
 import com.nelumbo.park.domain.exception.EmailNotFoundException;
 import com.nelumbo.park.domain.exception.InsufficientPermissionsException;
 import com.nelumbo.park.domain.exception.InvalidPasswordException;
-import com.nelumbo.park.exception.exceptions.JwtUserNotFoundException;
+import com.nelumbo.park.infrastructure.exception.JwtUserNotFoundException;
 import com.nelumbo.park.domain.exception.NoAssociatedParkingException;
 import com.nelumbo.park.domain.exception.ParkingNotFoundException;
 import com.nelumbo.park.domain.exception.UserNotFoundException;

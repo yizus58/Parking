@@ -1,16 +1,19 @@
 package com.nelumbo.park.service.infrastructure;
 
+import com.nelumbo.park.infrastructure.adapter.out.messaging.RabbitMQService;
+import com.nelumbo.park.infrastructure.adapter.out.storage.S3Service;
+
 import com.nelumbo.park.dto.response.FileInfoResponse;
 import com.nelumbo.park.dto.response.FileUploadResultResponse;
-import com.nelumbo.park.dto.response.RabbitMQResponse;
+import com.nelumbo.park.infrastructure.adapter.out.messaging.dto.RabbitMQResponse;
 import com.nelumbo.park.domain.model.report.VehicleOutDetail;
-import com.nelumbo.park.dto.response.EmailAttachmentResponse;
-import com.nelumbo.park.dto.response.EmailDataResponse;
+import com.nelumbo.park.infrastructure.adapter.out.messaging.dto.EmailAttachmentResponse;
+import com.nelumbo.park.infrastructure.adapter.out.messaging.dto.EmailDataResponse;
 import com.nelumbo.park.service.VehicleReportService;
-import com.nelumbo.park.utils.Excel;
-import com.nelumbo.park.utils.ExcelComponent;
-import com.nelumbo.park.utils.HtmlGenerator;
-import com.nelumbo.park.utils.Pdf;
+import com.nelumbo.park.infrastructure.adapter.out.report.Excel;
+import com.nelumbo.park.infrastructure.adapter.out.report.ExcelComponent;
+import com.nelumbo.park.infrastructure.adapter.out.report.HtmlGenerator;
+import com.nelumbo.park.infrastructure.adapter.out.report.Pdf;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
