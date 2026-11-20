@@ -14,10 +14,21 @@ import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Component("pdfReport")
 public class Pdf {
+
+    /**
+     * Money as "$1,234.50", independent of the server's default locale. Some
+     * locales group with characters the standard PDF fonts cannot encode
+     * (e.g. U+202F in fr), which made PDFBox throw while rendering.
+     */
+    static String formatAmount(Number amount) {
+        return String.format(Locale.US, "$%,.2f", amount == null ? 0f : amount.floatValue());
+    }
+
 
     public byte[] generarPdfPorUsuario(List<VehicleOutDetail> data) throws IOException {
         if (data == null || data.isEmpty()) {
@@ -133,7 +144,7 @@ public class Pdf {
                         Optional.ofNullable(v.getModelVehicle()).orElse(""),
                         Optional.ofNullable(v.getDayEntry()).orElse(""),
                         Optional.ofNullable(v.getDayExit()).orElse(""),
-                        String.format("$%,.2f", v.getTotalCost())
+                        formatAmount(v.getTotalCost())
                 };
 
                 for (int i = 0; i < rowData.length; i++) {
@@ -157,7 +168,7 @@ public class Pdf {
             float subtotalValueX = subtotalLabelX + colWidths[4];
             contentStream.beginText();
             contentStream.newLineAtOffset(subtotalValueX, y);
-            contentStream.showText(String.format("$%,.2f", item.getTotalEarnings()));
+            contentStream.showText(formatAmount(item.getTotalEarnings()));
             contentStream.endText();
 
         } else {

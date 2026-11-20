@@ -132,7 +132,7 @@ class IndicatorsAndRankingsControllerTest extends WebLayerTestSupport {
                 .andExpect(jsonPath("$.topParking[0].parkingId").value("park-1"))
                 .andExpect(jsonPath("$.topParking[0].parkingName").value("Parking Centro"))
                 .andExpect(jsonPath("$.topParking[0].totalVehicles").value(3))
-                .andExpect(jsonPath("$.topParking[0].totalCost").value(String.format("%.1f", 7500f) + "f"));
+                .andExpect(jsonPath("$.topParking[0].totalCost").value("7500.0f"));
     }
 
     @Test

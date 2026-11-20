@@ -167,10 +167,13 @@ public final class WebMapper {
         return ranking.topParkings().stream().map(WebMapper::toTopParking).toList();
     }
 
-    /** totalCost keeps its odd legacy format, e.g. "6000.0f" (locale dependent decimal separator). */
-    private static TopParkingResponse toTopParking(TopParking top) {
+    /**
+     * totalCost keeps its legacy wire format, e.g. "6000.0f", but always with a
+     * dot as decimal separator regardless of the server's default locale.
+     */
+    static TopParkingResponse toTopParking(TopParking top) {
         return new TopParkingResponse(top.parkingId(), top.parkingName(), top.totalVehicles(),
-                String.format("%.1f", top.totalEarnings()) + "f");
+                String.format(Locale.ROOT, "%.1f", top.totalEarnings()) + "f");
     }
 
     private static Date toDate(Instant instant) {

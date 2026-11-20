@@ -20,6 +20,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -128,6 +129,6 @@ public class DailyReportService implements SendDailyReportsUseCase {
         String userId = report.getUserId();
         String shortId = userId != null && userId.length() >= 8 ? userId.substring(0, 8) : "undefined";
         String date = LocalDate.now(clock).format(FILE_DATE);
-        return String.format("reporte_%s_%s_%s.xlsx", safeName, shortId, date).toLowerCase();
+        return String.format("reporte_%s_%s_%s.xlsx", safeName, shortId, date).toLowerCase(Locale.ROOT);
     }
 }
