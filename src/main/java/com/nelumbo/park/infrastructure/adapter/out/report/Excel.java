@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Component("report")
@@ -59,7 +60,7 @@ public class Excel {
     }
 
     private void createSheetHeaders(XSSFSheet sheet, VehicleOutDetail item, CellStyle boldStyle) {
-        String nameParking = Optional.ofNullable(item.getParking()).orElse("").toLowerCase();
+        String nameParking = Optional.ofNullable(item.getParking()).orElse("").toLowerCase(Locale.ROOT);
 
         // Fila título
         Row titleRow = sheet.createRow(0);

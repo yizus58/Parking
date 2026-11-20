@@ -61,7 +61,7 @@ public class Pdf {
             }
 
             String username = Optional.ofNullable(item.getUsername()).orElse("usuario");
-            String parkingName = Optional.ofNullable(item.getParking()).orElse("").toLowerCase();
+            String parkingName = Optional.ofNullable(item.getParking()).orElse("").toLowerCase(Locale.ROOT);
 
             // Title
             contentStream.beginText();

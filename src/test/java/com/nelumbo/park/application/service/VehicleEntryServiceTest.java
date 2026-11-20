@@ -1,5 +1,6 @@
 package com.nelumbo.park.application.service;
 
+import com.nelumbo.park.application.port.in.RegisterVehicleEntryUseCase;
 import com.nelumbo.park.application.port.in.RegisterVehicleEntryUseCase.VehicleEntryCommand;
 import com.nelumbo.park.application.port.out.CurrentUserPort;
 import com.nelumbo.park.application.port.out.ParkingRepositoryPort;
@@ -69,6 +70,19 @@ class VehicleEntryServiceTest {
                 () -> service.registerEntry(command));
         assertEquals("El vehiculo con placa ABC123 ya está registrado y actualmente en un parking", ex.getMessage());
         verify(vehicles, never()).save(any());
+    }
+
+    @Test
+    void lowercasePlate_isStoredUppercase_andCheckedAsSuch() {
+        when(vehicles.findByPlateNumberAndStatus("ABC123", VehicleStatus.IN))
+                .thenReturn(Optional.of(Fixtures.inside("v1", "ABC123", parking, owner)));
+
+        assertThrows(VehicleAlreadyInParkingException.class,
+                () -> service.registerEntry(new RegisterVehicleEntryUseCase.VehicleEntryCommand(" abc123 ", "Mazda", "park-1")));
+
+        when(vehicles.findByPlateNumberAndStatus("XYZ987", VehicleStatus.IN)).thenReturn(Optional.empty());
+        Vehicle saved = service.registerEntry(new RegisterVehicleEntryUseCase.VehicleEntryCommand("xyz987", "Kia", "park-1"));
+        assertEquals("XYZ987", saved.getPlateNumber());
     }
 
     @Test

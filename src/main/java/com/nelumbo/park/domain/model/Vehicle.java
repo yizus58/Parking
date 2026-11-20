@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.Locale;
 
 @Getter
 @Setter
@@ -31,8 +32,13 @@ public class Vehicle {
      * current hourly rate frozen on the vehicle.
      */
     public static Vehicle enter(String plateNumber, String model, Parking parking, User admin, Instant now) {
-        return new Vehicle(null, plateNumber, model, now, null, parking.getCostPerHour(),
+        return new Vehicle(null, normalizePlate(plateNumber), model, now, null, parking.getCostPerHour(),
                 VehicleStatus.IN, parking, admin);
+    }
+
+    /** Plates are stored and looked up trimmed and upper-cased, so "abc123 " and "ABC123" are the same vehicle. */
+    public static String normalizePlate(String plateNumber) {
+        return plateNumber == null ? null : plateNumber.trim().toUpperCase(Locale.ROOT);
     }
 
     public boolean isInside() {

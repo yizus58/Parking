@@ -30,7 +30,7 @@ public class VehicleExitService implements RegisterVehicleExitUseCase {
     @Override
     @Transactional
     public VehicleExit registerExit(String plateNumber) {
-        Vehicle vehicle = vehicleRepository.findByPlateNumberAndStatus(plateNumber.toUpperCase(), VehicleStatus.IN)
+        Vehicle vehicle = vehicleRepository.findByPlateNumberAndStatus(Vehicle.normalizePlate(plateNumber), VehicleStatus.IN)
                 .orElseThrow(VehicleNotFoundException::new);
         Optional<User> user = currentUser.current();
         if (currentUser.isPartner(user) && !vehicle.wasRegisteredBy(user.get())) {

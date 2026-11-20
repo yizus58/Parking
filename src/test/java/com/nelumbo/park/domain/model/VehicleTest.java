@@ -52,4 +52,22 @@ class VehicleTest {
 
         assertThrows(VehicleOutParkingException.class, () -> vehicle.exit(NOW.plusSeconds(7200)));
     }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"abc123,ABC123", "' Abc123 ',ABC123", "ABC123,ABC123"})
+    void enter_normalizesThePlate(String given, String stored) {
+        assertEquals(stored, Vehicle.enter(given, "Mazda", parking, partner, NOW).getPlateNumber());
+    }
+
+    @Test
+    void normalizePlate_isLocaleIndependentAndNullSafe() {
+        java.util.Locale original = java.util.Locale.getDefault();
+        try {
+            java.util.Locale.setDefault(java.util.Locale.forLanguageTag("tr-TR"));
+            assertEquals("XIL123", Vehicle.normalizePlate("xil123"));
+        } finally {
+            java.util.Locale.setDefault(original);
+        }
+        assertNull(Vehicle.normalizePlate(null));
+    }
 }

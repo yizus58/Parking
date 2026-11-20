@@ -30,6 +30,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -257,8 +258,8 @@ public class GlobalExceptionHandler {
         logger.error("Runtime exception: ", ex);
 
         if (ex.getMessage() != null &&
-                (ex.getMessage().toLowerCase().contains("content type") ||
-                        (ex.getMessage().toLowerCase().contains("media type") && !ex.getMessage().contains("application/json")))) {
+                (ex.getMessage().toLowerCase(Locale.ROOT).contains("content type") ||
+                        (ex.getMessage().toLowerCase(Locale.ROOT).contains("media type") && !ex.getMessage().contains("application/json")))) {
             return createJsonRequiredResponse();
         }
 

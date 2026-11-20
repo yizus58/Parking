@@ -48,12 +48,13 @@ public class VehicleEntryService implements RegisterVehicleEntryUseCase {
     @Override
     @Transactional
     public Vehicle registerEntry(VehicleEntryCommand command) {
-        ensureNotInside(command.plateNumber());
+        String plate = Vehicle.normalizePlate(command.plateNumber());
+        ensureNotInside(plate);
         Parking parking = parkingRepository.findByIdForUpdate(command.parkingId())
                 .orElseThrow(() -> new ParkingNotFoundException("Parking no encontrado con ID: " + command.parkingId()));
         // Checked again under the lock: a concurrent entry of the same plate into
         // this parking may have committed while we were waiting.
-        ensureNotInside(command.plateNumber());
+        ensureNotInside(plate);
         User user = currentUser.require();
         if (!parking.isOwnedBy(user)) {
             throw new InsufficientPermissionsException();
@@ -63,7 +64,7 @@ public class VehicleEntryService implements RegisterVehicleEntryUseCase {
             throw new LimitParkingFullException(
                     "El limite de vehiculos en parking " + parking.getName() + " ya ha sido alcanzado");
         }
-        return vehicleRepository.save(Vehicle.enter(command.plateNumber(), command.model(), parking, user, clock.instant()));
+        return vehicleRepository.save(Vehicle.enter(plate, command.model(), parking, user, clock.instant()));
     }
 
     private void ensureNotInside(String plateNumber) {
