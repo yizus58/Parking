@@ -67,12 +67,9 @@ public class ParkingIndicatorsService implements ParkingIndicatorsUseCase {
         return parkingRanking(RankingPeriod.weekOf(now()));
     }
 
-    /**
-     * Kept as before: the "month" parking ranking uses the current week.
-     */
     @Override
     public ParkingRanking parkingRankingOfMonth() {
-        return parkingRanking(RankingPeriod.weekOf(now()));
+        return parkingRanking(RankingPeriod.monthOf(now()));
     }
 
     private PartnerRanking partnerRanking(RankingPeriod period) {

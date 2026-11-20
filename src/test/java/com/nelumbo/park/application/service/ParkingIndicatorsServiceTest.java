@@ -66,7 +66,7 @@ class ParkingIndicatorsServiceTest {
         PartnerRanking ranking = service.partnersRankingOfMonth();
         assertEquals(LocalDateTime.of(2026, 11, 1, 5, 0), ranking.period().start());
         verify(vehicles).findTopPartners(Instant.parse("2026-11-01T10:00:00Z"),
-                Instant.parse("2026-12-02T04:59:59.999Z"), 3);
+                Instant.parse("2026-12-01T04:59:59.999Z"), 3);
     }
 
     @Test
@@ -84,7 +84,11 @@ class ParkingIndicatorsServiceTest {
     }
 
     @Test
-    void parkingMonth_keepsWeekWindow() {
-        assertEquals(LocalDateTime.of(2026, 11, 16, 5, 0), service.parkingRankingOfMonth().period().start());
+    void parkingMonth_usesTheWholeCalendarMonth() {
+        ParkingRanking ranking = service.parkingRankingOfMonth();
+
+        assertEquals(LocalDateTime.of(2026, 11, 1, 5, 0), ranking.period().start());
+        assertEquals(LocalDateTime.of(2026, 11, 30, 23, 59, 59, 999_000_000), ranking.period().end());
+        verify(vehicles).findExitedBetween(Instant.parse("2026-11-01T10:00:00Z"), Instant.parse("2026-12-01T04:59:59.999Z"));
     }
 }
