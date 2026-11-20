@@ -1,2 +1,2 @@
-org.springframework.context.ApplicationContextInitializer=com.nelumbo.park.config.initialization.DatabaseCreationInitializer
-org.springframework.boot.env.EnvironmentPostProcessor=com.nelumbo.park.config.dotenv.DotenvEnvironmentPostProcessor
+org.springframework.context.ApplicationContextInitializer=com.nelumbo.park.infrastructure.config.initialization.DatabaseCreationInitializer
+org.springframework.boot.env.EnvironmentPostProcessor=com.nelumbo.park.infrastructure.config.dotenv.DotenvEnvironmentPostProcessor

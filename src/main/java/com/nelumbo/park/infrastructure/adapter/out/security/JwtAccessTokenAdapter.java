@@ -1,7 +1,7 @@
 package com.nelumbo.park.infrastructure.adapter.out.security;
 
 import com.nelumbo.park.application.port.out.AccessTokenPort;
-import com.nelumbo.park.config.security.JwtService;
+import com.nelumbo.park.infrastructure.config.security.JwtService;
 import com.nelumbo.park.domain.model.User;
 import org.springframework.stereotype.Component;
 
