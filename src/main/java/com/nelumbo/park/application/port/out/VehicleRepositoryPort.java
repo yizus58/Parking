@@ -35,6 +35,12 @@ public interface VehicleRepositoryPort {
 
     List<Vehicle> findExitedBetween(Instant from, Instant to);
 
+    /**
+     * Inserts or updates the vehicle.
+     *
+     * @throws com.nelumbo.park.domain.exception.VehicleAlreadyInParkingException when the
+     *         plate is already inside a parking (enforced by the store, also under concurrency)
+     */
     Vehicle save(Vehicle vehicle);
 
     void deleteById(String id);

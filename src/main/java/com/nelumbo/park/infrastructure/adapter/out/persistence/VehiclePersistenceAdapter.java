@@ -1,6 +1,7 @@
 package com.nelumbo.park.infrastructure.adapter.out.persistence;
 
 import com.nelumbo.park.application.port.out.VehicleRepositoryPort;
+import com.nelumbo.park.domain.exception.VehicleAlreadyInParkingException;
 import com.nelumbo.park.domain.model.Vehicle;
 import com.nelumbo.park.domain.model.VehicleStatus;
 import com.nelumbo.park.domain.model.stats.TopPartner;
@@ -12,17 +13,23 @@ import com.nelumbo.park.infrastructure.adapter.out.persistence.mapper.Persistenc
 import com.nelumbo.park.infrastructure.adapter.out.persistence.repository.ParkingJpaRepository;
 import com.nelumbo.park.infrastructure.adapter.out.persistence.repository.UserJpaRepository;
 import com.nelumbo.park.infrastructure.adapter.out.persistence.repository.VehicleJpaRepository;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static com.nelumbo.park.infrastructure.adapter.out.persistence.mapper.PersistenceMapper.toDate;
 
 @Component
 public class VehiclePersistenceAdapter implements VehicleRepositoryPort {
+
+    /** Partial unique index on plate_number WHERE status = 'IN' (migration V2). */
+    static final String ACTIVE_PLATE_INDEX = "ux_vehicles_plate_inside";
 
     private final VehicleJpaRepository vehicleRepository;
     private final ParkingJpaRepository parkingRepository;
@@ -103,7 +110,17 @@ public class VehiclePersistenceAdapter implements VehicleRepositoryPort {
                 ? vehicleRepository.findById(vehicle.getId()).orElseGet(VehicleEntity::new)
                 : new VehicleEntity();
         PersistenceMapper.copy(vehicle, entity, parking, admin);
-        VehicleEntity saved = vehicleRepository.save(entity);
+        VehicleEntity saved;
+        try {
+            // Flush now so a unique-index violation surfaces here, as a domain error,
+            // instead of at commit time as a generic data access exception.
+            saved = vehicleRepository.saveAndFlush(entity);
+        } catch (DataIntegrityViolationException e) {
+            if (violates(e, ACTIVE_PLATE_INDEX)) {
+                throw VehicleAlreadyInParkingException.forPlate(vehicle.getPlateNumber());
+            }
+            throw e;
+        }
         Vehicle result = PersistenceMapper.toDomain(saved);
         // Keep the already loaded aggregates instead of touching lazy references.
         result.setParking(vehicle.getParking());
@@ -114,6 +131,22 @@ public class VehiclePersistenceAdapter implements VehicleRepositoryPort {
     @Override
     public void deleteById(String id) {
         vehicleRepository.deleteById(id);
+    }
+
+    static boolean violates(Throwable error, String constraintName) {
+        for (Throwable t = error; t != null; t = t.getCause()) {
+            if (t instanceof ConstraintViolationException cve && cve.getConstraintName() != null
+                    && cve.getConstraintName().equalsIgnoreCase(constraintName)) {
+                return true;
+            }
+            if (t.getMessage() != null && t.getMessage().toLowerCase(Locale.ROOT).contains(constraintName)) {
+                return true;
+            }
+            if (t.getCause() == t) {
+                break;
+            }
+        }
+        return false;
     }
 
     private static List<Vehicle> toDomain(List<VehicleEntity> entities) {

@@ -26,6 +26,11 @@ import java.time.Clock;
  * optimistic versioning because it needs no schema change (no version column,
  * and ddl-auto no longer alters the schema), needs no retry logic in callers,
  * and the lock is held only for a few short statements on a single row.
+ *
+ * <p>The parking lock does not serialise entries of the same plate into two
+ * different parkings. That case is enforced by the database (partial unique
+ * index ux_vehicles_plate_inside, migration V2): the repository reports the
+ * violation as {@link VehicleAlreadyInParkingException}.
  */
 @Service
 public class VehicleEntryService implements RegisterVehicleEntryUseCase {
@@ -69,8 +74,7 @@ public class VehicleEntryService implements RegisterVehicleEntryUseCase {
 
     private void ensureNotInside(String plateNumber) {
         if (vehicleRepository.findByPlateNumberAndStatus(plateNumber, VehicleStatus.IN).isPresent()) {
-            throw new VehicleAlreadyInParkingException(
-                    "El vehiculo con placa " + plateNumber + " ya está registrado y actualmente en un parking");
+            throw VehicleAlreadyInParkingException.forPlate(plateNumber);
         }
     }
 }

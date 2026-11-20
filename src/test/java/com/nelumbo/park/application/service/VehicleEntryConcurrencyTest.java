@@ -52,7 +52,7 @@ class VehicleEntryConcurrencyTest {
 
     private static final int CAPACITY = 3;
     private static final int THREADS = 8;
-    private static final AtomicReference<User> CURRENT = new AtomicReference<>();
+    static final AtomicReference<User> CURRENT = new AtomicReference<>();
 
     @TestConfiguration
     static class Config {
@@ -68,13 +68,13 @@ class VehicleEntryConcurrencyTest {
     }
 
     @Autowired
-    private RegisterVehicleEntryUseCase registerEntry;
+    RegisterVehicleEntryUseCase registerEntry;
     @Autowired
-    private UserPersistenceAdapter users;
+    UserPersistenceAdapter users;
     @Autowired
-    private ParkingPersistenceAdapter parkings;
+    ParkingPersistenceAdapter parkings;
     @Autowired
-    private VehiclePersistenceAdapter vehicles;
+    VehiclePersistenceAdapter vehicles;
     @Autowired
     private VehicleJpaRepository vehicleJpa;
     @Autowired
@@ -95,7 +95,7 @@ class VehicleEntryConcurrencyTest {
         return parkings.save(new Parking(null, "Parking Concurrente", "Calle 1 # 2-3", CAPACITY, 1000f, owner));
     }
 
-    private List<Object> runConcurrently(List<Callable<Object>> tasks) throws Exception {
+    List<Object> runConcurrently(List<Callable<Object>> tasks) throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(tasks.size());
         CountDownLatch start = new CountDownLatch(1);
         try {
