@@ -114,4 +114,21 @@ class PersistenceAdaptersTest {
         assertTrue(parkings.findById(parking.getId()).isEmpty());
         assertTrue(vehicles.findById(saved.getId()).isEmpty());
     }
+
+    @Test
+    void firstTimeParked_onlyReturnsPlatesWithNoPreviousVisit() {
+        Vehicle returning = vehicles.save(Vehicle.enter("OLD111", "Mazda", parking, partner, T0));
+        returning.exit(T0.plusSeconds(600));
+        vehicles.save(returning);
+        vehicles.save(Vehicle.enter("OLD111", "Mazda", parking, partner, T0.plusSeconds(3600)));
+        vehicles.save(Vehicle.enter("NEW222", "Kia", parking, partner, T0.plusSeconds(3600)));
+        Vehicle gone = vehicles.save(Vehicle.enter("GONE33", "Ford", parking, partner, T0));
+        gone.exit(T0.plusSeconds(60));
+        vehicles.save(gone);
+        entityManager.flush();
+
+        List<Vehicle> firstTime = vehicles.findFirstTimeParked(VehicleStatus.IN);
+
+        assertEquals(List.of("NEW222"), firstTime.stream().map(Vehicle::getPlateNumber).toList());
+    }
 }

@@ -14,11 +14,13 @@ import java.util.Optional;
 
 public interface VehicleJpaRepository extends JpaRepository<VehicleEntity, String> {
 
+    /**
+     * Vehicles with the given status whose plate has exactly one record in the
+     * whole history, i.e. it is the first time that plate has ever parked.
+     */
     @Query("SELECT v FROM VehicleEntity v " +
            "WHERE v.status = :status " +
-           "GROUP BY v.id, v.plateNumber, v.model, v.entryTime, v.exitTime, v.costPerHour," +
-           "v.status, v.parking.id, v.parking.name, v.parking.address, v.parking.capacity, v.parking.costPerHour, v.admin.id " +
-           "HAVING COUNT(v.plateNumber) = 1")
+           "AND (SELECT COUNT(h) FROM VehicleEntity h WHERE h.plateNumber = v.plateNumber) = 1")
     List<VehicleEntity> findFirstTimeParkedVehicles(@Param("status") VehicleStatus status);
 
     List<VehicleEntity> findByAdminId(String adminId);
